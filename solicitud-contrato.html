@@ -9,6 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Solicitud de Contrato – CNEL EP</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
   <style>
     .form-section { margin-bottom: 32px; }
@@ -54,6 +55,14 @@
       margin-bottom: 24px;
     }
     .required-note strong { color: var(--rojo-error); }
+    .cables-table { width:100%; border-collapse:collapse; }
+    .cables-table th { font-size:.82rem; font-weight:600; color:var(--gris-texto); padding:4px 8px; text-align:left; border-bottom:2px solid var(--gris-borde); }
+    .cables-table td { padding:4px 6px; vertical-align:middle; }
+    .cables-table td input, .cables-table td select { margin:0; }
+    .session-banner { background:#EEF4FF; border:1.5px solid var(--azul-medio); border-radius:var(--radio); padding:14px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .session-banner p { margin:0; font-size:.88rem; color:var(--azul-oscuro); }
+    .btn-coord-picker { background:var(--azul-medio);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:.9rem;transition:background .2s; }
+    .btn-coord-picker:hover { background:var(--azul-oscuro); }
   </style>
 </head>
 <body>
@@ -246,6 +255,23 @@
                 <div class="field-error" id="err-cobertura" role="alert"></div>
               </div>
             </div>
+            <div class="form-group" id="grupo-un-local" style="display:none">
+              <label for="un_local">Unidad de Negocio <span class="req">*</span></label>
+              <select id="un_local" name="un_local">
+                <option value="">Seleccione la Unidad de Negocio...</option>
+                <option value="CNEL EP UN Guayaquil">CNEL EP UN Guayaquil</option>
+                <option value="CNEL EP UN Guayas Los Ríos">CNEL EP UN Guayas Los Ríos</option>
+                <option value="CNEL EP UN Manabí">CNEL EP UN Manabí</option>
+                <option value="CNEL EP UN El Oro">CNEL EP UN El Oro</option>
+                <option value="CNEL EP UN Santa Elena">CNEL EP UN Santa Elena</option>
+                <option value="CNEL EP UN Milagro">CNEL EP UN Milagro</option>
+                <option value="CNEL EP UN Bolívar">CNEL EP UN Bolívar</option>
+                <option value="CNEL EP UN Los Ríos">CNEL EP UN Los Ríos</option>
+                <option value="CNEL EP UN Esmeraldas">CNEL EP UN Esmeraldas</option>
+                <option value="CNEL EP UN Sucumbíos">CNEL EP UN Sucumbíos</option>
+                <option value="CNEL EP OFC">CNEL EP OFC</option>
+              </select>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="provincias">Provincias involucradas <span class="req">*</span></label>
@@ -273,9 +299,9 @@
               <table class="table-form" id="tabla-rutas" aria-label="Tabla de rutas propuestas">
                 <thead>
                   <tr>
-                    <th>Provincia/Ciudad/Recinto</th>
+                    <th>Provincia / Cantón / Calle <button type="button" style="background:none;border:none;font-size:.75rem;color:var(--azul-medio);cursor:pointer;padding:0 4px" title="Use 📍 para seleccionar en mapa">📍 mapa</button></th>
                     <th>Rutas / Enlaces</th>
-                    <th>Postes ya utilizados</th>
+                    <th>Postes existentes</th>
                     <th>Postes nuevos</th>
                     <th>Total postes/ductos</th>
                     <th aria-label="Acciones"></th>
@@ -311,24 +337,21 @@
 
           <fieldset>
             <legend><span class="leg-icon" aria-hidden="true">🔌</span> Infraestructura a Instalar</legend>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="cable_tipo">Tipo de cable <span class="req">*</span></label>
-                <select id="cable_tipo" name="cable_tipo" required>
-                  <option value="">Seleccione...</option>
-                  <option value="Fibra óptica">Fibra óptica</option>
-                  <option value="Coaxial">Coaxial</option>
-                  <option value="Fibra óptica y Coaxial">Fibra óptica y Coaxial</option>
-                  <option value="Otros">Otros</option>
-                </select>
-                <div class="field-error" id="err-cable_tipo" role="alert"></div>
-              </div>
-              <div class="form-group">
-                <label for="cable_metros">Metros de cable</label>
-                <input type="number" id="cable_metros" name="cable_metros" placeholder="0" min="0" max="9999999">
-              </div>
+            <p class="form-hint" style="margin-bottom:10px">Puede agregar múltiples tipos de cable con sus respectivos metrajes.</p>
+            <div style="overflow-x:auto;margin-bottom:10px">
+              <table class="cables-table" id="tabla-cables" aria-label="Tipos de cable a instalar">
+                <thead>
+                  <tr>
+                    <th style="width:55%">Tipo de cable <span class="req">*</span></th>
+                    <th style="width:35%">Metros lineales</th>
+                    <th style="width:10%" aria-label="Acciones"></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-            <div class="form-row">
+            <button type="button" id="btn-add-cable" class="btn btn-secondary btn-sm">＋ Agregar tipo de cable</button>
+            <div class="form-row" style="margin-top:16px">
               <div class="form-group">
                 <label for="equip_activos">Cantidad de elementos activos (equipos)</label>
                 <input type="number" id="equip_activos" name="equip_activos" placeholder="0" min="0" max="9999">
@@ -492,6 +515,7 @@
             <div>
               <strong>Instrucciones de presentación:</strong> Descargue el documento, imprímalo, fírmelo con tinta azul o negra
               y preséntelo junto con todos los requisitos documentales ante la Unidad de Negocio o Gerencia General de CNEL EP correspondiente.
+              <br><strong>Si envía por vía electrónica:</strong> puede utilizar su <strong>firma electrónica</strong> (token o Firma EC) emitida por el Banco Central del Ecuador u entidad certificadora autorizada, y enviar el documento en formato PDF firmado digitalmente.
             </div>
           </div>
 
@@ -548,8 +572,34 @@
       <span class="footer-legal">Portal SIG-CNEL</span>
     </div>
   </div>
+<!-- MODAL: Mapa para selección de ruta -->
+<div id="modal-ruta-mapa" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Seleccionar ubicación de ruta">
+  <div class="modal" style="max-width:620px;width:100%">
+    <div class="modal-header">
+      <h3>📍 Seleccionar ubicación en el mapa</h3>
+      <button class="modal-close" id="btn-close-ruta-mapa" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.88rem;color:var(--gris-texto);margin:0 0 10px 0">
+        Haga clic en el mapa para seleccionar la ubicación. Se completará automáticamente la provincia, cantón y calle.
+      </p>
+      <div id="ruta-mapa-div" style="height:320px;border-radius:var(--radio);border:1.5px solid var(--gris-borde);overflow:hidden;margin-bottom:12px;z-index:0"></div>
+      <div class="form-group" style="margin-bottom:6px">
+        <label style="font-size:.82rem;font-weight:600;color:var(--azul-oscuro)">Ubicación detectada</label>
+        <input type="text" id="ruta-ubicacion-texto" placeholder="Haga clic en el mapa..." style="font-size:.9rem" readonly>
+      </div>
+      <p class="form-hint" style="margin-bottom:12px">Puede editar el texto manualmente si es necesario.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" id="ruta-mapa-apply" class="btn btn-primary">✓ Aplicar ubicación</button>
+        <button type="button" id="ruta-mapa-cancel" class="btn btn-secondary">✕ Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="main.js"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();

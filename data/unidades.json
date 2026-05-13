@@ -1,0 +1,42 @@
+{
+  "gerencia_general": {
+    "nombre": "Ing. Roberto Salazar Romero",
+    "cargo": "Gerente General",
+    "email": "gerencia.general@cnelep.gob.ec",
+    "ciudad": "Guayaquil"
+  },
+  "unidades": [
+    {
+      "id": "guayaquil",
+      "nombre_unidad": "CNEL EP UN Guayaquil",
+      "responsable": "Ing. Carlos Mendoza Villalba",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.guayaquil@cnelep.gob.ec",
+      "ciudad": "Guayaquil"
+    },
+    {
+      "id": "guayas_los_rios",
+      "nombre_unidad": "CNEL EP UN Guayas Los Ríos",
+      "responsable": "Ing. María Fernanda Ochoa Suárez",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.guayaslorios@cnelep.gob.ec",
+      "ciudad": "Milagro"
+    },
+    {
+      "id": "manabi",
+      "nombre_unidad": "CNEL EP UN Manabí",
+      "responsable": "Ing. Jorge Luis Bravo Cedeño",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.manabi@cnelep.gob.ec",
+      "ciudad": "Portoviejo"
+    },
+    {
+      "id": "ofc",
+      "nombre_unidad": "CNEL EP OFC",
+      "responsable": "Ing. Ana Lucía Torres Vélez",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "ofc@cnelep.gob.ec",
+      "ciudad": "Guayaquil"
+    }
+  ]
+}
