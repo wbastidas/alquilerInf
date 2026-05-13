@@ -5,6 +5,12 @@
     "email": "gerencia.general@cnelep.gob.ec",
     "ciudad": "Guayaquil"
   },
+  "oficina_central": {
+    "nombre": "Ing. Patricia Sánchez Andrade",
+    "cargo": "Directora de Gestión Comercial",
+    "email": "comercial@cnelep.gob.ec",
+    "ciudad": "Guayaquil"
+  },
   "unidades": [
     {
       "id": "guayaquil",
@@ -31,11 +37,67 @@
       "ciudad": "Portoviejo"
     },
     {
-      "id": "ofc",
-      "nombre_unidad": "CNEL EP OFC",
-      "responsable": "Ing. Ana Lucía Torres Vélez",
+      "id": "el_oro",
+      "nombre_unidad": "CNEL EP UN El Oro",
+      "responsable": "Ing. Luis Fernando Aguilar Mora",
       "cargo": "Administrador de Unidad de Negocio",
-      "email": "ofc@cnelep.gob.ec",
+      "email": "un.eloro@cnelep.gob.ec",
+      "ciudad": "Machala"
+    },
+    {
+      "id": "santa_elena",
+      "nombre_unidad": "CNEL EP UN Santa Elena",
+      "responsable": "Ing. Carmen Rosa Vera Loor",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.santaelena@cnelep.gob.ec",
+      "ciudad": "Santa Elena"
+    },
+    {
+      "id": "milagro",
+      "nombre_unidad": "CNEL EP UN Milagro",
+      "responsable": "Ing. Ricardo Andrés Pino Cabrera",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.milagro@cnelep.gob.ec",
+      "ciudad": "Milagro"
+    },
+    {
+      "id": "bolivar",
+      "nombre_unidad": "CNEL EP UN Bolívar",
+      "responsable": "Ing. Silvia Margarita Chávez Flores",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.bolivar@cnelep.gob.ec",
+      "ciudad": "Guaranda"
+    },
+    {
+      "id": "los_rios",
+      "nombre_unidad": "CNEL EP UN Los Ríos",
+      "responsable": "Ing. Héctor Manuel Naranjo Salas",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.losrios@cnelep.gob.ec",
+      "ciudad": "Babahoyo"
+    },
+    {
+      "id": "esmeraldas",
+      "nombre_unidad": "CNEL EP UN Esmeraldas",
+      "responsable": "Ing. Verónica Paola Mina Quiñónez",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.esmeraldas@cnelep.gob.ec",
+      "ciudad": "Esmeraldas"
+    },
+    {
+      "id": "sucumbios",
+      "nombre_unidad": "CNEL EP UN Sucumbíos",
+      "responsable": "Ing. Marco Antonio Salinas Rueda",
+      "cargo": "Administrador de Unidad de Negocio",
+      "email": "un.sucumbios@cnelep.gob.ec",
+      "ciudad": "Nueva Loja"
+    },
+    {
+      "id": "ofc",
+      "nombre_unidad": "CNEL EP Oficina Central",
+      "responsable": "Ing. Patricia Sánchez Andrade",
+      "cargo": "Directora de Gestión Comercial",
+      "email": "comercial@cnelep.gob.ec",
       "ciudad": "Guayaquil"
     }
   ]
