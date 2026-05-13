@@ -437,6 +437,7 @@
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="main.js"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -448,7 +449,8 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
   const map = L.map('mapa-ubicacion', { zoomControl: true }).setView([-1.8312, -78.1834], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-    maxZoom: 19
+    maxZoom: 19,
+    crossOrigin: true
   }).addTo(map);
 
   const markerIcon = L.divIcon({
@@ -634,175 +636,131 @@ function getFormData() {
   };
 }
 
+// ─── Helpers de estilos Word ───
+const W = {
+  p:    (t, extra='') => `<p style="font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;margin:0 0 5pt 0;line-height:1.5;${extra}">${t}</p>`,
+  bold: (t, extra='') => `<p style="font-family:Arial,sans-serif;font-size:11pt;color:#1a1a1a;font-weight:bold;margin:0 0 5pt 0;line-height:1.5;${extra}">${t}</p>`,
+  sec:  (t)           => `<p style="font-family:Arial,sans-serif;font-size:10.5pt;font-weight:bold;color:#002855;background-color:#EEF4FF;padding:5pt 10pt;margin:12pt 0 5pt 0;border-left:4pt solid #E8A000;line-height:1.4">${t}</p>`,
+  sub:  (t)           => `<p style="font-family:Arial,sans-serif;font-size:10.5pt;font-weight:bold;color:#004A99;margin:8pt 0 3pt 0;line-height:1.4">${t}</p>`,
+  th:   `font-family:Arial,sans-serif;font-size:9.5pt;font-weight:bold;background-color:#002855;color:#ffffff;padding:6pt 8pt;border:1pt solid #001a40;text-align:left`,
+  thc:  `font-family:Arial,sans-serif;font-size:9.5pt;font-weight:bold;background-color:#002855;color:#ffffff;padding:6pt 8pt;border:1pt solid #001a40;text-align:center`,
+  td:   `font-family:Arial,sans-serif;font-size:9.5pt;color:#1a1a1a;padding:5pt 8pt;border:1pt solid #cccccc;vertical-align:top`,
+  tdc:  `font-family:Arial,sans-serif;font-size:9.5pt;color:#1a1a1a;padding:5pt 8pt;border:1pt solid #cccccc;vertical-align:top;text-align:center`,
+  tbl:  `border-collapse:collapse;width:100%;margin:5pt 0 10pt 0`,
+  li:   (t)           => `<li style="font-family:Arial,sans-serif;font-size:10.5pt;color:#1a1a1a;margin:2pt 0;line-height:1.5">${t}</li>`,
+};
+
 // ─── HTML para Word ───
 function buildDocumentHTML(d) {
-  const fechaEs     = CNEL.formatDateES(d.fecha);
+  const fechaEs       = CNEL.formatDateES(d.fecha);
   const contratoFecha = CNEL.formatDateES(d.contrato_fecha);
-  const TH = 'style="background:#002855;color:#ffffff;padding:7pt 9pt;font-size:10pt;font-family:Arial,sans-serif;font-weight:bold;border:1px solid #002855;text-align:left"';
-  const TD = 'style="padding:6pt 9pt;font-size:10pt;font-family:Arial,sans-serif;border:1px solid #cccccc;vertical-align:top"';
-  const TDc = 'style="padding:6pt 9pt;font-size:10pt;font-family:Arial,sans-serif;border:1px solid #cccccc;vertical-align:top;text-align:center"';
-  const TABLE = 'border="1" cellpadding="0" cellspacing="0" style="border-collapse:collapse;width:100%;margin:8pt 0 14pt 0"';
 
-  const secH = txt => `<p style="font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;color:#002855;background:#EEF4FF;padding:5pt 10pt;border-left:4pt solid #E8A000;margin:14pt 0 6pt 0">${txt}</p>`;
-  const subH = txt => `<p style="font-family:Arial,sans-serif;font-size:10pt;font-weight:bold;color:#004A99;margin:10pt 0 4pt 0">${txt}</p>`;
+  const rutaFilas = d.rutas.map((r, i) =>
+    `<tr${i%2?' style="background-color:#F7FAFF"':''}>
+      <td style="${W.td}">${r[0]}</td><td style="${W.td}">${r[1]}</td>
+      <td style="${W.td}">${r[2]}</td><td style="${W.tdc}">${r[3]}</td><td style="${W.td}">${r[4]}</td>
+    </tr>`
+  ).join('');
+  const motivHTML = (d.motivaciones.length ? d.motivaciones : ['No especificada']).map(m => W.li(m)).join('');
+  const cronoFilas = d.cronograma.map((c, i) =>
+    `<tr${i%2?' style="background-color:#F7FAFF"':''}>
+      <td style="${W.td}">${c[0]}</td><td style="${W.tdc}">${c[1]}</td>
+      <td style="${W.td}">${c[2]}</td><td style="${W.td}">${c[3]}</td><td style="${W.td}">${c[4]}</td>
+    </tr>`
+  ).join('');
+  const persFilas = d.personal.map((p, i) =>
+    `<tr${i%2?' style="background-color:#F7FAFF"':''}>
+      <td style="${W.td}">${p[0]}</td><td style="${W.td}">${p[1]}</td>
+      <td style="${W.tdc}">${p[2]}</td><td style="${W.td}">${p[3]}</td>
+    </tr>`
+  ).join('');
 
-  const rutaFilas = d.rutas.map(r =>
-    `<tr><td ${TD}>${r[0]}</td><td ${TD}>${r[1]}</td><td ${TD}>${r[2]}</td><td ${TDc}>${r[3]}</td><td ${TD}>${r[4]}</td></tr>`
-  ).join('');
-  const motivacionesHTML = d.motivaciones.length
-    ? d.motivaciones.map(m => `<li style="font-family:Arial,sans-serif;font-size:10pt;margin:3pt 0">${m}</li>`).join('')
-    : '<li style="font-family:Arial,sans-serif;font-size:10pt">No especificada</li>';
-  const cronoFilas = d.cronograma.map(c =>
-    `<tr><td ${TD}>${c[0]}</td><td ${TDc}>${c[1]}</td><td ${TD}>${c[2]}</td><td ${TD}>${c[3]}</td><td ${TD}>${c[4]}</td></tr>`
-  ).join('');
-  const personalFilas = d.personal.map(p =>
-    `<tr><td ${TD}>${p[0]}</td><td ${TD}>${p[1]}</td><td ${TDc}>${p[2]}</td><td ${TD}>${p[3]}</td></tr>`
-  ).join('');
-
+  const mapImg = d.mapImage
+    ? `<img src="${d.mapImage}" style="width:100%;max-width:460pt;display:block;margin:6pt 0 8pt 0;border:1pt solid #cccccc">`
+    : '';
   const coordTexto = (d.mapa_lat && d.mapa_lng)
-    ? `<p style="font-family:Arial,sans-serif;font-size:10pt;margin:4pt 0"><strong>Coordenadas seleccionadas:</strong> Lat ${d.mapa_lat}, Lng ${d.mapa_lng}</p>`
+    ? W.p(`<strong>Coordenadas:</strong> Lat ${d.mapa_lat}, Lng ${d.mapa_lng}`)
     : '';
 
+  const T = (headers, rows, emptyCols) =>
+    `<table border="1" cellpadding="0" cellspacing="0" style="${W.tbl}">
+  <thead><tr>${headers.map(h => `<th style="${h.center ? W.thc : W.th}">${h.label}</th>`).join('')}</tr></thead>
+  <tbody>${rows || `<tr><td style="${W.td}" colspan="${emptyCols}"><em>Sin datos ingresados</em></td></tr>`}</tbody>
+</table>`;
+
   return `
-<!-- CABECERA INSTITUCIONAL -->
-<table border="0" cellpadding="0" cellspacing="0" style="width:100%;border-bottom:3pt solid #E8A000;margin-bottom:14pt;padding-bottom:10pt">
-  <tr>
-    <td style="width:65%;vertical-align:middle">
-      <p style="font-family:Arial,sans-serif;font-size:15pt;font-weight:bold;color:#002855;margin:0 0 2pt 0">CNEL EP</p>
-      <p style="font-family:Arial,sans-serif;font-size:9pt;color:#444444;margin:0">Corporación Nacional de Electricidad — Empresa Pública Estratégica</p>
-      <p style="font-family:Arial,sans-serif;font-size:8.5pt;color:#666666;margin:2pt 0 0 0">Portal de Arrendamiento de Infraestructura Eléctrica</p>
-    </td>
-    <td style="width:35%;vertical-align:top;text-align:right">
-      ${d.num_solicitud ? `<p style="font-family:Arial,sans-serif;font-size:9pt;margin:0 0 3pt 0"><strong>No. SOLICITUD:</strong> ${d.num_solicitud}</p>` : ''}
-      <p style="font-family:Arial,sans-serif;font-size:9pt;margin:0"><strong>Fecha:</strong> ${d.ciudad}, ${fechaEs}</p>
-    </td>
-  </tr>
-</table>
+${W.bold('CNEL EP', 'font-size:15pt;color:#002855;margin:0 0 1pt 0')}
+${W.p('Corporación Nacional de Electricidad — Empresa Pública Estratégica', 'font-size:9pt;color:#555;margin:0 0 1pt 0')}
+${W.p('Portal de Arrendamiento de Infraestructura Eléctrica', 'font-size:8.5pt;color:#777;margin:0 0 8pt 0')}
+<hr style="border:0;border-top:3pt solid #E8A000;margin:0 0 12pt 0">
 
-<!-- DESTINATARIO -->
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 3pt 0">Señor(a)</p>
-<p style="font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;margin:0 0 2pt 0">${d.dest_nombre}</p>
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 2pt 0">Coordinador/a Gestión Arriendo de Infraestructura</p>
-${d.dest_unidad ? `<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 2pt 0">${d.dest_unidad}</p>` : ''}
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 16pt 0">Empresa Eléctrica Pública Estratégica — CNEL EP</p>
-
-<!-- ASUNTO Y REF -->
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 6pt 0"><strong>ASUNTO:</strong>&nbsp;&nbsp;SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP</p>
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 4pt 0"><strong>REF.:</strong></p>
-<ul style="margin:0 0 14pt 0;padding-left:20pt">
-  <li style="font-family:Arial,sans-serif;font-size:10.5pt;margin:2pt 0">Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}</li>
-  <li style="font-family:Arial,sans-serif;font-size:10.5pt;margin:2pt 0">Última ampliación autorizada: ${d.ultima_ampliacion}</li>
+${d.num_solicitud ? W.p(`<strong>No. SOLICITUD:</strong> ${d.num_solicitud}`) : ''}
+${W.p(`<strong>Fecha:</strong> ${d.ciudad}, ${fechaEs}`)}
+${W.p('&nbsp;')}
+${W.p('Señor(a)')}
+${W.bold(d.dest_nombre)}
+${W.p('Coordinador/a Gestión Arriendo de Infraestructura')}
+${d.dest_unidad ? W.p(d.dest_unidad) : ''}
+${W.p('Empresa Eléctrica Pública Estratégica — CNEL EP')}
+${W.p('&nbsp;')}
+${W.p('<strong>ASUNTO:</strong>&nbsp; SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP')}
+${W.p('<strong>REF.:</strong>')}
+<ul style="margin:0 0 8pt 0;padding-left:18pt">
+  ${W.li(`Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}`)}
+  ${W.li(`Última ampliación autorizada: ${d.ultima_ampliacion}`)}
 </ul>
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 8pt 0">De mi consideración:</p>
-<p style="font-family:Arial,sans-serif;font-size:11pt;line-height:1.6;margin:0 0 16pt 0">
-  Yo, <strong>${d.rep_nombre}</strong>, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>,
-  con RUC No. <strong>${d.empresa_ruc}</strong>, en el marco del contrato de arrendamiento de infraestructura eléctrica
-  vigente de la referencia, por medio del presente solicito formalmente a usted se digne autorizar la ampliación del
-  uso de infraestructura eléctrica de CNEL EP, conforme al siguiente detalle:
-</p>
+${W.p('De mi consideración:')}
+${W.p(`Yo, <strong>${d.rep_nombre}</strong>, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, con RUC No. <strong>${d.empresa_ruc}</strong>, en el marco del contrato de arrendamiento de infraestructura eléctrica vigente de la referencia, por medio del presente solicito formalmente a usted se digne autorizar la ampliación del uso de infraestructura eléctrica de CNEL EP, conforme al siguiente detalle:`, 'line-height:1.6;margin-top:4pt')}
 
-${secH('1.&nbsp; RESUMEN EJECUTIVO DE LA AMPLIACIÓN')}
-<table ${TABLE}>
-  <thead>
-    <tr>
-      <th ${TH}>Concepto</th>
-      <th ${TH} style="${TH.slice(8,-1)};text-align:center">Cantidad Actual</th>
-      <th ${TH} style="${TH.slice(8,-1)};text-align:center">Ampliación Solicitada</th>
-      <th ${TH} style="${TH.slice(8,-1)};text-align:center">Total Proyectado</th>
-      <th ${TH} style="${TH.slice(8,-1)};text-align:center">Incremento %</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td ${TD}>Postes aéreos</td>
-      <td ${TDc}>${d.pos_actual}</td><td ${TDc}>${d.pos_amp}</td>
-      <td ${TDc}>${d.pos_total}</td><td ${TDc}>${d.pos_pct}</td>
-    </tr>
-    <tr>
-      <td ${TD}>Ductos subterráneos (m)</td>
-      <td ${TDc}>${d.duc_actual}</td><td ${TDc}>${d.duc_amp}</td>
-      <td ${TDc}>${d.duc_total}</td><td ${TDc}>${d.duc_pct}</td>
-    </tr>
-  </tbody>
-</table>
+${W.sec('1.&nbsp; RESUMEN EJECUTIVO DE LA AMPLIACIÓN')}
+${T(
+  [{label:'Concepto'},{label:'Cantidad Actual',center:true},{label:'Ampliación Solicitada',center:true},{label:'Total Proyectado',center:true},{label:'Incremento %',center:true}],
+  `<tr><td style="${W.td}">Postes aéreos</td><td style="${W.tdc}">${d.pos_actual}</td><td style="${W.tdc}">${d.pos_amp}</td><td style="${W.tdc}">${d.pos_total}</td><td style="${W.tdc}">${d.pos_pct}</td></tr>
+   <tr style="background-color:#F7FAFF"><td style="${W.td}">Ductos subterráneos (m)</td><td style="${W.tdc}">${d.duc_actual}</td><td style="${W.tdc}">${d.duc_amp}</td><td style="${W.tdc}">${d.duc_total}</td><td style="${W.tdc}">${d.duc_pct}</td></tr>`,
+  5
+)}
 
-${secH('2.&nbsp; DETALLE TÉCNICO DE RUTAS A AMPLIAR')}
-<table ${TABLE}>
-  <thead>
-    <tr>
-      <th ${TH}>Provincia / Ciudad / Recinto</th>
-      <th ${TH}>Rutas / Enlaces</th>
-      <th ${TH}>Desde / Hasta (Coordenadas)</th>
-      <th ${TH} style="${TH.slice(8,-1)};text-align:center">Total Postes / Ductos</th>
-      <th ${TH}>Total Equipos Act/Pas</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${rutaFilas || `<tr><td ${TD} colspan="5"><em>Sin rutas ingresadas</em></td></tr>`}
-  </tbody>
-</table>
+${W.sec('2.&nbsp; DETALLE TÉCNICO DE RUTAS A AMPLIAR')}
+${T([{label:'Provincia / Ciudad / Recinto'},{label:'Rutas / Enlaces'},{label:'Desde / Hasta (Coordenadas)'},{label:'Total Postes / Ductos',center:true},{label:'Total Equipos Act/Pas'}], rutaFilas, 5)}
 
-${secH('3.&nbsp; JUSTIFICACIÓN TÉCNICA')}
-${subH('3.1 Motivación de la ampliación:')}
-<ul style="margin:0 0 10pt 0;padding-left:20pt">${motivacionesHTML}</ul>
+${W.sec('3.&nbsp; JUSTIFICACIÓN TÉCNICA')}
+${W.sub('3.1 Motivación de la ampliación:')}
+<ul style="margin:0 0 8pt 0;padding-left:18pt">${motivHTML}</ul>
 
-${secH('4.&nbsp; DETALLES DE LA ACTIVIDAD')}
-${subH('4.1 Descripción de Ubicación:')}
-<p style="font-family:Arial,sans-serif;font-size:10.5pt;line-height:1.55;margin:0 0 6pt 0">
-  ${d.ubicacion_desc || 'Se adjuntarán imágenes del sector de trabajo con referencia de postes (ArcGIS / Google Earth).'}
-</p>
+${W.sec('4.&nbsp; DETALLES DE LA ACTIVIDAD')}
+${W.sub('4.1 Descripción de Ubicación:')}
+${W.p(d.ubicacion_desc || 'Se adjuntarán imágenes del sector de trabajo con referencia de postes (ArcGIS / Google Earth).')}
 ${coordTexto}
+${mapImg}
 
-${subH('4.2 Geodatabase SIG:')}
-<p style="font-family:Arial,sans-serif;font-size:10.5pt;line-height:1.55;margin:0 0 10pt 0">
-  Se adjunta la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (formato File Geodatabase / WGS84 UTM Zona 17S), conforme a lo establecido en el Manual GU-TEC-OPE-102.
-</p>
+${W.sub('4.2 Geodatabase SIG:')}
+${W.p('Se adjunta la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (formato File Geodatabase / WGS84 UTM Zona 17S), conforme al Manual GU-TEC-OPE-102.')}
 
-${subH('4.3 Cronograma de Trabajos:')}
-<table ${TABLE}>
-  <thead>
-    <tr>
-      <th ${TH}>Fecha</th><th ${TH}>Horario</th><th ${TH}>Actividad</th>
-      <th ${TH}>Ubicación</th><th ${TH}>Técnico Encargado</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${cronoFilas || `<tr><td ${TD} colspan="5"><em>Sin cronograma ingresado</em></td></tr>`}
-  </tbody>
-</table>
+${W.sub('4.3 Cronograma de Trabajos:')}
+${T([{label:'Fecha'},{label:'Horario',center:true},{label:'Actividad'},{label:'Ubicación'},{label:'Técnico Encargado'}], cronoFilas, 5)}
 
-${secH('5.&nbsp; PERSONAL TÉCNICO ASIGNADO')}
-<table ${TABLE}>
-  <thead>
-    <tr>
-      <th ${TH}>Función</th><th ${TH}>Nombre Completo</th>
-      <th ${TH}>Celular</th><th ${TH}>Email</th>
-    </tr>
-  </thead>
-  <tbody>
-    ${personalFilas || `<tr><td ${TD} colspan="4"><em>Sin personal ingresado</em></td></tr>`}
-  </tbody>
-</table>
+${W.sec('5.&nbsp; PERSONAL TÉCNICO ASIGNADO')}
+${T([{label:'Función'},{label:'Nombre Completo'},{label:'Celular',center:true},{label:'Email'}], persFilas, 4)}
 
-${secH('6.&nbsp; COMPROMISOS DEL PROVEEDOR')}
-<ul style="margin:0 0 14pt 0;padding-left:20pt">
-  <li style="font-family:Arial,sans-serif;font-size:10.5pt;margin:4pt 0"><strong>Cumplimiento Normativo:</strong> Declaro plena adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes aplicables.</li>
-  <li style="font-family:Arial,sans-serif;font-size:10.5pt;margin:4pt 0"><strong>Responsabilidad Civil:</strong> Acepto responsabilidad total por daños ocasionados a terceros y a la propiedad de CNEL EP derivados de la instalación.</li>
-  <li style="font-family:Arial,sans-serif;font-size:10.5pt;margin:4pt 0"><strong>Pólizas de Seguro:</strong> Confirmo contar con las pólizas de seguro vigentes que cubren la totalidad de las operaciones autorizadas.</li>
+${W.sec('6.&nbsp; COMPROMISOS DEL PROVEEDOR')}
+<ul style="margin:0 0 12pt 0;padding-left:18pt">
+  ${W.li('<strong>Cumplimiento Normativo:</strong> Declaro plena adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes.')}
+  ${W.li('<strong>Responsabilidad Civil:</strong> Acepto responsabilidad total por daños a terceros y a la propiedad de CNEL EP.')}
+  ${W.li('<strong>Pólizas de Seguro:</strong> Confirmo contar con pólizas de seguro vigentes que cubren las operaciones autorizadas.')}
 </ul>
 
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:20pt 0 4pt 0">Por la favorable atención que se sirva dar a la presente, anticipo mis agradecimientos.</p>
-<p style="font-family:Arial,sans-serif;font-size:11pt;margin:0 0 40pt 0">Atentamente,</p>
+${W.p('Por la favorable atención que se sirva dar a la presente, anticipo mis agradecimientos.', 'margin-top:14pt')}
+${W.p('Atentamente,', 'margin-top:4pt;margin-bottom:36pt')}
 
-<table border="0" cellpadding="0" cellspacing="0" style="width:100%;margin-top:10pt">
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
   <tr>
-    <td style="width:50%;vertical-align:bottom">
-      <p style="font-family:Arial,sans-serif;font-size:10pt;border-top:1pt solid #000000;padding-top:6pt;margin:0"><strong>${d.rep_nombre}</strong></p>
-      <p style="font-family:Arial,sans-serif;font-size:10pt;margin:2pt 0 0 0">REPRESENTANTE LEGAL</p>
-      <p style="font-family:Arial,sans-serif;font-size:10pt;margin:2pt 0 0 0">${d.empresa_razon}</p>
-      <p style="font-family:Arial,sans-serif;font-size:10pt;margin:2pt 0 0 0">RUC: ${d.empresa_ruc}</p>
+    <td style="width:48%;vertical-align:top;border-top:1pt solid #000000;padding-top:5pt">
+      ${W.bold(d.rep_nombre, 'margin:0 0 1pt 0')}
+      ${W.p('REPRESENTANTE LEGAL', 'margin:0 0 1pt 0;font-size:10pt')}
+      ${W.p(d.empresa_razon, 'margin:0 0 1pt 0;font-size:10pt')}
+      ${W.p(`RUC: ${d.empresa_ruc}`, 'margin:0;font-size:10pt')}
     </td>
-    <td style="width:50%"></td>
+    <td style="width:52%"></td>
   </tr>
 </table>
 `;
@@ -814,35 +772,28 @@ function buildPdfBlocks(d) {
   const contratoFecha = CNEL.formatDateES(d.contrato_fecha);
 
   const blocks = [
-    // Título principal
     { type: 'title', text: `SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA${d.num_solicitud ? '\nNo. ' + d.num_solicitud : ''}` },
-    { type: 'spacer', size: 6 },
-
-    // Fecha y destinatario
-    { type: 'text', text: `${d.ciudad}, ${fechaEs}` },
-    { type: 'spacer', size: 5 },
-    { type: 'text', text: `Señor(a)` },
-    { type: 'text', text: d.dest_nombre },
-    { type: 'text', text: `Coordinador/a Gestión Arriendo de Infraestructura` },
-    ...(d.dest_unidad ? [{ type: 'text', text: d.dest_unidad }] : []),
-    { type: 'text', text: `Empresa Eléctrica Pública Estratégica — CNEL EP` },
-    { type: 'spacer', size: 5 },
-
-    // Asunto y ref
-    { type: 'text', text: `ASUNTO:  SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP` },
     { type: 'spacer', size: 3 },
-    { type: 'text', text: `REF.:` },
+
+    { type: 'text', text: `${d.ciudad}, ${fechaEs}` },
+    { type: 'spacer', size: 3 },
+    { type: 'text', text: 'Señor(a)' },
+    { type: 'bold-text', text: d.dest_nombre },
+    { type: 'text', text: 'Coordinador/a Gestión Arriendo de Infraestructura' },
+    ...(d.dest_unidad ? [{ type: 'text', text: d.dest_unidad }] : []),
+    { type: 'text', text: 'Empresa Eléctrica Pública Estratégica — CNEL EP' },
+    { type: 'spacer', size: 3 },
+
+    { type: 'bold-text', text: 'ASUNTO:  SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP' },
+    { type: 'bold-text', text: 'REF.:' },
     { type: 'bullet', text: `Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}` },
     { type: 'bullet', text: `Última ampliación autorizada: ${d.ultima_ampliacion}` },
-    { type: 'spacer', size: 4 },
+    { type: 'spacer', size: 3 },
 
-    // Cuerpo introductorio
-    { type: 'text', text: `De mi consideración:` },
-    { type: 'spacer', size: 2 },
-    { type: 'text', text: `Yo, ${d.rep_nombre}, en mi calidad de Representante Legal de ${d.empresa_razon}, RUC No. ${d.empresa_ruc}, en el marco del contrato de arrendamiento de infraestructura eléctrica vigente de la referencia, por medio del presente solicito formalmente autorización para la ampliación del uso de infraestructura eléctrica de CNEL EP, conforme al siguiente detalle:` },
-    { type: 'spacer', size: 4 },
+    { type: 'text', text: 'De mi consideración:' },
+    { type: 'text', text: `Yo, ${d.rep_nombre}, en mi calidad de Representante Legal de ${d.empresa_razon}, RUC No. ${d.empresa_ruc}, en el marco del contrato de arrendamiento de infraestructura eléctrica vigente de la referencia, por medio del presente solicito formalmente a usted se digne autorizar la ampliación del uso de infraestructura eléctrica de CNEL EP, conforme al siguiente detalle:` },
+    { type: 'spacer', size: 3 },
 
-    // Sección 1
     { type: 'heading', text: '1.  RESUMEN EJECUTIVO DE LA AMPLIACIÓN' },
     { type: 'table',
       headers: ['Concepto', 'Cantidad Actual', 'Ampliación Solicitada', 'Total Proyectado', 'Incremento %'],
@@ -851,58 +802,48 @@ function buildPdfBlocks(d) {
         ['Ductos subterráneos (m)', d.duc_actual, d.duc_amp, d.duc_total, d.duc_pct],
       ]
     },
-    { type: 'spacer', size: 2 },
 
-    // Sección 2
     { type: 'heading', text: '2.  DETALLE TÉCNICO DE RUTAS A AMPLIAR' },
     { type: 'table',
       headers: ['Provincia / Ciudad', 'Rutas / Enlaces', 'Desde / Hasta (Coord.)', 'Postes / Ductos', 'Equipos Act/Pas'],
       rows: d.rutas.length ? d.rutas : [['Sin rutas ingresadas', '', '', '', '']]
     },
-    { type: 'spacer', size: 2 },
 
-    // Sección 3
     { type: 'heading', text: '3.  JUSTIFICACIÓN TÉCNICA' },
     { type: 'subheading', text: '3.1  Motivación de la ampliación:' },
     ...((d.motivaciones.length ? d.motivaciones : ['No especificada']).map(m => ({ type: 'bullet', text: m }))),
-    { type: 'spacer', size: 2 },
 
-    // Sección 4
     { type: 'heading', text: '4.  DETALLES DE LA ACTIVIDAD' },
     { type: 'subheading', text: '4.1  Descripción de Ubicación:' },
     { type: 'text', text: d.ubicacion_desc || 'Se adjuntarán imágenes del sector de trabajo con referencia de postes (ArcGIS / Google Earth).' },
-    ...((d.mapa_lat && d.mapa_lng) ? [{ type: 'text', text: `Coordenadas seleccionadas: Lat ${d.mapa_lat}, Lng ${d.mapa_lng}` }] : []),
-    { type: 'spacer', size: 2 },
+    ...((d.mapa_lat && d.mapa_lng) ? [{ type: 'bold-text', text: `Coordenadas: Lat ${d.mapa_lat}, Lng ${d.mapa_lng}` }] : []),
+    ...( d.mapImage ? [{ type: 'image', src: d.mapImage, width: 170, height: 85 }] : []),
+
     { type: 'subheading', text: '4.2  Geodatabase SIG:' },
     { type: 'text', text: 'Se adjunta la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (formato File Geodatabase / WGS84 UTM Zona 17S), conforme al Manual GU-TEC-OPE-102.' },
-    { type: 'spacer', size: 2 },
+
     { type: 'subheading', text: '4.3  Cronograma de Trabajos:' },
     { type: 'table',
       headers: ['Fecha', 'Horario', 'Actividad', 'Ubicación', 'Técnico Encargado'],
       rows: d.cronograma.length ? d.cronograma : [['Sin cronograma ingresado', '', '', '', '']]
     },
-    { type: 'spacer', size: 2 },
 
-    // Sección 5
     { type: 'heading', text: '5.  PERSONAL TÉCNICO ASIGNADO' },
     { type: 'table',
       headers: ['Función', 'Nombre Completo', 'Celular', 'Email'],
       rows: d.personal.length ? d.personal : [['Sin personal ingresado', '', '', '']]
     },
-    { type: 'spacer', size: 2 },
 
-    // Sección 6
     { type: 'heading', text: '6.  COMPROMISOS DEL PROVEEDOR' },
     { type: 'bullet', text: 'Cumplimiento Normativo: Plena adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes.' },
     { type: 'bullet', text: 'Responsabilidad Civil: Responsabilidad total por daños a terceros y a la propiedad de CNEL EP.' },
-    { type: 'bullet', text: 'Pólizas de Seguro: Confirmación de contar con pólizas vigentes que cubran las operaciones autorizadas.' },
-    { type: 'spacer', size: 6 },
-
-    // Cierre
-    { type: 'text', text: 'Por la favorable atención, anticipo mis agradecimientos.' },
+    { type: 'bullet', text: 'Pólizas de Seguro: Confirmación de pólizas de seguro vigentes que cubren las operaciones autorizadas.' },
     { type: 'spacer', size: 4 },
+
+    { type: 'text', text: 'Por la favorable atención que se sirva dar a la presente, anticipo mis agradecimientos.' },
+    { type: 'spacer', size: 2 },
     { type: 'text', text: 'Atentamente,' },
-    { type: 'spacer', size: 10 },
+    { type: 'spacer', size: 8 },
     { type: 'signature', name: d.rep_nombre, role: 'REPRESENTANTE LEGAL', company: `${d.empresa_razon}  |  RUC: ${d.empresa_ruc}` }
   ];
   return blocks;
@@ -931,19 +872,45 @@ function validate() {
   return ok;
 }
 
-document.getElementById('btn-download-word').addEventListener('click', () => {
+// ─── Captura de imagen del mapa ───
+async function captureMapImage() {
+  const lat = document.getElementById('mapa_lat').value;
+  if (!lat || typeof html2canvas === 'undefined') return null;
+  try {
+    const mapDiv = document.getElementById('mapa-ubicacion');
+    const canvas = await html2canvas(mapDiv, {
+      useCORS: true, allowTaint: false, scale: 1.5, logging: false,
+      windowWidth: mapDiv.offsetWidth, windowHeight: mapDiv.offsetHeight
+    });
+    return canvas.toDataURL('image/png');
+  } catch(e) { return null; }
+}
+
+document.getElementById('btn-download-word').addEventListener('click', async () => {
   if (!validate()) return;
-  const d = getFormData();
-  CNEL.DocGenerator.downloadWord(buildDocumentHTML(d), `Solicitud-Ampliacion-CNEL-${d.empresa_ruc || 'EP'}`);
-  CNEL.Toast.show('Documento Word generado correctamente.', 'success');
+  const btnW = document.getElementById('btn-download-word');
+  btnW.disabled = true; btnW.textContent = '⏳ Generando Word...';
+  try {
+    const mapImage = await captureMapImage();
+    const d = getFormData();
+    d.mapImage = mapImage;
+    CNEL.DocGenerator.downloadWord(buildDocumentHTML(d), `Solicitud-Ampliacion-CNEL-${d.empresa_ruc || 'EP'}`);
+    CNEL.Toast.show('Documento Word generado correctamente.', 'success');
+  } catch(e) {
+    CNEL.Toast.show('Error al generar el Word.', 'error');
+  } finally {
+    btnW.disabled = false; btnW.textContent = '📄 Descargar en Word (.doc)';
+  }
 });
 
 document.getElementById('btn-download-pdf').addEventListener('click', async () => {
   if (!validate()) return;
-  const d = getFormData();
   const btn = document.getElementById('btn-download-pdf');
   btn.disabled = true; btn.textContent = '⏳ Generando PDF...';
   try {
+    const mapImage = await captureMapImage();
+    const d = getFormData();
+    d.mapImage = mapImage;
     await CNEL.PdfGenerator.downloadPDF(buildPdfBlocks(d), `Solicitud-Ampliacion-CNEL-${d.empresa_ruc || 'EP'}`);
     CNEL.Toast.show('PDF generado correctamente.', 'success');
   } catch(e) {

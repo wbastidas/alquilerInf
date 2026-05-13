@@ -378,6 +378,21 @@ const PdfGenerator = {
       } else if (block.type === 'table') {
         y = this._drawTable(doc, block, margin, y, maxW);
         y += 6;
+      } else if (block.type === 'bold-text') {
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.setTextColor(20, 20, 20);
+        const lines = doc.splitTextToSize(block.text, maxW);
+        doc.text(lines, margin, y);
+        y += lines.length * lineH + 2;
+      } else if (block.type === 'image') {
+        if (block.src) {
+          const imgW = block.width  || maxW;
+          const imgH = block.height || 70;
+          if (y + imgH > 265) { doc.addPage(); y = 20; }
+          try { doc.addImage(block.src, 'PNG', margin, y, imgW, imgH); } catch(e) {}
+          y += imgH + 4;
+        }
       } else if (block.type === 'signature') {
         y += 20;
         doc.setDrawColor(0, 0, 0);
