@@ -261,17 +261,12 @@ const DocGenerator = {
         <meta charset='utf-8'>
         <title>${Sanitize.html(filename)}</title>
         <style>
-          body { font-family: Arial, sans-serif; font-size: 11pt; margin: 2cm; color: #000; }
-          h1 { font-size: 14pt; text-align: center; }
-          h2 { font-size: 12pt; margin-top: 16pt; }
-          table { border-collapse: collapse; width: 100%; margin: 8pt 0; }
-          th { background: #002855; color: white; padding: 6pt; font-size: 10pt; text-align: left; }
-          td { border: 1px solid #ccc; padding: 5pt; font-size: 10pt; }
-          p { margin: 4pt 0; line-height: 1.5; }
-          ul { margin: 4pt 0 4pt 16pt; }
+          @page { margin: 2.5cm; }
+          body { font-family: Arial, sans-serif; font-size: 11pt; margin: 0; padding: 0; color: #000; }
+          table { border-collapse: collapse; }
+          p { margin: 3pt 0; line-height: 1.45; }
+          ul, ol { margin: 3pt 0 3pt 18pt; }
           li { margin: 2pt 0; }
-          .firma { margin-top: 48pt; }
-          .linea { border-top: 1px solid #000; width: 220pt; margin-top: 36pt; }
         </style>
       </head>
       <body>${safeHtml}</body>
@@ -315,16 +310,16 @@ const PdfGenerator = {
 
     // Encabezado institucional
     doc.setFillColor(0, 40, 85);
-    doc.rect(0, 0, pageW, 28, 'F');
+    doc.rect(0, 0, pageW, 22, 'F');
     doc.setTextColor(255, 255, 255);
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(12);
-    doc.text('CNEL EP', margin, 12);
-    doc.setFontSize(8);
+    doc.setFontSize(11);
+    doc.text('CNEL EP', margin, 10);
+    doc.setFontSize(7.5);
     doc.setFont('helvetica', 'normal');
-    doc.text('Corporación Nacional de Electricidad', margin, 18);
-    doc.text('Portal de Arrendamiento de Infraestructura', margin, 23);
-    y = 40;
+    doc.text('Corporación Nacional de Electricidad', margin, 15.5);
+    doc.text('Portal de Arrendamiento de Infraestructura', margin, 19.5);
+    y = 30;
 
     doc.setTextColor(0, 0, 0);
 
@@ -426,37 +421,53 @@ const PdfGenerator = {
   },
 
   _drawTable(doc, block, x, y, maxW) {
-    const cols   = block.headers.length;
-    const colW   = maxW / cols;
-    const rowH   = 8;
+    const cols = block.headers.length;
+    // colWidths can be provided as relative proportions; default = equal
+    let cw;
+    if (block.colWidths && block.colWidths.length === cols) {
+      const sum = block.colWidths.reduce((a, b) => a + b, 0);
+      cw = block.colWidths.map(w => w * maxW / sum);
+    } else {
+      cw = Array(cols).fill(maxW / cols);
+    }
+    const xAt = i => x + cw.slice(0, i).reduce((a, b) => a + b, 0);
+    const lH  = 5;
+    const hdrH = 8;
 
     // Encabezado
     doc.setFillColor(0, 40, 85);
-    doc.rect(x, y, maxW, rowH, 'F');
+    doc.rect(x, y, maxW, hdrH, 'F');
     doc.setFont('helvetica', 'bold');
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
     block.headers.forEach((h, i) => {
-      doc.text(h, x + colW * i + 3, y + 5.5);
+      const wrapped = doc.splitTextToSize(String(h), cw[i] - 4);
+      doc.text(wrapped, xAt(i) + 2, y + 5.5);
     });
-    y += rowH;
+    y += hdrH;
 
-    // Filas
+    // Filas con altura dinámica
     block.rows.forEach((row, ri) => {
-      if (y > 265) { doc.addPage(); y = 20; }
+      const lineCount = row.map((cell, i) =>
+        doc.splitTextToSize(String(cell || ''), cw[i] - 4).length
+      );
+      const maxLines = Math.max(...lineCount, 1);
+      const rH = Math.max(8, maxLines * lH + 4);
+
+      if (y + rH > 265) { doc.addPage(); y = 20; }
       doc.setFillColor(ri % 2 === 0 ? 247 : 255, ri % 2 === 0 ? 250 : 255, ri % 2 === 0 ? 255 : 255);
-      doc.rect(x, y, maxW, rowH, 'F');
+      doc.rect(x, y, maxW, rH, 'F');
       doc.setDrawColor(200, 210, 220);
       doc.setLineWidth(.2);
-      doc.rect(x, y, maxW, rowH, 'S');
+      doc.rect(x, y, maxW, rH, 'S');
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(8.5);
       doc.setTextColor(40, 40, 40);
       row.forEach((cell, i) => {
-        const cellText = doc.splitTextToSize(String(cell || ''), colW - 4);
-        doc.text(cellText, x + colW * i + 3, y + 5.5);
+        const cellText = doc.splitTextToSize(String(cell || ''), cw[i] - 4);
+        doc.text(cellText, xAt(i) + 2, y + 5.5);
       });
-      y += rowH;
+      y += rH;
     });
     return y;
   },
