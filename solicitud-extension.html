@@ -142,24 +142,20 @@
 
       <div class="form-row">
         <div class="form-group">
-          <label for="dest_nombre">Nombre del destinatario <span class="req">*</span></label>
-          <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Nombre del Coordinador Gestión Arriendo" maxlength="120" required>
-          <div class="field-error" id="err-dest_nombre" role="alert"></div>
+          <label for="dest_unidad">Unidad de Negocio / Oficina <span class="req">*</span></label>
+          <select id="dest_unidad" name="dest_unidad" required>
+            <option value="">— Cargando opciones… —</option>
+          </select>
+          <div class="field-error" id="err-dest_unidad" role="alert"></div>
         </div>
         <div class="form-group">
-          <label for="dest_unidad">Unidad de Negocio / Oficina</label>
-          <select id="dest_unidad" name="dest_unidad">
-            <option value="">— Seleccione —</option>
-            <option value="CNEL EP UN Guayaquil">CNEL EP UN Guayaquil</option>
-            <option value="CNEL EP UN Guayas Los Ríos">CNEL EP UN Guayas Los Ríos</option>
-            <option value="CNEL EP UN Manabí">CNEL EP UN Manabí</option>
-            <option value="CNEL EP OFC">CNEL EP OFC</option>
-          </select>
+          <label for="dest_nombre">Nombre del destinatario</label>
+          <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Se completa al seleccionar la Unidad de Negocio" maxlength="120" readonly style="background:#f4f6fa;cursor:default">
+          <p class="form-hint">Completado automáticamente según la UN seleccionada.</p>
         </div>
         <div class="form-group" id="dest_email_group" style="display:none">
-          <label for="dest_email">Correo electrónico del destinatario</label>
-          <input type="email" id="dest_email" name="dest_email" placeholder="correo@cnelep.gob.ec" maxlength="120">
-          <p class="form-hint">Precargado según la Unidad de Negocio seleccionada. Editable si es necesario.</p>
+          <label for="dest_email">Correo del destinatario</label>
+          <input type="email" id="dest_email" name="dest_email" placeholder="correo@cnelep.gob.ec" maxlength="120" readonly style="background:#f4f6fa;cursor:default">
         </div>
       </div>
 
@@ -175,12 +171,6 @@
           <div class="field-error" id="err-contrato_fecha" role="alert"></div>
         </div>
       </div>
-      <div class="form-group">
-        <label for="ultima_ampliacion">Última ampliación autorizada (si aplica)</label>
-        <input type="date" id="ultima_ampliacion" name="ultima_ampliacion" style="max-width:220px">
-        <p class="form-hint">Deje en blanco si no ha habido ampliaciones previas.</p>
-      </div>
-
       <div class="form-row">
         <div class="form-group">
           <label for="rep_nombre">Representante Legal <span class="req">*</span></label>
@@ -326,8 +316,8 @@
         <table class="table-form" id="tabla-cronograma" aria-label="Cronograma de trabajos">
           <thead>
             <tr>
-              <th>Fecha (dd/mm/aaaa)</th>
-              <th>Horario</th>
+              <th>Fecha Inicio</th>
+              <th>Fecha Fin</th>
               <th>Actividad</th>
               <th>Ubicación</th>
               <th>Técnico Encargado</th>
@@ -489,41 +479,60 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
 
 // ─── Carga de Unidades de Negocio desde archivo externo ───
 (function() {
+  const selUN      = document.getElementById('dest_unidad');
+  const destNombre = document.getElementById('dest_nombre');
+  const destEmail  = document.getElementById('dest_email');
+  const emailGroup = document.getElementById('dest_email_group');
   let unidadesData = null;
 
   fetch('data/unidades.json')
     .then(r => r.json())
     .then(data => {
       unidadesData = data;
-      // Apply immediately if a UN is already selected
-      applyUnidad(document.getElementById('dest_unidad').value);
+      // Poblar el select dinámicamente
+      selUN.innerHTML = '<option value="">— Seleccione la Unidad de Negocio —</option>';
+      data.unidades.forEach(u => {
+        const opt = document.createElement('option');
+        opt.value = u.id;
+        opt.textContent = u.nombre_unidad;
+        selUN.appendChild(opt);
+      });
+      // Si ya había un valor guardado, aplicarlo
+      if (selUN.value) applyUnidad(selUN.value);
     })
-    .catch(() => {}); // Graceful: fields remain editable if file not found
+    .catch(() => {
+      // Si el archivo no carga, dejar el select como texto libre y habilitar nombre
+      selUN.innerHTML = `
+        <option value="">— Seleccione —</option>
+        <option value="guayaquil">CNEL EP UN Guayaquil</option>
+        <option value="guayas_los_rios">CNEL EP UN Guayas Los Ríos</option>
+        <option value="manabi">CNEL EP UN Manabí</option>
+        <option value="ofc">CNEL EP Oficina Central</option>`;
+      destNombre.removeAttribute('readonly');
+      destNombre.style.background = '';
+    });
 
-  function applyUnidad(val) {
-    if (!unidadesData) return;
-    const emailGroup = document.getElementById('dest_email_group');
-    const destNombre = document.getElementById('dest_nombre');
-    const destEmail  = document.getElementById('dest_email');
-
-    if (!val) { if (emailGroup) emailGroup.style.display = 'none'; return; }
-
-    const found = unidadesData.unidades.find(u => u.nombre_unidad === val);
+  function applyUnidad(id) {
+    if (!unidadesData || !id) {
+      destNombre.value = '';
+      destEmail.value  = '';
+      emailGroup.style.display = 'none';
+      return;
+    }
+    const found = unidadesData.unidades.find(u => u.id === id);
     if (found) {
-      if (destNombre && !destNombre.value) destNombre.value = found.responsable;
-      if (destEmail) { destEmail.value = found.email; if (emailGroup) emailGroup.style.display = ''; }
+      destNombre.value        = found.responsable;
+      destEmail.value         = found.email;
+      emailGroup.style.display = '';
     } else {
-      if (emailGroup) emailGroup.style.display = 'none';
+      destNombre.value = '';
+      destEmail.value  = '';
+      emailGroup.style.display = 'none';
     }
   }
 
-  document.getElementById('dest_unidad').addEventListener('change', function() {
+  selUN.addEventListener('change', function() {
     applyUnidad(this.value);
-    // Also update name if user hasn't typed custom text or it matches previous auto-fill
-    if (!unidadesData) return;
-    const destNombre = document.getElementById('dest_nombre');
-    const found = unidadesData.unidades.find(u => u.nombre_unidad === this.value);
-    if (found && destNombre) destNombre.value = found.responsable;
   });
 })();
 
@@ -722,12 +731,19 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
     n++;
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><input type="date"   name="crn_fecha_${n}"></td>
-      <td><input type="text"   name="crn_hora_${n}"  placeholder="08:00 - 17:00" maxlength="20"></td>
-      <td><input type="text"   name="crn_act_${n}"   placeholder="Actividad"     maxlength="150"></td>
-      <td><input type="text"   name="crn_ubic_${n}"  placeholder="Dirección o coordenadas" maxlength="150"></td>
-      <td><input type="text"   name="crn_tec_${n}"   placeholder="Nombre del técnico" maxlength="100"></td>
+      <td><input type="date" name="crn_fecha_ini_${n}" id="crn_fecha_ini_${n}"></td>
+      <td><input type="date" name="crn_fecha_fin_${n}" id="crn_fecha_fin_${n}"></td>
+      <td><input type="text" name="crn_act_${n}"   placeholder="Actividad"     maxlength="150"></td>
+      <td><input type="text" name="crn_ubic_${n}"  placeholder="Dirección o coordenadas" maxlength="150"></td>
+      <td><input type="text" name="crn_tec_${n}"   placeholder="Nombre del técnico" maxlength="100"></td>
       <td><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
+    // Al poner fecha inicio, fecha fin se iguala automáticamente (y solo acepta >= inicio)
+    const fIni = tr.querySelector(`#crn_fecha_ini_${n}`);
+    const fFin = tr.querySelector(`#crn_fecha_fin_${n}`);
+    fIni.addEventListener('change', function() {
+      if (!fFin.value || fFin.value < this.value) fFin.value = this.value;
+      fFin.min = this.value;
+    });
     tr.querySelector('.btn-icon').onclick = () => tr.remove();
     tbody.appendChild(tr);
   }
@@ -790,14 +806,16 @@ function getFormData() {
     ]);
   });
 
-  // Cronograma
+  // Cronograma (Fecha Inicio, Fecha Fin, Actividad, Ubicación, Técnico)
   const cronograma = [];
   document.querySelectorAll('#tabla-cronograma tbody tr').forEach(tr => {
     const inputs = tr.querySelectorAll('input');
     if (inputs[0]?.value) cronograma.push([
       CNEL.formatDateES(s(inputs[0]?.value || '')),
-      s(inputs[1]?.value || ''), s(inputs[2]?.value || ''),
-      s(inputs[3]?.value || ''), s(inputs[4]?.value || ''),
+      CNEL.formatDateES(s(inputs[1]?.value || '')),
+      s(inputs[2]?.value || ''),
+      s(inputs[3]?.value || ''),
+      s(inputs[4]?.value || ''),
     ]);
   });
 
@@ -816,11 +834,10 @@ function getFormData() {
     ciudad:             gi('ciudad'),
     fecha:              gi('fecha'),
     dest_nombre:        gi('dest_nombre'),
-    dest_unidad:        gi('dest_unidad'),
+    dest_unidad:        document.getElementById('dest_unidad')?.selectedOptions[0]?.textContent?.trim() || '',
     dest_email:         gi('dest_email'),
     contrato_num:       gi('contrato_num'),
     contrato_fecha:     gi('contrato_fecha'),
-    ultima_ampliacion:  gi('ultima_ampliacion') ? CNEL.formatDateES(gi('ultima_ampliacion')) : 'N/A',
     rep_nombre:         gi('rep_nombre'),
     empresa_razon:      gi('empresa_razon'),
     empresa_ruc:        gi('empresa_ruc'),
@@ -886,7 +903,7 @@ function buildDocumentHTML(d) {
   ).join('');
   const motivHTML = (d.motivaciones.length ? d.motivaciones : ['No especificada']).map(m => li(m)).join('');
   const cronoFilas = d.cronograma.map(c =>
-    `<tr><td style="${TD}">${c[0]}</td><td style="${TDC}">${c[1]}</td><td style="${TD}">${c[2]}</td><td style="${TD}">${c[3]}</td><td style="${TD}">${c[4]}</td></tr>`
+    `<tr><td style="${TD}">${c[0]}</td><td style="${TD}">${c[1]}</td><td style="${TD}">${c[2]}</td><td style="${TD}">${c[3]}</td><td style="${TD}">${c[4]}</td></tr>`
   ).join('');
   const persFilas = d.personal.map(pp =>
     `<tr><td style="${TD}">${pp[0]}</td><td style="${TD}">${pp[1]}</td><td style="${TDC}">${pp[2]}</td><td style="${TD}">${pp[3]}</td></tr>`
@@ -914,7 +931,6 @@ ${pb('ASUNTO:&nbsp; SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRIC
 ${pb('REF.:')}
 <ul style="margin:0 0 8pt 0;padding-left:20pt">
   ${li(`Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}`)}
-  ${li(`Última ampliación autorizada: ${d.ultima_ampliacion}`)}
 </ul>
 
 ${p('De mi consideración:')}
@@ -945,7 +961,7 @@ ${sub('4.2  Geodatabase SIG:')}
 ${p('Se adjunta la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (formato File Geodatabase / WGS84 UTM Zona 17S), conforme al Manual GU-TEC-OPE-102.')}
 
 ${sub('4.3  Cronograma de Trabajos:')}
-${T([{l:'Fecha'},{l:'Horario',c:true},{l:'Actividad'},{l:'Ubicación'},{l:'Técnico Encargado'}], cronoFilas, 5)}
+${T([{l:'Fecha Inicio'},{l:'Fecha Fin'},{l:'Actividad'},{l:'Ubicación'},{l:'Técnico Encargado'}], cronoFilas, 5)}
 
 ${sec('5.  PERSONAL TÉCNICO ASIGNADO')}
 ${T([{l:'Función'},{l:'Nombre Completo'},{l:'Celular',c:true},{l:'Email'}], persFilas, 4)}
@@ -995,7 +1011,6 @@ function buildPdfBlocks(d) {
     { type: 'bold-text', text: 'ASUNTO:  SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP' },
     { type: 'bold-text', text: 'REF.:' },
     { type: 'bullet', text: `Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}` },
-    { type: 'bullet', text: `Última ampliación autorizada: ${d.ultima_ampliacion}` },
     { type: 'spacer', size: 3 },
 
     { type: 'text', text: 'De mi consideración:' },
@@ -1033,7 +1048,8 @@ function buildPdfBlocks(d) {
 
     { type: 'subheading', text: '4.3  Cronograma de Trabajos:' },
     { type: 'table',
-      headers: ['Fecha', 'Horario', 'Actividad', 'Ubicación', 'Técnico Encargado'],
+      headers: ['Fecha Inicio', 'Fecha Fin', 'Actividad', 'Ubicación', 'Técnico Encargado'],
+      colWidths: [28, 28, 50, 40, 34],
       rows: d.cronograma.length ? d.cronograma : [['Sin cronograma ingresado', '', '', '', '']]
     },
 
