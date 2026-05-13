@@ -27,6 +27,8 @@
     .resumen-col .current { font-size:.88rem; color:rgba(255,255,255,.7); font-family:'Montserrat',sans-serif; }
     .resumen-col .nuevo { font-size:1.3rem; font-weight:800; color:var(--dorado-claro); font-family:'Montserrat',sans-serif; }
     .resumen-col .pct { font-size:.78rem; background:rgba(255,255,255,.15); border-radius:20px; padding:2px 8px; display:inline-block; margin-top:2px; }
+    .btn-coord-picker { background:var(--azul-medio);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:.9rem;vertical-align:middle;margin-left:4px;transition:background .2s; }
+    .btn-coord-picker:hover { background:var(--azul-oscuro); }
     @media(max-width:768px) { .motivacion-grid,.resumen-row { grid-template-columns:1fr; } }
   </style>
 </head>
@@ -434,6 +436,42 @@
       <span class="footer-legal">Portal SIG-CNEL</span>
     </div>
   </div>
+
+<!-- MODAL: Selector de coordenadas Desde / Hasta -->
+<div id="modal-coord-picker" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Seleccionar coordenadas Desde/Hasta">
+  <div class="modal" style="max-width:640px;width:100%">
+    <div class="modal-header">
+      <h3>📍 Seleccionar Desde / Hasta en el mapa</h3>
+      <button class="modal-close" id="btn-close-picker" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.88rem;color:var(--gris-texto);margin:0 0 10px 0">
+        Elija el modo y haga clic en el mapa para marcar cada punto. También puede escribir las coordenadas manualmente.
+      </p>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <button type="button" id="picker-btn-desde" class="btn btn-primary btn-sm" style="flex:1">📍 Marcar Desde (inicio)</button>
+        <button type="button" id="picker-btn-hasta" class="btn btn-secondary btn-sm" style="flex:1">🏁 Marcar Hasta (fin)</button>
+      </div>
+      <div id="picker-map" style="height:300px;border-radius:var(--radio);border:1.5px solid var(--gris-borde);overflow:hidden;margin-bottom:12px;z-index:0"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:6px">
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:var(--azul-oscuro);display:block;margin-bottom:4px">📍 Desde — Lat, Lng</label>
+          <input type="text" id="picker-desde" placeholder="-2.145600, -79.896700" maxlength="40" style="width:100%;font-family:monospace;font-size:.87rem">
+        </div>
+        <div>
+          <label style="font-size:.8rem;font-weight:600;color:var(--azul-oscuro);display:block;margin-bottom:4px">🏁 Hasta — Lat, Lng</label>
+          <input type="text" id="picker-hasta" placeholder="-2.301200, -79.900500" maxlength="40" style="width:100%;font-family:monospace;font-size:.87rem">
+        </div>
+      </div>
+      <p class="form-hint" style="margin-bottom:12px">Puede arrastrar los marcadores para ajustar su posición.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" id="picker-apply" class="btn btn-primary">✓ Aplicar coordenadas</button>
+        <button type="button" id="picker-clear" class="btn btn-secondary">✕ Limpiar puntos</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
@@ -486,6 +524,123 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
   });
 })();
 
+// ─── Selector de coordenadas Desde/Hasta ───
+(function() {
+  let pickerMap = null;
+  let markerDesde = null;
+  let markerHasta = null;
+  let currentMode = 'desde';
+  let targetInputId = null;
+
+  const iconDesde = () => L.divIcon({
+    className: '',
+    html: '<div style="width:26px;height:26px;background:#002855;border:3px solid #E8A000;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font-size:9px;font-weight:bold;line-height:1">D</span></div>',
+    iconSize: [26, 26], iconAnchor: [13, 26]
+  });
+  const iconHasta = () => L.divIcon({
+    className: '',
+    html: '<div style="width:26px;height:26px;background:#1a7a3c;border:3px solid #fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="transform:rotate(45deg);color:#fff;font-size:9px;font-weight:bold;line-height:1">H</span></div>',
+    iconSize: [26, 26], iconAnchor: [13, 26]
+  });
+
+  function updateModeButtons() {
+    const bD = document.getElementById('picker-btn-desde');
+    const bH = document.getElementById('picker-btn-hasta');
+    bD.style.opacity = currentMode === 'desde' ? '1' : '0.55';
+    bH.style.opacity = currentMode === 'hasta' ? '1' : '0.55';
+    bD.style.fontWeight = currentMode === 'desde' ? 'bold' : 'normal';
+    bH.style.fontWeight = currentMode === 'hasta' ? 'bold' : 'normal';
+  }
+
+  function setCoord(latlng, mode) {
+    const lat = latlng.lat.toFixed(6);
+    const lng = latlng.lng.toFixed(6);
+    document.getElementById(`picker-${mode}`).value = `${lat}, ${lng}`;
+  }
+
+  function initPickerMap() {
+    if (pickerMap) return;
+    pickerMap = L.map('picker-map', { zoomControl: true }).setView([-1.8312, -78.1834], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      maxZoom: 19, crossOrigin: true
+    }).addTo(pickerMap);
+
+    pickerMap.on('click', e => {
+      const mode = currentMode;
+      setCoord(e.latlng, mode);
+      if (mode === 'desde') {
+        if (markerDesde) markerDesde.setLatLng(e.latlng);
+        else {
+          markerDesde = L.marker(e.latlng, { icon: iconDesde(), draggable: true }).addTo(pickerMap);
+          markerDesde.on('dragend', ev => setCoord(ev.target.getLatLng(), 'desde'));
+        }
+        currentMode = 'hasta';
+      } else {
+        if (markerHasta) markerHasta.setLatLng(e.latlng);
+        else {
+          markerHasta = L.marker(e.latlng, { icon: iconHasta(), draggable: true }).addTo(pickerMap);
+          markerHasta.on('dragend', ev => setCoord(ev.target.getLatLng(), 'hasta'));
+        }
+        currentMode = 'desde';
+      }
+      updateModeButtons();
+    });
+  }
+
+  function openPicker(inputId) {
+    targetInputId = inputId;
+    // Pre-fill inputs if field already has data
+    const existing = (document.getElementById(inputId)?.value || '').trim();
+    document.getElementById('picker-desde').value = '';
+    document.getElementById('picker-hasta').value = '';
+    if (existing) {
+      const desdeMatch = existing.match(/Desde:\s*([-\d.]+,\s*[-\d.]+)/i);
+      const hastaMatch = existing.match(/Hasta:\s*([-\d.]+,\s*[-\d.]+)/i);
+      if (desdeMatch) document.getElementById('picker-desde').value = desdeMatch[1];
+      if (hastaMatch) document.getElementById('picker-hasta').value = hastaMatch[1];
+    }
+    currentMode = 'desde';
+    updateModeButtons();
+    document.getElementById('modal-coord-picker').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    initPickerMap();
+    setTimeout(() => pickerMap.invalidateSize(), 250);
+  }
+
+  function closePicker() {
+    document.getElementById('modal-coord-picker').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  document.getElementById('picker-btn-desde').addEventListener('click', () => { currentMode = 'desde'; updateModeButtons(); });
+  document.getElementById('picker-btn-hasta').addEventListener('click', () => { currentMode = 'hasta'; updateModeButtons(); });
+  document.getElementById('btn-close-picker').addEventListener('click', closePicker);
+  document.getElementById('modal-coord-picker').addEventListener('click', e => {
+    if (e.target === document.getElementById('modal-coord-picker')) closePicker();
+  });
+
+  document.getElementById('picker-apply').addEventListener('click', () => {
+    const desde = document.getElementById('picker-desde').value.trim();
+    const hasta  = document.getElementById('picker-hasta').value.trim();
+    const parts = [];
+    if (desde) parts.push(`Desde: ${desde}`);
+    if (hasta)  parts.push(`Hasta: ${hasta}`);
+    const target = document.getElementById(targetInputId);
+    if (target && parts.length) target.value = parts.join(' | ');
+    closePicker();
+  });
+
+  document.getElementById('picker-clear').addEventListener('click', () => {
+    document.getElementById('picker-desde').value = '';
+    document.getElementById('picker-hasta').value = '';
+    if (markerDesde) { pickerMap.removeLayer(markerDesde); markerDesde = null; }
+    if (markerHasta) { pickerMap.removeLayer(markerHasta); markerHasta = null; }
+  });
+
+  window.openCoordPicker = openPicker;
+})();
+
 // ─── Tabla de rutas de ampliación ───
 (function() {
   const tbody  = document.querySelector('#tabla-rutas-amp tbody');
@@ -497,9 +652,14 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
     tr.innerHTML = `
       <td><input type="text"   name="amp_prov_${n}"  placeholder="Provincia/Ciudad" maxlength="80"></td>
       <td><input type="text"   name="amp_ruta_${n}"  placeholder="Enlace A-B"       maxlength="120"></td>
-      <td><input type="text"   name="amp_coord_${n}" placeholder="Lat/Lon o ref."   maxlength="100"></td>
+      <td style="min-width:180px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="text" name="amp_coord_${n}" id="amp_coord_${n}" placeholder="Descripción o coordenadas" maxlength="200" style="flex:1;min-width:0">
+          <button type="button" onclick="openCoordPicker('amp_coord_${n}')" class="btn-coord-picker" title="Seleccionar Desde/Hasta en mapa" aria-label="Abrir selector de mapa">📍</button>
+        </div>
+      </td>
       <td><input type="number" name="amp_pos_${n}"   placeholder="0" min="0"></td>
-      <td><input type="text"   name="amp_equ_${n}"   placeholder="Ej: 2 act / 3 pas" maxlength="60"></td>
+      <td><input type="text"   name="amp_equ_${n}"   placeholder="2 act / 3 pas" maxlength="60"></td>
       <td><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
     tr.querySelector('.btn-icon').onclick = () => tr.remove();
     tbody.appendChild(tr);
@@ -650,117 +810,119 @@ const W = {
   li:   (t)           => `<li style="font-family:Arial,sans-serif;font-size:10.5pt;color:#1a1a1a;margin:2pt 0;line-height:1.5">${t}</li>`,
 };
 
-// ─── HTML para Word ───
+// ─── HTML para Word (formato carta oficial Anexo 5) ───
 function buildDocumentHTML(d) {
   const fechaEs       = CNEL.formatDateES(d.fecha);
   const contratoFecha = CNEL.formatDateES(d.contrato_fecha);
 
-  const rutaFilas = d.rutas.map((r, i) =>
-    `<tr${i%2?' style="background-color:#F7FAFF"':''}>
-      <td style="${W.td}">${r[0]}</td><td style="${W.td}">${r[1]}</td>
-      <td style="${W.td}">${r[2]}</td><td style="${W.tdc}">${r[3]}</td><td style="${W.td}">${r[4]}</td>
-    </tr>`
+  // Estilos base para carta oficial (sin branding de colores)
+  const F  = 'font-family:Arial,sans-serif';
+  const p  = (t, ex='') => `<p style="${F};font-size:11pt;color:#000;margin:0 0 6pt 0;line-height:1.5;${ex}">${t}</p>`;
+  const pb = (t, ex='') => `<p style="${F};font-size:11pt;color:#000;font-weight:bold;margin:0 0 6pt 0;line-height:1.5;${ex}">${t}</p>`;
+  const sec = t => `<p style="${F};font-size:11pt;color:#000;font-weight:bold;margin:10pt 0 4pt 0;line-height:1.4">${t}</p>`;
+  const sub = t => `<p style="${F};font-size:11pt;color:#000;font-weight:bold;margin:7pt 0 3pt 0;line-height:1.4">${t}</p>`;
+  const li  = t => `<li style="${F};font-size:11pt;color:#000;margin:2pt 0;line-height:1.5">${t}</li>`;
+
+  const TH = `${F};font-size:10pt;font-weight:bold;background-color:#002855;color:#fff;padding:5pt 7pt;border:1pt solid #001a40;text-align:left`;
+  const THC= `${F};font-size:10pt;font-weight:bold;background-color:#002855;color:#fff;padding:5pt 7pt;border:1pt solid #001a40;text-align:center`;
+  const TD = `${F};font-size:10pt;color:#000;padding:4pt 7pt;border:1pt solid #aaa;vertical-align:top`;
+  const TDC= `${F};font-size:10pt;color:#000;padding:4pt 7pt;border:1pt solid #aaa;vertical-align:top;text-align:center`;
+  const TBL= 'border-collapse:collapse;width:100%;margin:4pt 0 10pt 0';
+
+  const T = (headers, rows, emptyCols) =>
+    `<table border="0" cellpadding="0" cellspacing="0" style="${TBL}">
+  <thead><tr>${headers.map(h => `<th style="${h.c ? THC : TH}">${h.l}</th>`).join('')}</tr></thead>
+  <tbody>${rows || `<tr><td style="${TD}" colspan="${emptyCols}"><em>Sin datos ingresados</em></td></tr>`}</tbody>
+</table>`;
+
+  const rutaFilas = d.rutas.map(r =>
+    `<tr><td style="${TD}">${r[0]}</td><td style="${TD}">${r[1]}</td><td style="${TD}">${r[2]}</td><td style="${TDC}">${r[3]}</td><td style="${TD}">${r[4]}</td></tr>`
   ).join('');
-  const motivHTML = (d.motivaciones.length ? d.motivaciones : ['No especificada']).map(m => W.li(m)).join('');
-  const cronoFilas = d.cronograma.map((c, i) =>
-    `<tr${i%2?' style="background-color:#F7FAFF"':''}>
-      <td style="${W.td}">${c[0]}</td><td style="${W.tdc}">${c[1]}</td>
-      <td style="${W.td}">${c[2]}</td><td style="${W.td}">${c[3]}</td><td style="${W.td}">${c[4]}</td>
-    </tr>`
+  const motivHTML = (d.motivaciones.length ? d.motivaciones : ['No especificada']).map(m => li(m)).join('');
+  const cronoFilas = d.cronograma.map(c =>
+    `<tr><td style="${TD}">${c[0]}</td><td style="${TDC}">${c[1]}</td><td style="${TD}">${c[2]}</td><td style="${TD}">${c[3]}</td><td style="${TD}">${c[4]}</td></tr>`
   ).join('');
-  const persFilas = d.personal.map((p, i) =>
-    `<tr${i%2?' style="background-color:#F7FAFF"':''}>
-      <td style="${W.td}">${p[0]}</td><td style="${W.td}">${p[1]}</td>
-      <td style="${W.tdc}">${p[2]}</td><td style="${W.td}">${p[3]}</td>
-    </tr>`
+  const persFilas = d.personal.map(pp =>
+    `<tr><td style="${TD}">${pp[0]}</td><td style="${TD}">${pp[1]}</td><td style="${TDC}">${pp[2]}</td><td style="${TD}">${pp[3]}</td></tr>`
   ).join('');
 
   const mapImg = d.mapImage
-    ? `<img src="${d.mapImage}" style="width:100%;max-width:460pt;display:block;margin:6pt 0 8pt 0;border:1pt solid #cccccc">`
+    ? `<img src="${d.mapImage}" style="width:100%;max-width:440pt;display:block;margin:6pt 0 8pt 0;border:1pt solid #ccc">`
     : '';
   const coordTexto = (d.mapa_lat && d.mapa_lng)
-    ? W.p(`<strong>Coordenadas:</strong> Lat ${d.mapa_lat}, Lng ${d.mapa_lng}`)
+    ? p(`<strong>Coordenadas:</strong> Lat ${d.mapa_lat}, Lng ${d.mapa_lng}`)
     : '';
 
-  const T = (headers, rows, emptyCols) =>
-    `<table border="1" cellpadding="0" cellspacing="0" style="${W.tbl}">
-  <thead><tr>${headers.map(h => `<th style="${h.center ? W.thc : W.th}">${h.label}</th>`).join('')}</tr></thead>
-  <tbody>${rows || `<tr><td style="${W.td}" colspan="${emptyCols}"><em>Sin datos ingresados</em></td></tr>`}</tbody>
-</table>`;
-
   return `
-${W.bold('CNEL EP', 'font-size:15pt;color:#002855;margin:0 0 1pt 0')}
-${W.p('Corporación Nacional de Electricidad — Empresa Pública Estratégica', 'font-size:9pt;color:#555;margin:0 0 1pt 0')}
-${W.p('Portal de Arrendamiento de Infraestructura Eléctrica', 'font-size:8.5pt;color:#777;margin:0 0 8pt 0')}
-<hr style="border:0;border-top:3pt solid #E8A000;margin:0 0 12pt 0">
+${d.num_solicitud ? p(`<strong>No. SOLICITUD:</strong> ${d.num_solicitud}`) : ''}
+${p(`${d.ciudad}, ${fechaEs}`, 'margin-bottom:10pt')}
 
-${d.num_solicitud ? W.p(`<strong>No. SOLICITUD:</strong> ${d.num_solicitud}`) : ''}
-${W.p(`<strong>Fecha:</strong> ${d.ciudad}, ${fechaEs}`)}
-${W.p('&nbsp;')}
-${W.p('Señor(a)')}
-${W.bold(d.dest_nombre)}
-${W.p('Coordinador/a Gestión Arriendo de Infraestructura')}
-${d.dest_unidad ? W.p(d.dest_unidad) : ''}
-${W.p('Empresa Eléctrica Pública Estratégica — CNEL EP')}
-${W.p('&nbsp;')}
-${W.p('<strong>ASUNTO:</strong>&nbsp; SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP')}
-${W.p('<strong>REF.:</strong>')}
-<ul style="margin:0 0 8pt 0;padding-left:18pt">
-  ${W.li(`Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}`)}
-  ${W.li(`Última ampliación autorizada: ${d.ultima_ampliacion}`)}
+${p('Señor(a)')}
+${pb(d.dest_nombre)}
+${p('Coordinador/a Gestión Arriendo de Infraestructura')}
+${d.dest_unidad ? p(d.dest_unidad) : ''}
+${p('Empresa Eléctrica Pública Estratégica — CNEL EP')}
+${p('&nbsp;', 'margin:0')}
+
+${pb('ASUNTO:&nbsp; SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP')}
+${pb('REF.:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Contrato No. ${d.contrato_num}, suscrito el ${contratoFecha}`)}
+  ${li(`Última ampliación autorizada: ${d.ultima_ampliacion}`)}
 </ul>
-${W.p('De mi consideración:')}
-${W.p(`Yo, <strong>${d.rep_nombre}</strong>, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, con RUC No. <strong>${d.empresa_ruc}</strong>, en el marco del contrato de arrendamiento de infraestructura eléctrica vigente de la referencia, por medio del presente solicito formalmente a usted se digne autorizar la ampliación del uso de infraestructura eléctrica de CNEL EP, conforme al siguiente detalle:`, 'line-height:1.6;margin-top:4pt')}
 
-${W.sec('1.&nbsp; RESUMEN EJECUTIVO DE LA AMPLIACIÓN')}
+${p('De mi consideración:')}
+${p(`Yo, <strong>${d.rep_nombre}</strong>, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, con RUC No. <strong>${d.empresa_ruc}</strong>, en el marco del contrato de arrendamiento de infraestructura eléctrica vigente de la referencia, por medio del presente solicito formalmente a usted se digne autorizar la ampliación del uso de infraestructura eléctrica de CNEL EP, conforme al siguiente detalle:`, 'line-height:1.6')}
+
+${sec('1.  RESUMEN EJECUTIVO DE LA AMPLIACIÓN')}
 ${T(
-  [{label:'Concepto'},{label:'Cantidad Actual',center:true},{label:'Ampliación Solicitada',center:true},{label:'Total Proyectado',center:true},{label:'Incremento %',center:true}],
-  `<tr><td style="${W.td}">Postes aéreos</td><td style="${W.tdc}">${d.pos_actual}</td><td style="${W.tdc}">${d.pos_amp}</td><td style="${W.tdc}">${d.pos_total}</td><td style="${W.tdc}">${d.pos_pct}</td></tr>
-   <tr style="background-color:#F7FAFF"><td style="${W.td}">Ductos subterráneos (m)</td><td style="${W.tdc}">${d.duc_actual}</td><td style="${W.tdc}">${d.duc_amp}</td><td style="${W.tdc}">${d.duc_total}</td><td style="${W.tdc}">${d.duc_pct}</td></tr>`,
+  [{l:'Concepto'},{l:'Cantidad Actual',c:true},{l:'Ampliación Solicitada',c:true},{l:'Total Proyectado',c:true},{l:'Incremento %',c:true}],
+  `<tr><td style="${TD}">Postes aéreos</td><td style="${TDC}">${d.pos_actual}</td><td style="${TDC}">${d.pos_amp}</td><td style="${TDC}">${d.pos_total}</td><td style="${TDC}">${d.pos_pct}</td></tr>
+   <tr><td style="${TD}">Ductos subterráneos (m)</td><td style="${TDC}">${d.duc_actual}</td><td style="${TDC}">${d.duc_amp}</td><td style="${TDC}">${d.duc_total}</td><td style="${TDC}">${d.duc_pct}</td></tr>`,
   5
 )}
 
-${W.sec('2.&nbsp; DETALLE TÉCNICO DE RUTAS A AMPLIAR')}
-${T([{label:'Provincia / Ciudad / Recinto'},{label:'Rutas / Enlaces'},{label:'Desde / Hasta (Coordenadas)'},{label:'Total Postes / Ductos',center:true},{label:'Total Equipos Act/Pas'}], rutaFilas, 5)}
+${sec('2.  DETALLE TÉCNICO DE RUTAS A AMPLIAR')}
+${T([{l:'Provincia / Ciudad / Recinto'},{l:'Rutas / Enlaces'},{l:'Desde / Hasta (Coordenadas)'},{l:'Total Postes / Ductos',c:true},{l:'Total Equipos Act/Pas'}], rutaFilas, 5)}
 
-${W.sec('3.&nbsp; JUSTIFICACIÓN TÉCNICA')}
-${W.sub('3.1 Motivación de la ampliación:')}
-<ul style="margin:0 0 8pt 0;padding-left:18pt">${motivHTML}</ul>
+${sec('3.  JUSTIFICACIÓN TÉCNICA')}
+${sub('3.1  Motivación de la ampliación:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">${motivHTML}</ul>
 
-${W.sec('4.&nbsp; DETALLES DE LA ACTIVIDAD')}
-${W.sub('4.1 Descripción de Ubicación:')}
-${W.p(d.ubicacion_desc || 'Se adjuntarán imágenes del sector de trabajo con referencia de postes (ArcGIS / Google Earth).')}
+${sec('4.  DETALLES DE LA ACTIVIDAD')}
+${sub('4.1  Descripción de Ubicación:')}
+${p(d.ubicacion_desc || 'Se adjuntarán imágenes del sector de trabajo con referencia de postes (ArcGIS / Google Earth).')}
 ${coordTexto}
 ${mapImg}
 
-${W.sub('4.2 Geodatabase SIG:')}
-${W.p('Se adjunta la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (formato File Geodatabase / WGS84 UTM Zona 17S), conforme al Manual GU-TEC-OPE-102.')}
+${sub('4.2  Geodatabase SIG:')}
+${p('Se adjunta la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (formato File Geodatabase / WGS84 UTM Zona 17S), conforme al Manual GU-TEC-OPE-102.')}
 
-${W.sub('4.3 Cronograma de Trabajos:')}
-${T([{label:'Fecha'},{label:'Horario',center:true},{label:'Actividad'},{label:'Ubicación'},{label:'Técnico Encargado'}], cronoFilas, 5)}
+${sub('4.3  Cronograma de Trabajos:')}
+${T([{l:'Fecha'},{l:'Horario',c:true},{l:'Actividad'},{l:'Ubicación'},{l:'Técnico Encargado'}], cronoFilas, 5)}
 
-${W.sec('5.&nbsp; PERSONAL TÉCNICO ASIGNADO')}
-${T([{label:'Función'},{label:'Nombre Completo'},{label:'Celular',center:true},{label:'Email'}], persFilas, 4)}
+${sec('5.  PERSONAL TÉCNICO ASIGNADO')}
+${T([{l:'Función'},{l:'Nombre Completo'},{l:'Celular',c:true},{l:'Email'}], persFilas, 4)}
 
-${W.sec('6.&nbsp; COMPROMISOS DEL PROVEEDOR')}
-<ul style="margin:0 0 12pt 0;padding-left:18pt">
-  ${W.li('<strong>Cumplimiento Normativo:</strong> Declaro plena adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes.')}
-  ${W.li('<strong>Responsabilidad Civil:</strong> Acepto responsabilidad total por daños a terceros y a la propiedad de CNEL EP.')}
-  ${W.li('<strong>Pólizas de Seguro:</strong> Confirmo contar con pólizas de seguro vigentes que cubren las operaciones autorizadas.')}
+${sec('6.  COMPROMISOS DEL PROVEEDOR')}
+<ul style="margin:0 0 12pt 0;padding-left:20pt">
+  ${li('<strong>Cumplimiento Normativo:</strong> Declaro plena adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes.')}
+  ${li('<strong>Responsabilidad Civil:</strong> Acepto responsabilidad total por daños a terceros y a la propiedad de CNEL EP.')}
+  ${li('<strong>Pólizas de Seguro:</strong> Confirmo contar con pólizas de seguro vigentes que cubren las operaciones autorizadas.')}
 </ul>
 
-${W.p('Por la favorable atención que se sirva dar a la presente, anticipo mis agradecimientos.', 'margin-top:14pt')}
-${W.p('Atentamente,', 'margin-top:4pt;margin-bottom:36pt')}
+${p('Por la favorable atención que se sirva dar a la presente, anticipo mis agradecimientos.', 'margin-top:12pt')}
+${p('Atentamente,', 'margin-top:4pt;margin-bottom:40pt')}
 
 <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
   <tr>
-    <td style="width:48%;vertical-align:top;border-top:1pt solid #000000;padding-top:5pt">
-      ${W.bold(d.rep_nombre, 'margin:0 0 1pt 0')}
-      ${W.p('REPRESENTANTE LEGAL', 'margin:0 0 1pt 0;font-size:10pt')}
-      ${W.p(d.empresa_razon, 'margin:0 0 1pt 0;font-size:10pt')}
-      ${W.p(`RUC: ${d.empresa_ruc}`, 'margin:0;font-size:10pt')}
+    <td style="width:50%;vertical-align:top;border-top:1pt solid #000;padding-top:5pt">
+      ${pb(d.rep_nombre, 'margin:0 0 1pt 0')}
+      ${p('REPRESENTANTE LEGAL', 'margin:0 0 1pt 0;font-size:10pt')}
+      ${p(d.empresa_razon, 'margin:0 0 1pt 0;font-size:10pt')}
+      ${p(`RUC: ${d.empresa_ruc}`, 'margin:0;font-size:10pt')}
     </td>
-    <td style="width:52%"></td>
+    <td style="width:50%"></td>
   </tr>
 </table>
 `;
@@ -797,6 +959,7 @@ function buildPdfBlocks(d) {
     { type: 'heading', text: '1.  RESUMEN EJECUTIVO DE LA AMPLIACIÓN' },
     { type: 'table',
       headers: ['Concepto', 'Cantidad Actual', 'Ampliación Solicitada', 'Total Proyectado', 'Incremento %'],
+      colWidths: [55, 27, 37, 32, 19],
       rows: [
         ['Postes aéreos', d.pos_actual, d.pos_amp, d.pos_total, d.pos_pct],
         ['Ductos subterráneos (m)', d.duc_actual, d.duc_amp, d.duc_total, d.duc_pct],
