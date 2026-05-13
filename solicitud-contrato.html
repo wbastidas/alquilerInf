@@ -171,16 +171,24 @@
           <fieldset>
             <legend><span class="leg-icon" aria-hidden="true">👤</span> Destinatario de la Solicitud</legend>
             <div class="form-group">
-              <label for="dest_nombre">Nombre del destinatario <span class="req">*</span></label>
-              <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Nombre completo del Gerente/Administrador" maxlength="120" required>
-              <div class="field-error" id="err-dest_nombre" role="alert"></div>
-            </div>
-            <div class="form-group">
-              <label for="dest_cargo">Cargo</label>
+              <label for="dest_cargo">Cargo del destinatario</label>
               <select id="dest_cargo" name="dest_cargo">
                 <option value="Gerente General">Gerente General – CNEL EP (cobertura regional/nacional)</option>
-                <option value="Administrador de Unidad de Negocio">Administrador de Unidad de Negocio (cobertura local)</option>
+                <option value="Administrador de Unidad de Negocio">Administrador de Unidad de Negocio</option>
+                <option value="Oficina Central">Oficina Central – Dirección de Gestión Comercial</option>
               </select>
+            </div>
+            <div class="form-group" id="grupo-dest-un" style="display:none">
+              <label for="dest_un">Unidad de Negocio <span class="req">*</span></label>
+              <select id="dest_un" name="dest_un">
+                <option value="">Seleccione la Unidad de Negocio...</option>
+              </select>
+              <p class="form-hint">Al seleccionar se completará automáticamente el nombre del responsable.</p>
+            </div>
+            <div class="form-group">
+              <label for="dest_nombre">Nombre del destinatario <span class="req">*</span></label>
+              <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Se completa automáticamente o ingrese manualmente" maxlength="120" required>
+              <div class="field-error" id="err-dest_nombre" role="alert"></div>
             </div>
             <div class="form-group">
               <label for="dest_ciudad">Ciudad del destinatario <span class="req">*</span></label>
@@ -614,24 +622,66 @@ let _autoSaveEnabled = false; // Bloqueado durante inicialización para no pisar
 let unidadesData = null;
 fetch('data/unidades.json')
   .then(r => r.json())
-  .then(data => { unidadesData = data; applyDestCargo(); })
+  .then(data => {
+    unidadesData = data;
+    poblarSelectUN();
+    applyDestCargo(document.getElementById('dest_cargo').value, false);
+  })
   .catch(() => {});
 
-function applyDestCargo() {
+function poblarSelectUN() {
   if (!unidadesData) return;
-  const cargo = document.getElementById('dest_cargo').value;
+  const sel = document.getElementById('dest_un');
+  sel.innerHTML = '<option value="">Seleccione la Unidad de Negocio...</option>';
+  unidadesData.unidades.forEach(u => {
+    const opt = document.createElement('option');
+    opt.value = u.id;
+    opt.textContent = u.nombre_unidad;
+    sel.appendChild(opt);
+  });
+}
+
+function applyDestCargo(cargo, sobreescribir = true) {
+  if (!unidadesData) return;
+  const grupoUN   = document.getElementById('grupo-dest-un');
+  const nombre    = document.getElementById('dest_nombre');
+  const ciudad    = document.getElementById('dest_ciudad');
+
   if (cargo === 'Gerente General') {
+    grupoUN.style.display = 'none';
+    document.getElementById('dest_un').value = '';
     const gg = unidadesData.gerencia_general;
-    const nombre = document.getElementById('dest_nombre');
-    if (gg && nombre && !nombre.value) nombre.value = gg.nombre;
+    if (gg && sobreescribir) { nombre.value = gg.nombre; ciudad.value = gg.ciudad; }
+    else if (gg && !nombre.value) { nombre.value = gg.nombre; ciudad.value = gg.ciudad; }
+
+  } else if (cargo === 'Oficina Central') {
+    grupoUN.style.display = 'none';
+    document.getElementById('dest_un').value = '';
+    const oc = unidadesData.oficina_central;
+    if (oc && sobreescribir) { nombre.value = oc.nombre; ciudad.value = oc.ciudad; }
+    else if (oc && !nombre.value) { nombre.value = oc.nombre; ciudad.value = oc.ciudad; }
+
+  } else if (cargo === 'Administrador de Unidad de Negocio') {
+    grupoUN.style.display = '';
+    if (sobreescribir) { nombre.value = ''; ciudad.value = ''; }
+  } else {
+    grupoUN.style.display = 'none';
   }
 }
 
 document.getElementById('dest_cargo').addEventListener('change', function() {
-  if (this.value === 'Gerente General' && unidadesData) {
-    const gg = unidadesData.gerencia_general;
-    const nombre = document.getElementById('dest_nombre');
-    if (gg && nombre) nombre.value = gg.nombre;
+  applyDestCargo(this.value, true);
+  autoSave();
+});
+
+// Al seleccionar una UN, autocompleta nombre y ciudad
+document.getElementById('dest_un').addEventListener('change', function() {
+  if (!unidadesData || !this.value) return;
+  const found = unidadesData.unidades.find(u => u.id === this.value);
+  if (found) {
+    document.getElementById('dest_nombre').value = found.responsable;
+    document.getElementById('dest_ciudad').value  = found.ciudad;
+    autoSave();
   }
 });
 
@@ -1007,8 +1057,9 @@ function restoreSession(data) {
       else el.value = data[el.id];
     }
   });
-  // Cobertura: mostrar/ocultar UN
+  // Restaurar visibilidad de combo cargo/UN y cobertura
   document.getElementById('cobertura').dispatchEvent(new Event('change'));
+  applyDestCargo(document.getElementById('dest_cargo').value, false);
   // Restaurar cables
   if (Array.isArray(data.__cables) && data.__cables.length > 0) {
     document.querySelector('#tabla-cables tbody').innerHTML = '';
@@ -1120,6 +1171,7 @@ function getFormData() {
     fecha:              gi('fecha'),
     dest_nombre:        gi('dest_nombre'),
     dest_cargo:         gi('dest_cargo'),
+    dest_un:            gi('dest_un'),
     dest_ciudad:        gi('dest_ciudad'),
     rep_nombre:         gi('rep_nombre'),
     empresa_razon:      gi('empresa_razon'),
