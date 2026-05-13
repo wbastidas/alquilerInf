@@ -156,6 +156,11 @@
             <option value="CNEL EP OFC">CNEL EP OFC</option>
           </select>
         </div>
+        <div class="form-group" id="dest_email_group" style="display:none">
+          <label for="dest_email">Correo electrónico del destinatario</label>
+          <input type="email" id="dest_email" name="dest_email" placeholder="correo@cnelep.gob.ec" maxlength="120">
+          <p class="form-hint">Precargado según la Unidad de Negocio seleccionada. Editable si es necesario.</p>
+        </div>
       </div>
 
       <div class="form-row">
@@ -482,6 +487,46 @@ document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
 
+// ─── Carga de Unidades de Negocio desde archivo externo ───
+(function() {
+  let unidadesData = null;
+
+  fetch('data/unidades.json')
+    .then(r => r.json())
+    .then(data => {
+      unidadesData = data;
+      // Apply immediately if a UN is already selected
+      applyUnidad(document.getElementById('dest_unidad').value);
+    })
+    .catch(() => {}); // Graceful: fields remain editable if file not found
+
+  function applyUnidad(val) {
+    if (!unidadesData) return;
+    const emailGroup = document.getElementById('dest_email_group');
+    const destNombre = document.getElementById('dest_nombre');
+    const destEmail  = document.getElementById('dest_email');
+
+    if (!val) { if (emailGroup) emailGroup.style.display = 'none'; return; }
+
+    const found = unidadesData.unidades.find(u => u.nombre_unidad === val);
+    if (found) {
+      if (destNombre && !destNombre.value) destNombre.value = found.responsable;
+      if (destEmail) { destEmail.value = found.email; if (emailGroup) emailGroup.style.display = ''; }
+    } else {
+      if (emailGroup) emailGroup.style.display = 'none';
+    }
+  }
+
+  document.getElementById('dest_unidad').addEventListener('change', function() {
+    applyUnidad(this.value);
+    // Also update name if user hasn't typed custom text or it matches previous auto-fill
+    if (!unidadesData) return;
+    const destNombre = document.getElementById('dest_nombre');
+    const found = unidadesData.unidades.find(u => u.nombre_unidad === this.value);
+    if (found && destNombre) destNombre.value = found.responsable;
+  });
+})();
+
 // ─── Mapa Leaflet ───
 (function() {
   const map = L.map('mapa-ubicacion', { zoomControl: true }).setView([-1.8312, -78.1834], 7);
@@ -772,6 +817,7 @@ function getFormData() {
     fecha:              gi('fecha'),
     dest_nombre:        gi('dest_nombre'),
     dest_unidad:        gi('dest_unidad'),
+    dest_email:         gi('dest_email'),
     contrato_num:       gi('contrato_num'),
     contrato_fecha:     gi('contrato_fecha'),
     ultima_ampliacion:  gi('ultima_ampliacion') ? CNEL.formatDateES(gi('ultima_ampliacion')) : 'N/A',

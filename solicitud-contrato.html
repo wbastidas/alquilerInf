@@ -9,6 +9,7 @@
   <meta name="robots" content="noindex, nofollow">
   <title>Solicitud de Contrato – CNEL EP</title>
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
   <style>
     .form-section { margin-bottom: 32px; }
@@ -54,6 +55,14 @@
       margin-bottom: 24px;
     }
     .required-note strong { color: var(--rojo-error); }
+    .cables-table { width:100%; border-collapse:collapse; }
+    .cables-table th { font-size:.82rem; font-weight:600; color:var(--gris-texto); padding:4px 8px; text-align:left; border-bottom:2px solid var(--gris-borde); }
+    .cables-table td { padding:4px 6px; vertical-align:middle; }
+    .cables-table td input, .cables-table td select { margin:0; }
+    .session-banner { background:#EEF4FF; border:1.5px solid var(--azul-medio); border-radius:var(--radio); padding:14px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+    .session-banner p { margin:0; font-size:.88rem; color:var(--azul-oscuro); }
+    .btn-coord-picker { background:var(--azul-medio);border:none;color:#fff;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:.9rem;transition:background .2s; }
+    .btn-coord-picker:hover { background:var(--azul-oscuro); }
   </style>
 </head>
 <body>
@@ -246,6 +255,23 @@
                 <div class="field-error" id="err-cobertura" role="alert"></div>
               </div>
             </div>
+            <div class="form-group" id="grupo-un-local" style="display:none">
+              <label for="un_local">Unidad de Negocio <span class="req">*</span></label>
+              <select id="un_local" name="un_local">
+                <option value="">Seleccione la Unidad de Negocio...</option>
+                <option value="CNEL EP UN Guayaquil">CNEL EP UN Guayaquil</option>
+                <option value="CNEL EP UN Guayas Los Ríos">CNEL EP UN Guayas Los Ríos</option>
+                <option value="CNEL EP UN Manabí">CNEL EP UN Manabí</option>
+                <option value="CNEL EP UN El Oro">CNEL EP UN El Oro</option>
+                <option value="CNEL EP UN Santa Elena">CNEL EP UN Santa Elena</option>
+                <option value="CNEL EP UN Milagro">CNEL EP UN Milagro</option>
+                <option value="CNEL EP UN Bolívar">CNEL EP UN Bolívar</option>
+                <option value="CNEL EP UN Los Ríos">CNEL EP UN Los Ríos</option>
+                <option value="CNEL EP UN Esmeraldas">CNEL EP UN Esmeraldas</option>
+                <option value="CNEL EP UN Sucumbíos">CNEL EP UN Sucumbíos</option>
+                <option value="CNEL EP OFC">CNEL EP OFC</option>
+              </select>
+            </div>
             <div class="form-row">
               <div class="form-group">
                 <label for="provincias">Provincias involucradas <span class="req">*</span></label>
@@ -273,9 +299,9 @@
               <table class="table-form" id="tabla-rutas" aria-label="Tabla de rutas propuestas">
                 <thead>
                   <tr>
-                    <th>Provincia/Ciudad/Recinto</th>
+                    <th>Provincia / Cantón / Calle <button type="button" style="background:none;border:none;font-size:.75rem;color:var(--azul-medio);cursor:pointer;padding:0 4px" title="Use 📍 para seleccionar en mapa">📍 mapa</button></th>
                     <th>Rutas / Enlaces</th>
-                    <th>Postes ya utilizados</th>
+                    <th>Postes existentes</th>
                     <th>Postes nuevos</th>
                     <th>Total postes/ductos</th>
                     <th aria-label="Acciones"></th>
@@ -311,24 +337,21 @@
 
           <fieldset>
             <legend><span class="leg-icon" aria-hidden="true">🔌</span> Infraestructura a Instalar</legend>
-            <div class="form-row">
-              <div class="form-group">
-                <label for="cable_tipo">Tipo de cable <span class="req">*</span></label>
-                <select id="cable_tipo" name="cable_tipo" required>
-                  <option value="">Seleccione...</option>
-                  <option value="Fibra óptica">Fibra óptica</option>
-                  <option value="Coaxial">Coaxial</option>
-                  <option value="Fibra óptica y Coaxial">Fibra óptica y Coaxial</option>
-                  <option value="Otros">Otros</option>
-                </select>
-                <div class="field-error" id="err-cable_tipo" role="alert"></div>
-              </div>
-              <div class="form-group">
-                <label for="cable_metros">Metros de cable</label>
-                <input type="number" id="cable_metros" name="cable_metros" placeholder="0" min="0" max="9999999">
-              </div>
+            <p class="form-hint" style="margin-bottom:10px">Puede agregar múltiples tipos de cable con sus respectivos metrajes.</p>
+            <div style="overflow-x:auto;margin-bottom:10px">
+              <table class="cables-table" id="tabla-cables" aria-label="Tipos de cable a instalar">
+                <thead>
+                  <tr>
+                    <th style="width:55%">Tipo de cable <span class="req">*</span></th>
+                    <th style="width:35%">Metros lineales</th>
+                    <th style="width:10%" aria-label="Acciones"></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
             </div>
-            <div class="form-row">
+            <button type="button" id="btn-add-cable" class="btn btn-secondary btn-sm">＋ Agregar tipo de cable</button>
+            <div class="form-row" style="margin-top:16px">
               <div class="form-group">
                 <label for="equip_activos">Cantidad de elementos activos (equipos)</label>
                 <input type="number" id="equip_activos" name="equip_activos" placeholder="0" min="0" max="9999">
@@ -492,6 +515,7 @@
             <div>
               <strong>Instrucciones de presentación:</strong> Descargue el documento, imprímalo, fírmelo con tinta azul o negra
               y preséntelo junto con todos los requisitos documentales ante la Unidad de Negocio o Gerencia General de CNEL EP correspondiente.
+              <br><strong>Si envía por vía electrónica:</strong> puede utilizar su <strong>firma electrónica</strong> (token o Firma EC) emitida por el Banco Central del Ecuador u entidad certificadora autorizada, y enviar el documento en formato PDF firmado digitalmente.
             </div>
           </div>
 
@@ -548,18 +572,288 @@
       <span class="footer-legal">Portal SIG-CNEL</span>
     </div>
   </div>
+<!-- MODAL: Mapa para selección de ruta -->
+<div id="modal-ruta-mapa" class="modal-overlay" role="dialog" aria-modal="true" aria-label="Seleccionar ubicación de ruta">
+  <div class="modal" style="max-width:620px;width:100%">
+    <div class="modal-header">
+      <h3>📍 Seleccionar ubicación en el mapa</h3>
+      <button class="modal-close" id="btn-close-ruta-mapa" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:.88rem;color:var(--gris-texto);margin:0 0 10px 0">
+        Haga clic en el mapa para seleccionar la ubicación. Se completará automáticamente la provincia, cantón y calle.
+      </p>
+      <div id="ruta-mapa-div" style="height:320px;border-radius:var(--radio);border:1.5px solid var(--gris-borde);overflow:hidden;margin-bottom:12px;z-index:0"></div>
+      <div class="form-group" style="margin-bottom:6px">
+        <label style="font-size:.82rem;font-weight:600;color:var(--azul-oscuro)">Ubicación detectada</label>
+        <input type="text" id="ruta-ubicacion-texto" placeholder="Haga clic en el mapa..." style="font-size:.9rem" readonly>
+      </div>
+      <p class="form-hint" style="margin-bottom:12px">Puede editar el texto manualmente si es necesario.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button type="button" id="ruta-mapa-apply" class="btn btn-primary">✓ Aplicar ubicación</button>
+        <button type="button" id="ruta-mapa-cancel" class="btn btn-secondary">✕ Cancelar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </footer>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="main.js"></script>
 <script>
 document.getElementById('year').textContent = new Date().getFullYear();
-
-// Fijar fecha máxima = hoy para campo fecha
 document.getElementById('fecha').max = new Date().toISOString().split('T')[0];
 document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
+// ─── Constantes ───
+const STORAGE_KEY = 'cnelep_contrato_v1';
+let _autoSaveEnabled = false; // Bloqueado durante inicialización para no pisar datos guardados
+
+// ─── Carga de Unidades de Negocio ───
+let unidadesData = null;
+fetch('data/unidades.json')
+  .then(r => r.json())
+  .then(data => { unidadesData = data; applyDestCargo(); })
+  .catch(() => {});
+
+function applyDestCargo() {
+  if (!unidadesData) return;
+  const cargo = document.getElementById('dest_cargo').value;
+  if (cargo === 'Gerente General') {
+    const gg = unidadesData.gerencia_general;
+    const nombre = document.getElementById('dest_nombre');
+    if (gg && nombre && !nombre.value) nombre.value = gg.nombre;
+  }
+}
+
+document.getElementById('dest_cargo').addEventListener('change', function() {
+  if (this.value === 'Gerente General' && unidadesData) {
+    const gg = unidadesData.gerencia_general;
+    const nombre = document.getElementById('dest_nombre');
+    if (gg && nombre) nombre.value = gg.nombre;
+  }
+});
+
+// ─── Cobertura → mostrar UN (Local Y Regional) ───
+document.getElementById('cobertura').addEventListener('change', function() {
+  const grp = document.getElementById('grupo-un-local');
+  const show = this.value === 'Local' || this.value === 'Regional';
+  grp.style.display = show ? '' : 'none';
+  const lbl = document.querySelector('#grupo-un-local label');
+  if (lbl) lbl.textContent = this.value === 'Regional'
+    ? 'Unidades de Negocio involucradas *'
+    : 'Unidad de Negocio *';
+  if (!show) document.getElementById('un_local').value = '';
+});
+
+// ─── Sincronizar rep_nombre → rl_nombre automáticamente ───
+document.getElementById('rep_nombre').addEventListener('input', function() {
+  const rl = document.getElementById('rl_nombre');
+  if (rl && !rl.dataset.custom) rl.value = this.value;
+});
+document.getElementById('rl_nombre').addEventListener('input', function() {
+  this.dataset.custom = this.value ? '1' : '';
+});
+
+// ─── Validación de teléfono (sin letras) ───
+document.querySelectorAll('input[type="tel"]').forEach(tel => {
+  tel.addEventListener('input', function() {
+    this.value = this.value.replace(/[^0-9+\-\s]/g, '');
+  });
+  tel.addEventListener('blur', function() {
+    const errEl = document.getElementById(`err-${this.id}`);
+    if (this.value && !/^(\+593|0)?[0-9]{8,11}$/.test(this.value.replace(/\s/g,''))) {
+      this.classList.add('error');
+      if (errEl) { errEl.textContent = 'Teléfono inválido.'; errEl.classList.add('show'); }
+    } else {
+      this.classList.remove('error');
+      if (errEl) errEl.classList.remove('show');
+    }
+  });
+});
+
+// ─── Validación de correo en blur ───
+document.querySelectorAll('input[type="email"]').forEach(em => {
+  em.addEventListener('blur', function() {
+    const errEl = document.getElementById(`err-${this.id}`);
+    if (this.value && !CNEL.Sanitize.email(this.value)) {
+      this.classList.add('error');
+      if (errEl) { errEl.textContent = 'Correo electrónico inválido.'; errEl.classList.add('show'); }
+    } else {
+      this.classList.remove('error');
+      if (errEl) errEl.classList.remove('show');
+    }
+  });
+});
+
 // ─── Tabla de rutas ───
-CNEL.createRouteTable('tabla-rutas', 'btn-add-ruta');
+(function() {
+  const tbody  = document.querySelector('#tabla-rutas tbody');
+  const addBtn = document.getElementById('btn-add-ruta');
+  let n = 0;
+  function addRow(savedLat, savedLng) {
+    n++;
+    const rowId = n;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="min-width:200px">
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="text" name="ruta_loc_${rowId}" id="ruta_loc_${rowId}" placeholder="Provincia / Cantón / Calle" maxlength="200" style="flex:1;min-width:0">
+          <button type="button" class="btn-coord-picker" onclick="openRutaMapa('ruta_loc_${rowId}','ruta_lat_${rowId}','ruta_lng_${rowId}')" title="Seleccionar en mapa" aria-label="Abrir mapa">📍</button>
+        </div>
+        <input type="hidden" name="ruta_lat_${rowId}" id="ruta_lat_${rowId}" value="${savedLat||''}">
+        <input type="hidden" name="ruta_lng_${rowId}" id="ruta_lng_${rowId}" value="${savedLng||''}">
+      </td>
+      <td><input type="text" name="ruta_enlace_${rowId}" placeholder="Enlace A-B" maxlength="150"></td>
+      <td><input type="number" name="ruta_exist_${rowId}" placeholder="0" min="0" style="width:80px"></td>
+      <td><input type="number" name="ruta_nueva_${rowId}" placeholder="0" min="0" style="width:80px"></td>
+      <td><input type="number" name="ruta_total_${rowId}" placeholder="0" min="0" style="width:80px" readonly tabindex="-1" style="background:#f4f6fa"></td>
+      <td><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
+    // Auto-calcular total = existentes + nuevos
+    const existInput = tr.querySelector(`[name="ruta_exist_${rowId}"]`);
+    const nuevaInput = tr.querySelector(`[name="ruta_nueva_${rowId}"]`);
+    const totalInput = tr.querySelector(`[name="ruta_total_${rowId}"]`);
+    const calcTotal = () => {
+      totalInput.value = (parseInt(existInput.value)||0) + (parseInt(nuevaInput.value)||0);
+      autoSave();
+    };
+    existInput.addEventListener('input', calcTotal);
+    nuevaInput.addEventListener('input', calcTotal);
+    tr.querySelector('.btn-icon').onclick = () => { tr.remove(); autoSave(); };
+    tbody.appendChild(tr);
+    // No llamar autoSave() aquí — se llama desde event listeners o explícitamente
+  }
+  addBtn.addEventListener('click', () => { addRow(); autoSave(); });
+  addRow();
+  window._addRutaRow = addRow;
+})();
+
+// ─── Mapa de rutas (modal) ───
+(function() {
+  let rutaMap = null;
+  let rutaMarker = null;
+  let rutaTargetId = null;
+  let rutaLatId = null;
+  let rutaLngId = null;
+  let lastLat = null, lastLng = null;
+  const modal  = document.getElementById('modal-ruta-mapa');
+  const textoEl = document.getElementById('ruta-ubicacion-texto');
+
+  function initRutaMap() {
+    if (rutaMap) return;
+    rutaMap = L.map('ruta-mapa-div', { zoomControl: true }).setView([-1.8312, -78.1834], 7);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors', maxZoom: 19, crossOrigin: true
+    }).addTo(rutaMap);
+    rutaMap.on('click', async e => {
+      lastLat = e.latlng.lat; lastLng = e.latlng.lng;
+      if (rutaMarker) rutaMarker.setLatLng(e.latlng);
+      else rutaMarker = L.marker(e.latlng, { draggable: true }).addTo(rutaMap)
+            .on('dragend', ev => {
+              lastLat = ev.target.getLatLng().lat;
+              lastLng = ev.target.getLatLng().lng;
+              reverseGeocode(lastLat, lastLng);
+            });
+      textoEl.value = 'Buscando dirección...';
+      textoEl.removeAttribute('readonly');
+      reverseGeocode(lastLat, lastLng);
+    });
+  }
+
+  async function reverseGeocode(lat, lng) {
+    try {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}&accept-language=es`;
+      const res = await fetch(url, { headers: { 'User-Agent': 'CNELEP-Portal/1.0' } });
+      const data = await res.json();
+      const a = data.address || {};
+      const parts = [
+        a.state || a.province || '',
+        a.county || a.city || a.town || a.village || '',
+        a.road || a.pedestrian || a.footway || a.suburb || ''
+      ].filter(Boolean);
+      textoEl.value = parts.join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    } catch(e) {
+      textoEl.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+    }
+  }
+
+  window.openRutaMapa = function(inputId, latId, lngId) {
+    rutaTargetId = inputId; rutaLatId = latId; rutaLngId = lngId;
+    lastLat = null; lastLng = null;
+    const existingLat = document.getElementById(latId)?.value;
+    const existingLng = document.getElementById(lngId)?.value;
+    textoEl.value = document.getElementById(inputId)?.value || '';
+    textoEl.removeAttribute('readonly');
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    initRutaMap();
+    setTimeout(() => {
+      rutaMap.invalidateSize();
+      if (existingLat && existingLng) {
+        const ll = L.latLng(parseFloat(existingLat), parseFloat(existingLng));
+        if (rutaMarker) rutaMarker.setLatLng(ll); else rutaMarker = L.marker(ll, { draggable: true }).addTo(rutaMap);
+        rutaMap.setView(ll, 14);
+        lastLat = parseFloat(existingLat); lastLng = parseFloat(existingLng);
+      }
+    }, 250);
+  };
+
+  document.getElementById('btn-close-ruta-mapa').addEventListener('click', closeRutaMapa);
+  document.getElementById('ruta-mapa-cancel').addEventListener('click', closeRutaMapa);
+  modal.addEventListener('click', e => { if (e.target === modal) closeRutaMapa(); });
+
+  document.getElementById('ruta-mapa-apply').addEventListener('click', () => {
+    const val = textoEl.value.trim();
+    if (rutaTargetId) {
+      const target = document.getElementById(rutaTargetId);
+      if (target && val) target.value = val;
+      if (lastLat !== null) {
+        const latEl = document.getElementById(rutaLatId);
+        const lngEl = document.getElementById(rutaLngId);
+        if (latEl) latEl.value = lastLat.toFixed(6);
+        if (lngEl) lngEl.value = lastLng.toFixed(6);
+      }
+    }
+    autoSave();
+    closeRutaMapa();
+  });
+
+  function closeRutaMapa() {
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+})();
+
+// ─── Tabla de cables ───
+(function() {
+  const tbody  = document.querySelector('#tabla-cables tbody');
+  const addBtn = document.getElementById('btn-add-cable');
+  let n = 0;
+  function addCableRow(tipo='', metros='') {
+    n++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <select name="cable_tipo_${n}" style="width:100%">
+          <option value="">Seleccione...</option>
+          <option value="Fibra óptica"${tipo==='Fibra óptica'?' selected':''}>Fibra óptica</option>
+          <option value="Coaxial"${tipo==='Coaxial'?' selected':''}>Coaxial</option>
+          <option value="ADSS"${tipo==='ADSS'?' selected':''}>ADSS (autosoportado)</option>
+          <option value="Par trenzado"${tipo==='Par trenzado'?' selected':''}>Par trenzado (UTP/FTP)</option>
+          <option value="Fibra óptica y Coaxial"${tipo==='Fibra óptica y Coaxial'?' selected':''}>Fibra óptica y Coaxial</option>
+          <option value="Otros"${tipo==='Otros'?' selected':''}>Otros</option>
+        </select>
+      </td>
+      <td><input type="number" name="cable_metros_${n}" value="${metros}" placeholder="0" min="0" max="9999999" style="width:100%"></td>
+      <td style="text-align:center"><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
+    tr.querySelector('.btn-icon').onclick = () => { tr.remove(); autoSave(); };
+    tbody.appendChild(tr);
+  }
+  addBtn.addEventListener('click', () => { addCableRow(); autoSave(); });
+  addCableRow();
+  window._addCableRow = addCableRow;
+})();
 
 // ─── Manejo de pasos ───
 const steps = Array.from(document.querySelectorAll('.form-step'));
@@ -567,12 +861,15 @@ const stepItems = Array.from(document.querySelectorAll('.step-item'));
 const btnNext = document.getElementById('btn-next');
 const btnPrev = document.getElementById('btn-prev');
 let currentStep = 0;
+let maxVisitedStep = 0; // Paso máximo al que se ha llegado (permite navegar hacia atrás Y adelante)
 
 function showStep(n) {
   steps.forEach((s, i) => s.classList.toggle('active', i === n));
   stepItems.forEach((si, i) => {
     si.classList.toggle('active', i === n);
     si.classList.toggle('done', i < n);
+    si.style.cursor = i <= maxVisitedStep ? 'pointer' : 'default';
+    si.style.opacity = i <= maxVisitedStep ? '1' : '0.55';
     si.setAttribute('tabindex', i === n ? '0' : '-1');
   });
   btnPrev.style.display = n === 0 ? 'none' : '';
@@ -580,47 +877,78 @@ function showStep(n) {
   btnNext.disabled = n === steps.length - 1;
   if (n === steps.length - 1) generatePreview();
   window.scrollTo({ top: document.querySelector('.step-indicator').offsetTop - 80, behavior: 'smooth' });
+  autoSave();
 }
 
-// Validación por paso antes de avanzar
+// ─── Validación por paso ───
 function validateCurrentStep() {
   const step = steps[currentStep];
   const required = step.querySelectorAll('[required]');
   let ok = true;
   required.forEach(field => {
-    if (!field.value.trim()) {
+    const val = field.tagName === 'SELECT' ? field.value : field.value.trim();
+    if (!val) {
       field.classList.add('error');
-      const err = document.getElementById(`err-${field.id || field.name}`);
+      const err = document.getElementById(`err-${field.id}`);
       if (err) { err.textContent = 'Este campo es requerido.'; err.classList.add('show'); }
       ok = false;
     } else {
       field.classList.remove('error');
-      const err = document.getElementById(`err-${field.id || field.name}`);
+      const err = document.getElementById(`err-${field.id}`);
       if (err) err.classList.remove('show');
     }
   });
-  // Validaciones específicas
+  // RUC
   const ruc = document.getElementById('empresa_ruc');
-  if (ruc && ruc.value && !CNEL.Sanitize.ruc(ruc.value)) {
+  if (ruc && step.contains(ruc) && ruc.value && !CNEL.Sanitize.ruc(ruc.value)) {
     ruc.classList.add('error');
     const e = document.getElementById('err-empresa_ruc');
-    if (e) { e.textContent = 'El RUC debe tener 13 dígitos.'; e.classList.add('show'); }
+    if (e) { e.textContent = 'El RUC debe tener 13 dígitos numéricos.'; e.classList.add('show'); }
     ok = false;
   }
-  const email = document.getElementById('rl_email');
-  if (email && email.value && !CNEL.Sanitize.email(email.value)) {
-    email.classList.add('error');
-    const e = document.getElementById('err-rl_email');
-    if (e) { e.textContent = 'Correo inválido.'; e.classList.add('show'); }
-    ok = false;
+  // Emails en este paso
+  step.querySelectorAll('input[type="email"]').forEach(em => {
+    if (em.value && !CNEL.Sanitize.email(em.value)) {
+      em.classList.add('error');
+      const e = document.getElementById(`err-${em.id}`);
+      if (e) { e.textContent = 'Correo electrónico inválido.'; e.classList.add('show'); }
+      ok = false;
+    }
+  });
+  // Validación de fechas (paso 3)
+  const ini = document.getElementById('fecha_inicio');
+  const fin = document.getElementById('fecha_fin');
+  const srv = document.getElementById('fecha_servicio');
+  if (step.contains(ini) && ini && fin && srv && ini.value && fin.value && srv.value) {
+    if (new Date(fin.value) < new Date(ini.value)) {
+      fin.classList.add('error');
+      const e = document.getElementById('err-fecha_fin');
+      if (e) { e.textContent = 'La finalización no puede ser anterior al inicio.'; e.classList.add('show'); }
+      ok = false;
+    }
+    if (new Date(srv.value) < new Date(fin.value)) {
+      srv.classList.add('error');
+      const e = document.getElementById('err-fecha_servicio');
+      if (e) { e.textContent = 'La puesta en servicio no puede ser anterior a la finalización estimada.'; e.classList.add('show'); }
+      ok = false;
+    }
   }
-  if (!ok) CNEL.Toast.show('Por favor complete todos los campos requeridos.', 'error');
+  if (!ok) CNEL.Toast.show('Por favor complete todos los campos requeridos correctamente.', 'error');
   return ok;
 }
 
 btnNext.addEventListener('click', () => {
-  if (!validateCurrentStep()) return;
-  if (currentStep < steps.length - 1) { currentStep++; showStep(currentStep); }
+  if (currentStep < steps.length - 1) {
+    if (!validateCurrentStep()) return;
+    // Al avanzar al paso 4, sincronizar rep_nombre → rl_nombre si rl_nombre está vacío
+    if (currentStep === 0) {
+      const rl = document.getElementById('rl_nombre');
+      if (rl && !rl.value && !rl.dataset.custom) rl.value = document.getElementById('rep_nombre').value;
+    }
+    currentStep++;
+    if (currentStep > maxVisitedStep) maxVisitedStep = currentStep;
+    showStep(currentStep);
+  }
 });
 btnPrev.addEventListener('click', () => {
   if (currentStep > 0) { currentStep--; showStep(currentStep); }
@@ -628,305 +956,466 @@ btnPrev.addEventListener('click', () => {
 
 stepItems.forEach((si, i) => {
   si.addEventListener('click', () => {
-    if (i <= currentStep) { currentStep = i; showStep(i); }
+    if (i <= maxVisitedStep) { currentStep = i; showStep(i); }
   });
   si.addEventListener('keydown', e => {
-    if ((e.key === 'Enter' || e.key === ' ') && i <= currentStep) { e.preventDefault(); currentStep = i; showStep(i); }
+    if ((e.key === 'Enter' || e.key === ' ') && i <= maxVisitedStep) {
+      e.preventDefault(); currentStep = i; showStep(i);
+    }
   });
 });
 
-// ─── Recolección de datos del formulario ───
+// ─── LocalStorage: auto-guardar ───
+function autoSave() {
+  if (!_autoSaveEnabled) return;
+  try {
+    const data = { __step: currentStep, __maxStep: maxVisitedStep };
+    document.querySelectorAll('#formContrato input:not([type="hidden"]), #formContrato select, #formContrato textarea').forEach(el => {
+      if (el.id) data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
+    });
+    // Guardar cables
+    const cables = [];
+    document.querySelectorAll('#tabla-cables tbody tr').forEach(tr => {
+      const sel = tr.querySelector('select');
+      const inp = tr.querySelector('input[type="number"]');
+      if (sel) cables.push({ tipo: sel.value, metros: inp?.value || '' });
+    });
+    data.__cables = cables;
+    // Guardar rutas (incluye lat/lng ocultos)
+    const rutas = [];
+    document.querySelectorAll('#tabla-rutas tbody tr').forEach(tr => {
+      const inputs = tr.querySelectorAll('input:not([type="hidden"])');
+      const latEl  = tr.querySelector('input[name^="ruta_lat_"]');
+      const lngEl  = tr.querySelector('input[name^="ruta_lng_"]');
+      rutas.push({
+        vals: [...inputs].map(i => i.value),
+        lat:  latEl?.value || '',
+        lng:  lngEl?.value || ''
+      });
+    });
+    data.__rutas = rutas;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch(e) {}
+}
+
+// ─── Restaurar sesión ───
+function restoreSession(data) {
+  // Campos simples
+  document.querySelectorAll('#formContrato input:not([type="hidden"]), #formContrato select, #formContrato textarea').forEach(el => {
+    if (el.id && data[el.id] !== undefined) {
+      if (el.type === 'checkbox') el.checked = data[el.id];
+      else el.value = data[el.id];
+    }
+  });
+  // Cobertura: mostrar/ocultar UN
+  document.getElementById('cobertura').dispatchEvent(new Event('change'));
+  // Restaurar cables
+  if (Array.isArray(data.__cables) && data.__cables.length > 0) {
+    document.querySelector('#tabla-cables tbody').innerHTML = '';
+    data.__cables.forEach(c => window._addCableRow(c.tipo, c.metros));
+  }
+  // Restaurar rutas
+  if (Array.isArray(data.__rutas) && data.__rutas.length > 0) {
+    document.querySelector('#tabla-rutas tbody').innerHTML = '';
+    data.__rutas.forEach(r => {
+      window._addRutaRow();
+      const last = document.querySelector('#tabla-rutas tbody tr:last-child');
+      if (last) {
+        const inputs = last.querySelectorAll('input:not([type="hidden"])');
+        const vals = r.vals || r; // compatible con formato anterior
+        vals.forEach((val, i) => { if (inputs[i]) inputs[i].value = val; });
+        // Recalcular total
+        const exist = parseInt(vals[2]) || 0;
+        const nueva = parseInt(vals[3]) || 0;
+        if (inputs[4]) inputs[4].value = exist + nueva;
+        // Restaurar lat/lng ocultos
+        const latEl = last.querySelector('input[name^="ruta_lat_"]');
+        const lngEl = last.querySelector('input[name^="ruta_lng_"]');
+        if (latEl && r.lat) latEl.value = r.lat;
+        if (lngEl && r.lng) lngEl.value = r.lng;
+      }
+    });
+  }
+  // Restaurar paso
+  if (data.__maxStep) maxVisitedStep = data.__maxStep;
+  if (data.__step) { currentStep = data.__step; showStep(currentStep); }
+  // Marcar rl_nombre como custom si difiere de rep_nombre
+  const rl = document.getElementById('rl_nombre');
+  const rep = document.getElementById('rep_nombre');
+  if (rl && rep && rl.value && rl.value !== rep.value) rl.dataset.custom = '1';
+}
+
+// ─── Inicialización: auto-restaurar sin banner si hay datos guardados ───
+(function() {
+  let savedData = null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) savedData = JSON.parse(raw);
+  } catch(e) {}
+
+  if (savedData && savedData.empresa_razon) {
+    // Auto-restaurar directamente, sin pedir confirmación
+    restoreSession(savedData);
+    // Mostrar aviso compacto con opción de borrar
+    const notice = document.createElement('div');
+    notice.className = 'session-banner';
+    notice.setAttribute('role', 'status');
+    notice.innerHTML = `
+      <p>📂 Sesión previa restaurada — <em>${CNEL.Sanitize.html(savedData.empresa_razon)}</em></p>
+      <button type="button" id="btn-clear-session" class="btn btn-secondary btn-sm">✕ Borrar y empezar de nuevo</button>`;
+    const form = document.getElementById('formContrato');
+    form.parentNode.insertBefore(notice, form);
+    document.getElementById('btn-clear-session').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+  }
+
+  // Habilitar auto-guardado DESPUÉS de la restauración
+  _autoSaveEnabled = true;
+
+  // Actualizar apariencia de steps según maxVisitedStep
+  showStep(currentStep);
+})();
+
+// Auto-guardar en cualquier cambio del formulario
+document.getElementById('formContrato').addEventListener('input', autoSave);
+document.getElementById('formContrato').addEventListener('change', autoSave);
+
+// ─── Recolección de datos ───
 function getFormData() {
-  const s = CNEL.Sanitize.text;
+  const s  = CNEL.Sanitize.text;
   const gi = id => s(document.getElementById(id)?.value || '');
 
-  // Filas de rutas
+  // Rutas (incluye lat/lng)
   const rutaRows = [];
   document.querySelectorAll('#tabla-rutas tbody tr').forEach(tr => {
-    const cells = tr.querySelectorAll('input, select');
-    if (cells[0]?.value?.trim()) {
+    const inputs = tr.querySelectorAll('input:not([type="hidden"])');
+    const latEl  = tr.querySelector('input[name^="ruta_lat_"]');
+    const lngEl  = tr.querySelector('input[name^="ruta_lng_"]');
+    const loc    = inputs[0]?.value?.trim();
+    if (loc) {
       rutaRows.push([
-        s(cells[0]?.value || ''),
-        s(cells[1]?.value || ''),
-        cells[2]?.value || '0',
-        cells[3]?.value || '0',
-        cells[4]?.value || '0',
+        s(inputs[0]?.value || ''),
+        s(inputs[1]?.value || ''),
+        inputs[2]?.value || '0',
+        inputs[3]?.value || '0',
+        inputs[4]?.value || '0',
+        latEl?.value || '',
+        lngEl?.value || '',
       ]);
     }
   });
 
+  // Cables
+  const cables = [];
+  document.querySelectorAll('#tabla-cables tbody tr').forEach(tr => {
+    const sel = tr.querySelector('select');
+    const inp = tr.querySelector('input[type="number"]');
+    if (sel?.value) cables.push({ tipo: s(sel.value), metros: inp?.value || '0' });
+  });
+
   return {
-    ciudad:              gi('ciudad'),
-    fecha:               gi('fecha'),
-    dest_nombre:         gi('dest_nombre'),
-    dest_cargo:          gi('dest_cargo'),
-    dest_ciudad:         gi('dest_ciudad'),
-    rep_nombre:          gi('rep_nombre'),
-    empresa_razon:       gi('empresa_razon'),
-    empresa_ruc:         gi('empresa_ruc'),
-    arcotel_resolucion:  gi('arcotel_resolucion'),
-    servicios:           gi('servicios_autorizados'),
-    cant_postes:         gi('cant_postes') || '0',
-    cant_ductos:         gi('cant_ductos') || '0',
-    cobertura:           gi('cobertura'),
-    provincias:          gi('provincias'),
-    tipo_red:            gi('tipo_red'),
-    rutas:               rutaRows,
-    obj_proyecto:        gi('obj_proyecto'),
-    cable_tipo:          gi('cable_tipo'),
-    cable_metros:        gi('cable_metros') || '0',
-    equip_activos:       gi('equip_activos') || '0',
-    equip_pasivos:       gi('equip_pasivos') || '0',
-    fecha_inicio:        gi('fecha_inicio'),
-    fecha_fin:           gi('fecha_fin'),
-    fecha_servicio:      gi('fecha_servicio'),
-    rl_nombre:           gi('rl_nombre'),
-    rl_cedula:           gi('rl_cedula'),
-    rl_tel:              gi('rl_tel'),
-    rl_email:            gi('rl_email'),
-    rt_nombre:           gi('rt_nombre'),
-    rt_titulo:           gi('rt_titulo'),
-    rt_tel:              gi('rt_tel'),
-    rt_email:            gi('rt_email'),
-    cc_nombre:           gi('cc_nombre'),
-    cc_tel:              gi('cc_tel'),
-    cc_email:            gi('cc_email'),
-    ct_razon:            gi('ct_razon'),
-    ct_ruc:              gi('ct_ruc'),
-    ct_rep:              gi('ct_rep'),
-    ct_tel:              gi('ct_tel'),
-    ct_email:            gi('ct_email'),
+    ciudad:             gi('ciudad'),
+    fecha:              gi('fecha'),
+    dest_nombre:        gi('dest_nombre'),
+    dest_cargo:         gi('dest_cargo'),
+    dest_ciudad:        gi('dest_ciudad'),
+    rep_nombre:         gi('rep_nombre'),
+    empresa_razon:      gi('empresa_razon'),
+    empresa_ruc:        gi('empresa_ruc'),
+    arcotel_resolucion: gi('arcotel_resolucion'),
+    servicios:          gi('servicios_autorizados'),
+    cant_postes:        gi('cant_postes') || '0',
+    cant_ductos:        gi('cant_ductos') || '0',
+    cobertura:          gi('cobertura'),
+    un_local:           gi('un_local'),
+    provincias:         gi('provincias'),
+    tipo_red:           gi('tipo_red'),
+    rutas:              rutaRows,
+    obj_proyecto:       gi('obj_proyecto'),
+    cables:             cables,
+    equip_activos:      gi('equip_activos') || '0',
+    equip_pasivos:      gi('equip_pasivos') || '0',
+    fecha_inicio:       gi('fecha_inicio'),
+    fecha_fin:          gi('fecha_fin'),
+    fecha_servicio:     gi('fecha_servicio'),
+    rl_nombre:          gi('rl_nombre'),
+    rl_cedula:          gi('rl_cedula'),
+    rl_tel:             gi('rl_tel'),
+    rl_email:           gi('rl_email'),
+    rt_nombre:          gi('rt_nombre'),
+    rt_titulo:          gi('rt_titulo'),
+    rt_tel:             gi('rt_tel'),
+    rt_email:           gi('rt_email'),
+    cc_nombre:          gi('cc_nombre'),
+    cc_tel:             gi('cc_tel'),
+    cc_email:           gi('cc_email'),
+    ct_razon:           gi('ct_razon'),
+    ct_ruc:             gi('ct_ruc'),
+    ct_rep:             gi('ct_rep'),
+    ct_tel:             gi('ct_tel'),
+    ct_email:           gi('ct_email'),
   };
 }
 
 // ─── Vista previa ───
 function generatePreview() {
   const d = getFormData();
-  const fechaEs = CNEL.formatDateES(d.fecha);
+  const fechaEs  = CNEL.formatDateES(d.fecha);
   const fechaIni = CNEL.formatDateES(d.fecha_inicio);
   const fechaFin = CNEL.formatDateES(d.fecha_fin);
   const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
 
-  let rutasHTML = '';
-  if (d.rutas.length) {
-    rutasHTML = `<table style="border-collapse:collapse;width:100%;font-size:.85rem;margin:8px 0">
-      <thead><tr style="background:#002855;color:#fff">
-        <th style="padding:6px;text-align:left">Provincia/Ciudad</th>
-        <th style="padding:6px">Rutas/Enlaces</th>
-        <th style="padding:6px">Postes existentes</th>
-        <th style="padding:6px">Postes nuevos</th>
-        <th style="padding:6px">Total</th>
-      </tr></thead><tbody>
-      ${d.rutas.map((r,i) => `<tr style="background:${i%2===0?'#f7faff':'#fff'}">
-        <td style="padding:5px;border:1px solid #ddd">${r[0]}</td>
-        <td style="padding:5px;border:1px solid #ddd">${r[1]}</td>
-        <td style="padding:5px;border:1px solid #ddd;text-align:center">${r[2]}</td>
-        <td style="padding:5px;border:1px solid #ddd;text-align:center">${r[3]}</td>
-        <td style="padding:5px;border:1px solid #ddd;text-align:center">${r[4]}</td>
-      </tr>`).join('')}
-    </tbody></table>`;
-  } else {
-    rutasHTML = '<em style="color:#a0aec0">Sin rutas ingresadas</em>';
-  }
+  let rutasHTML = d.rutas.length
+    ? `<table style="border-collapse:collapse;width:100%;font-size:.85rem;margin:6px 0">
+        <thead><tr style="background:#002855;color:#fff">
+          <th style="padding:5px 8px;text-align:left">Provincia/Cantón/Calle</th>
+          <th style="padding:5px 8px">Rutas/Enlaces</th>
+          <th style="padding:5px 8px;text-align:center">Exist.</th>
+          <th style="padding:5px 8px;text-align:center">Nuevos</th>
+          <th style="padding:5px 8px;text-align:center">Total</th>
+          <th style="padding:5px 8px;text-align:center">Coordenadas</th>
+        </tr></thead><tbody>
+        ${d.rutas.map((r,i) => `<tr style="background:${i%2===0?'#f7faff':'#fff'}">
+          <td style="padding:4px 8px;border:1px solid #ddd">${CNEL.Sanitize.html(r[0])}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd">${CNEL.Sanitize.html(r[1])}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${r[2]}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${r[3]}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${r[4]}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-size:.78rem;color:#666">${r[5]&&r[6]?r[5]+', '+r[6]:'—'}</td>
+        </tr>`).join('')}
+      </tbody></table>`
+    : '<em style="color:#a0aec0">Sin rutas ingresadas</em>';
+
+  const cablesText = d.cables.length
+    ? d.cables.map(c => `${c.tipo}: ${c.metros} m`).join(' · ')
+    : 'Sin cables especificados';
 
   document.getElementById('preview-area').innerHTML = `
     <p><strong>FECHA:</strong> ${CNEL.Sanitize.html(d.ciudad)}, ${fechaEs}</p>
     <p><strong>Destinatario:</strong> ${CNEL.Sanitize.html(d.dest_nombre)} — ${CNEL.Sanitize.html(d.dest_cargo)}, CNEL EP ${CNEL.Sanitize.html(d.dest_ciudad)}</p>
-    <hr style="margin:12px 0;border-color:#D0D9E8">
+    ${d.un_local ? `<p><strong>Unidad de Negocio:</strong> ${CNEL.Sanitize.html(d.un_local)}</p>` : ''}
+    <hr style="margin:10px 0;border-color:#D0D9E8">
     <p><strong>Empresa:</strong> ${CNEL.Sanitize.html(d.empresa_razon)} | RUC: ${CNEL.Sanitize.html(d.empresa_ruc)}</p>
     <p><strong>Representante Legal:</strong> ${CNEL.Sanitize.html(d.rep_nombre)}</p>
     <p><strong>Resolución ARCOTEL:</strong> ${CNEL.Sanitize.html(d.arcotel_resolucion)}</p>
     <p><strong>Servicios:</strong> ${CNEL.Sanitize.html(d.servicios)}</p>
-    <hr style="margin:12px 0;border-color:#D0D9E8">
-    <p><strong>Infraestructura:</strong> ${CNEL.Sanitize.html(d.cant_postes)} postes | ${CNEL.Sanitize.html(d.cant_ductos)} m.l. de ductos | Cobertura: ${CNEL.Sanitize.html(d.cobertura)}</p>
-    <p><strong>Provincias:</strong> ${CNEL.Sanitize.html(d.provincias)}</p>
-    <p><strong>Tipo de red:</strong> ${CNEL.Sanitize.html(d.tipo_red)}</p>
+    <hr style="margin:10px 0;border-color:#D0D9E8">
+    <p><strong>Infraestructura:</strong> ${CNEL.Sanitize.html(d.cant_postes)} postes | ${CNEL.Sanitize.html(d.cant_ductos)} m.l. ductos | Cobertura: ${CNEL.Sanitize.html(d.cobertura)}</p>
+    <p><strong>Provincias:</strong> ${CNEL.Sanitize.html(d.provincias)} | <strong>Tipo de red:</strong> ${CNEL.Sanitize.html(d.tipo_red)}</p>
     <p><strong>Rutas propuestas:</strong></p>${rutasHTML}
-    <hr style="margin:12px 0;border-color:#D0D9E8">
+    <hr style="margin:10px 0;border-color:#D0D9E8">
     <p><strong>Objetivo:</strong> ${CNEL.Sanitize.html(d.obj_proyecto)}</p>
-    <p><strong>Cable:</strong> ${CNEL.Sanitize.html(d.cable_tipo)} — ${CNEL.Sanitize.html(d.cable_metros)} m | Activos: ${CNEL.Sanitize.html(d.equip_activos)} | Pasivos: ${CNEL.Sanitize.html(d.equip_pasivos)}</p>
-    <p><strong>Cronograma:</strong> Inicio ${fechaIni} · Fin ${fechaFin} · Servicio ${fechaSrv}</p>
+    <p><strong>Cables:</strong> ${CNEL.Sanitize.html(cablesText)} | Activos: ${CNEL.Sanitize.html(d.equip_activos)} | Pasivos: ${CNEL.Sanitize.html(d.equip_pasivos)}</p>
+    <p><strong>Cronograma:</strong> Inicio ${fechaIni} · Finalización ${fechaFin} · Servicio ${fechaSrv}</p>
   `;
 }
 
-// ─── Generación del documento Word ───
+// ─── HTML para Word ───
 function buildDocumentHTML(d) {
-  const fechaEs = CNEL.formatDateES(d.fecha);
+  const fechaEs  = CNEL.formatDateES(d.fecha);
   const fechaIni = CNEL.formatDateES(d.fecha_inicio);
   const fechaFin = CNEL.formatDateES(d.fecha_fin);
   const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
 
-  const rutaFilas = d.rutas.length
-    ? d.rutas.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:center">${r[2]}</td><td style="text-align:center">${r[3]}</td><td style="text-align:center">${r[4]}</td></tr>`).join('')
-    : '<tr><td colspan="5" style="text-align:center;color:#999"><em>Sin rutas ingresadas</em></td></tr>';
+  const F   = 'font-family:Arial,sans-serif';
+  const p   = (t, ex='') => `<p style="${F};font-size:11pt;color:#000;margin:0 0 5pt 0;line-height:1.5;${ex}">${t}</p>`;
+  const pb  = (t, ex='') => `<p style="${F};font-size:11pt;color:#000;font-weight:bold;margin:0 0 5pt 0;line-height:1.5;${ex}">${t}</p>`;
+  const sec = t => `<p style="${F};font-size:11pt;color:#000;font-weight:bold;margin:10pt 0 4pt 0;line-height:1.4">${t}</p>`;
+  const sub = t => `<p style="${F};font-size:11pt;color:#000;font-weight:bold;margin:7pt 0 3pt 0;line-height:1.4">${t}</p>`;
+  const li  = t => `<li style="${F};font-size:11pt;color:#000;margin:2pt 0;line-height:1.5">${t}</li>`;
 
-  const contratista = (d.ct_razon || d.ct_rep)
-    ? `<h2>4.4 Empresa Contratista</h2>
-       <p><strong>Razón social:</strong> ${d.ct_razon || 'N/A'}</p>
-       <p><strong>RUC:</strong> ${d.ct_ruc || 'N/A'}</p>
-       <p><strong>Representante:</strong> ${d.ct_rep || 'N/A'}</p>
-       <p><strong>Teléfono:</strong> ${d.ct_tel || 'N/A'}</p>
-       <p><strong>Correo:</strong> ${d.ct_email || 'N/A'}</p>` : '';
+  const TH  = `${F};font-size:10pt;font-weight:bold;background-color:#002855;color:#fff;padding:5pt 7pt;border:1pt solid #001a40;text-align:left`;
+  const THC = `${F};font-size:10pt;font-weight:bold;background-color:#002855;color:#fff;padding:5pt 7pt;border:1pt solid #001a40;text-align:center`;
+  const TD  = `${F};font-size:10pt;color:#000;padding:4pt 7pt;border:1pt solid #aaa;vertical-align:top`;
+  const TDC = `${F};font-size:10pt;color:#000;padding:4pt 7pt;border:1pt solid #aaa;vertical-align:top;text-align:center`;
+  const TBL = 'border-collapse:collapse;width:100%;margin:4pt 0 10pt 0';
+
+  const rutaFilas = d.rutas.length
+    ? d.rutas.map(r => {
+        const coord = r[5] && r[6] ? `<br><small style="color:#555">Lat: ${r[5]}, Lng: ${r[6]}</small>` : '';
+        return `<tr><td style="${TD}">${r[0]}${coord}</td><td style="${TD}">${r[1]}</td><td style="${TDC}">${r[2]}</td><td style="${TDC}">${r[3]}</td><td style="${TDC}">${r[4]}</td></tr>`;
+      }).join('')
+    : `<tr><td style="${TD}" colspan="5"><em>Sin rutas ingresadas</em></td></tr>`;
+
+  const cablesItems = d.cables.length
+    ? d.cables.map(c => li(`${c.tipo}: ${c.metros} metros`)).join('')
+    : li('Sin cables especificados');
+
+  const contratista = (d.ct_razon || d.ct_rep) ? `
+${sec('4.4  Empresa Contratista')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Razón social: ${d.ct_razon || 'N/A'}`)}
+  ${li(`RUC: ${d.ct_ruc || 'N/A'}`)}
+  ${li(`Representante: ${d.ct_rep || 'N/A'} | Teléfono: ${d.ct_tel || 'N/A'}`)}
+  ${li(`Correo: ${d.ct_email || 'N/A'}`)}
+</ul>` : '';
 
   return `
-<p style="text-align:right"><strong>FECHA:</strong> ${d.ciudad}, ${fechaEs}</p>
-<br>
-<p>Señor(a)<br>
-<strong>${d.dest_nombre}</strong><br>
-${d.dest_cargo}<br>
-Empresa Eléctrica Pública Estratégica Corporación Nacional de Electricidad CNEL EP<br>
-${d.dest_ciudad}</p>
-<br>
-<p><strong>ASUNTO:</strong> SOLICITUD DE SUSCRIPCIÓN DE CONTRATO PARA USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP</p>
-<br>
-<p>De mi consideración:</p>
-<p>${d.rep_nombre}, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, con RUC No. ${d.empresa_ruc},
-empresa debidamente autorizada por la Agencia de Regulación y Control de las Telecomunicaciones (ARCOTEL) mediante resolución No. ${d.arcotel_resolucion}
-para la prestación de servicios de ${d.servicios}, comparezco ante usted para solicitar formalmente el arrendamiento de infraestructura eléctrica de su representada.</p>
+${p(`${d.ciudad}, ${fechaEs}`, 'margin-bottom:10pt')}
+${p('Señor(a)')}
+${pb(d.dest_nombre)}
+${p(d.dest_cargo)}
+${d.un_local ? p(d.un_local) : ''}
+${p('Empresa Eléctrica Pública Estratégica — CNEL EP')}
+${p(d.dest_ciudad)}
+${p('&nbsp;', 'margin:0')}
+${pb('ASUNTO:&nbsp; SOLICITUD DE SUSCRIPCIÓN DE CONTRATO PARA USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP')}
+${p('&nbsp;', 'margin:0')}
+${p('De mi consideración:')}
+${p(`Yo, <strong>${d.rep_nombre}</strong>, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, con RUC No. <strong>${d.empresa_ruc}</strong>, empresa debidamente autorizada por la Agencia de Regulación y Control de las Telecomunicaciones (ARCOTEL) mediante Resolución No. <strong>${d.arcotel_resolucion}</strong> para la prestación de servicios de ${d.servicios}, comparezco ante usted para solicitar formalmente el arrendamiento de infraestructura eléctrica de su representada.`, 'line-height:1.6')}
 
-<h2>1. ALCANCE DE LA SOLICITUD</h2>
-<p>Solicitamos autorización para el uso de la siguiente infraestructura:</p>
-<ul>
-  <li>Postes: ${d.cant_postes} unidades</li>
-  <li>Ductos subterráneos: ${d.cant_ductos} metros lineales</li>
-  <li>Cobertura geográfica: ${d.cobertura}</li>
-  <li>Provincias involucradas: ${d.provincias}</li>
-  <li>Tipo de redes a instalar: ${d.tipo_red}</li>
+${sec('1.  ALCANCE DE LA SOLICITUD')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Postes: ${d.cant_postes} unidades`)}
+  ${li(`Ductos subterráneos: ${d.cant_ductos} metros lineales`)}
+  ${li(`Cobertura geográfica: ${d.cobertura}${d.un_local ? ' — ' + d.un_local : ''}`)}
+  ${li(`Provincias involucradas: ${d.provincias}`)}
+  ${li(`Tipo de redes a instalar: ${d.tipo_red}`)}
 </ul>
 
-<h2>2. DETALLE DE RUTAS PROPUESTAS</h2>
-<table>
-  <tr>
-    <th>Provincia/Ciudad/Recinto</th>
-    <th>Rutas/Enlaces</th>
-    <th>Postes/Ductos ya utilizados</th>
-    <th>Postes/Ductos nuevos</th>
-    <th>Postes/Ductos totales</th>
-  </tr>
-  ${rutaFilas}
+${sec('2.  DETALLE DE RUTAS PROPUESTAS')}
+<table border="0" cellpadding="0" cellspacing="0" style="${TBL}">
+  <thead><tr>
+    <th style="${TH}">Provincia / Cantón / Calle</th>
+    <th style="${TH}">Rutas / Enlaces</th>
+    <th style="${THC}">Postes existentes</th>
+    <th style="${THC}">Postes nuevos</th>
+    <th style="${THC}">Total</th>
+  </tr></thead>
+  <tbody>${rutaFilas}</tbody>
 </table>
 
-<h2>3. INFORMACIÓN DEL PROYECTO</h2>
-<h2>3.1 Objetivo del proyecto:</h2>
-<p>${d.obj_proyecto}</p>
-
-<h2>3.2 Tipo de infraestructura a instalar:</h2>
-<ul>
-  <li>Tipo de redes: ${d.cable_tipo} — ${d.cable_metros} metros</li>
-  <li>Elementos activos: ${d.equip_activos} equipos</li>
-  <li>Elementos pasivos: ${d.equip_pasivos} equipos</li>
+${sec('3.  INFORMACIÓN DEL PROYECTO')}
+${sub('3.1  Objetivo del proyecto:')}
+${p(d.obj_proyecto)}
+${sub('3.2  Infraestructura a instalar:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${cablesItems}
+  ${li(`Elementos activos: ${d.equip_activos} equipos`)}
+  ${li(`Elementos pasivos: ${d.equip_pasivos} equipos`)}
+</ul>
+${sub('3.3  Cronograma tentativo:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Inicio de instalación: ${fechaIni}`)}
+  ${li(`Finalización estimada: ${fechaFin}`)}
+  ${li(`Puesta en servicio: ${fechaSrv}`)}
 </ul>
 
-<h2>3.3 Cronograma tentativo:</h2>
-<ul>
-  <li>Inicio de instalación: ${fechaIni}</li>
-  <li>Finalización estimada: ${fechaFin}</li>
-  <li>Puesta en servicio: ${fechaSrv}</li>
+${sec('4.  INFORMACIÓN TÉCNICA Y ADMINISTRATIVA')}
+${sub('4.1  Representante Legal:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Nombre: ${d.rl_nombre} | Cédula: ${d.rl_cedula}`)}
+  ${li(`Teléfono: ${d.rl_tel} | Correo: ${d.rl_email}`)}
 </ul>
-
-<h2>4. INFORMACIÓN TÉCNICA Y ADMINISTRATIVA</h2>
-<h2>4.1 Representante Legal:</h2>
-<ul>
-  <li>Nombre: ${d.rl_nombre}</li>
-  <li>Cédula: ${d.rl_cedula}</li>
-  <li>Teléfono: ${d.rl_tel}</li>
-  <li>Correo electrónico: ${d.rl_email}</li>
+${sub('4.2  Responsable Técnico:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Nombre: ${d.rt_nombre || 'N/A'} | Título: ${d.rt_titulo || 'N/A'}`)}
+  ${li(`Teléfono: ${d.rt_tel || 'N/A'} | Correo: ${d.rt_email || 'N/A'}`)}
 </ul>
-
-<h2>4.2 Responsable Técnico:</h2>
-<ul>
-  <li>Nombre: ${d.rt_nombre || '[No registrado]'}</li>
-  <li>Título profesional: ${d.rt_titulo || '[No registrado]'}</li>
-  <li>Teléfono móvil: ${d.rt_tel || '[No registrado]'}</li>
-  <li>Correo electrónico: ${d.rt_email || '[No registrado]'}</li>
+${sub('4.3  Coordinador de Campo:')}
+<ul style="margin:0 0 8pt 0;padding-left:20pt">
+  ${li(`Nombre: ${d.cc_nombre || 'N/A'} | Teléfono: ${d.cc_tel || 'N/A'}`)}
+  ${li(`Correo: ${d.cc_email || 'N/A'}`)}
 </ul>
-
-<h2>4.3 Coordinador de Campo:</h2>
-<ul>
-  <li>Nombre: ${d.cc_nombre || '[No registrado]'}</li>
-  <li>Teléfono móvil: ${d.cc_tel || '[No registrado]'}</li>
-  <li>Correo electrónico: ${d.cc_email || '[No registrado]'}</li>
-</ul>
-
 ${contratista}
 
-<h2>5. DECLARACIONES Y COMPROMISOS</h2>
-<p>Por medio de la presente, declaro y me comprometo a:</p>
-<ol>
-  <li>Cumplir estrictamente con toda la normativa técnica vigente, incluyendo el Manual MAPOD y el MN-TEC-OPE-102 de CNEL EP.</li>
-  <li>Mantener vigente nuestro título habilitante durante toda la duración del contrato.</li>
-  <li>Contratar las pólizas de seguro requeridas (responsabilidad civil e incendio contra todo riesgo).</li>
-  <li>Respetar la integridad de la infraestructura eléctrica y no afectar el servicio de energía.</li>
-  <li>Identificar adecuadamente todos los elementos instalados según normativa.</li>
-  <li>Pagar puntualmente los valores de canon de arrendamiento establecidos, así como los valores por multa, intereses o cualquier otra actividad inherente descrita en el contrato o sus anexos.</li>
-  <li>Presentar anualmente la información georreferenciada actualizada en formato SIG.</li>
-  <li>Realizar el mantenimiento preventivo y correctivo de nuestras instalaciones.</li>
+${sec('5.  DECLARACIONES Y COMPROMISOS')}
+${p('Por medio de la presente, declaro y me comprometo a:')}
+<ol style="margin:0 0 10pt 0;padding-left:20pt">
+  ${li('Cumplir estrictamente con toda la normativa técnica vigente, incluyendo el Manual MAPOD y el MN-TEC-OPE-102 de CNEL EP.')}
+  ${li('Mantener vigente nuestro título habilitante durante toda la duración del contrato.')}
+  ${li('Contratar las pólizas de seguro requeridas (responsabilidad civil e incendio contra todo riesgo).')}
+  ${li('Respetar la integridad de la infraestructura eléctrica y no afectar el servicio de energía.')}
+  ${li('Identificar adecuadamente todos los elementos instalados según normativa.')}
+  ${li('Pagar puntualmente los valores de canon de arrendamiento establecidos, así como los valores por multa, intereses o cualquier otra actividad inherente descrita en el contrato o sus anexos.')}
+  ${li('Presentar anualmente la información georreferenciada actualizada en formato SIG.')}
+  ${li('Realizar el mantenimiento preventivo y correctivo de nuestras instalaciones.')}
 </ol>
-<p>Agradecemos de antemano la atención que se sirva dar a la presente solicitud y quedo a su disposición para cualquier información adicional que requiera, así como para coordinar las inspecciones técnicas necesarias.</p>
-<br><br>
-<p>Atentamente,</p>
-<br><br><br>
-<div class="linea"></div>
-<p><strong>${d.rep_nombre}</strong><br>
-REPRESENTANTE LEGAL<br>
-${d.empresa_razon}</p>
+${p('Agradecemos de antemano la atención que se sirva dar a la presente solicitud y quedo a su disposición para cualquier información adicional que requiera, así como para coordinar las inspecciones técnicas necesarias.', 'margin-top:10pt')}
+${p('Atentamente,', 'margin-top:4pt;margin-bottom:40pt')}
+<table border="0" cellpadding="0" cellspacing="0" style="width:100%">
+  <tr>
+    <td style="width:50%;vertical-align:top;border-top:1pt solid #000;padding-top:5pt">
+      ${pb(d.rep_nombre, 'margin:0 0 1pt 0')}
+      ${p('REPRESENTANTE LEGAL', 'margin:0 0 1pt 0;font-size:10pt')}
+      ${p(d.empresa_razon, 'margin:0;font-size:10pt')}
+    </td>
+    <td style="width:50%"></td>
+  </tr>
+</table>
 `;
 }
 
-// ─── Construir bloques PDF ───
+// ─── Bloques PDF ───
 function buildPdfBlocks(d) {
-  const fechaEs = CNEL.formatDateES(d.fecha);
+  const fechaEs  = CNEL.formatDateES(d.fecha);
   const fechaIni = CNEL.formatDateES(d.fecha_inicio);
   const fechaFin = CNEL.formatDateES(d.fecha_fin);
   const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
 
+  // Rutas para PDF: incluir coordenadas si existen
+  const rutasPdf = d.rutas.map(r => [
+    r[0] + (r[5] && r[6] ? ` [${r[5]}, ${r[6]}]` : ''),
+    r[1], r[2], r[3], r[4]
+  ]);
+
   const blocks = [
     { type: 'title', text: 'SOLICITUD DE SUSCRIPCIÓN DE CONTRATO\nUSO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP' },
-    { type: 'spacer', size: 4 },
+    { type: 'spacer', size: 3 },
     { type: 'text', text: `${d.ciudad}, ${fechaEs}` },
     { type: 'spacer', size: 3 },
-    { type: 'text', text: `Señor(a) ${d.dest_nombre}` },
-    { type: 'text', text: `${d.dest_cargo} — CNEL EP, ${d.dest_ciudad}` },
+    { type: 'text', text: 'Señor(a)' },
+    { type: 'bold-text', text: d.dest_nombre },
+    { type: 'text', text: d.dest_cargo },
+    ...(d.un_local ? [{ type: 'text', text: d.un_local }] : []),
+    { type: 'text', text: `Empresa Eléctrica Pública Estratégica — CNEL EP, ${d.dest_ciudad}` },
     { type: 'spacer', size: 3 },
-    { type: 'text', text: `${d.rep_nombre}, en calidad de Representante Legal de ${d.empresa_razon}, RUC ${d.empresa_ruc}, autorizada por ARCOTEL mediante resolución No. ${d.arcotel_resolucion} para la prestación de ${d.servicios}, solicita formalmente el arrendamiento de infraestructura eléctrica.` },
+    { type: 'bold-text', text: 'ASUNTO:  SOLICITUD DE SUSCRIPCIÓN DE CONTRATO PARA USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP' },
     { type: 'spacer', size: 3 },
-    { type: 'heading', text: '1. ALCANCE DE LA SOLICITUD' },
+    { type: 'text', text: 'De mi consideración:' },
+    { type: 'text', text: `${d.rep_nombre}, en calidad de Representante Legal de ${d.empresa_razon}, RUC No. ${d.empresa_ruc}, autorizada por ARCOTEL mediante resolución No. ${d.arcotel_resolucion} para la prestación de servicios de ${d.servicios}, solicita formalmente el arrendamiento de infraestructura eléctrica de CNEL EP.` },
+    { type: 'spacer', size: 3 },
+    { type: 'heading', text: '1.  ALCANCE DE LA SOLICITUD' },
     { type: 'bullet', text: `Postes: ${d.cant_postes} unidades` },
     { type: 'bullet', text: `Ductos subterráneos: ${d.cant_ductos} metros lineales` },
-    { type: 'bullet', text: `Cobertura geográfica: ${d.cobertura}` },
+    { type: 'bullet', text: `Cobertura geográfica: ${d.cobertura}${d.un_local ? ' — ' + d.un_local : ''}` },
     { type: 'bullet', text: `Provincias: ${d.provincias}` },
     { type: 'bullet', text: `Tipo de redes: ${d.tipo_red}` },
-    { type: 'spacer', size: 3 },
-    { type: 'heading', text: '2. DETALLE DE RUTAS PROPUESTAS' },
-    {
-      type: 'table',
-      headers: ['Provincia/Ciudad', 'Rutas/Enlaces', 'Exist.', 'Nuevos', 'Total'],
-      rows: d.rutas.length ? d.rutas : [['Sin rutas ingresadas', '', '', '', '']]
+    { type: 'heading', text: '2.  DETALLE DE RUTAS PROPUESTAS' },
+    { type: 'table',
+      headers: ['Provincia / Cantón / Calle', 'Rutas/Enlaces', 'Exist.', 'Nuevos', 'Total'],
+      colWidths: [60, 42, 16, 16, 16],
+      rows: rutasPdf.length ? rutasPdf : [['Sin rutas ingresadas', '', '', '', '']]
     },
-    { type: 'spacer', size: 3 },
-    { type: 'heading', text: '3. INFORMACIÓN DEL PROYECTO' },
-    { type: 'subheading', text: 'Objetivo del proyecto:' },
+    { type: 'heading', text: '3.  INFORMACIÓN DEL PROYECTO' },
+    { type: 'subheading', text: '3.1  Objetivo del proyecto:' },
     { type: 'text', text: d.obj_proyecto },
-    { type: 'subheading', text: 'Infraestructura a instalar:' },
-    { type: 'bullet', text: `Cable: ${d.cable_tipo} — ${d.cable_metros} metros` },
+    { type: 'subheading', text: '3.2  Infraestructura a instalar:' },
+    ...d.cables.map(c => ({ type: 'bullet', text: `${c.tipo}: ${c.metros} metros` })),
+    ...(d.cables.length === 0 ? [{ type: 'bullet', text: 'Sin cables especificados' }] : []),
     { type: 'bullet', text: `Elementos activos: ${d.equip_activos}` },
     { type: 'bullet', text: `Elementos pasivos: ${d.equip_pasivos}` },
-    { type: 'subheading', text: 'Cronograma tentativo:' },
-    { type: 'bullet', text: `Inicio: ${fechaIni}` },
-    { type: 'bullet', text: `Finalización: ${fechaFin}` },
+    { type: 'subheading', text: '3.3  Cronograma tentativo:' },
+    { type: 'bullet', text: `Inicio de instalación: ${fechaIni}` },
+    { type: 'bullet', text: `Finalización estimada: ${fechaFin}` },
     { type: 'bullet', text: `Puesta en servicio: ${fechaSrv}` },
-    { type: 'spacer', size: 3 },
-    { type: 'heading', text: '4. INFORMACIÓN TÉCNICA Y ADMINISTRATIVA' },
-    { type: 'subheading', text: '4.1 Representante Legal:' },
+    { type: 'heading', text: '4.  INFORMACIÓN TÉCNICA Y ADMINISTRATIVA' },
+    { type: 'subheading', text: '4.1  Representante Legal:' },
     { type: 'bullet', text: `Nombre: ${d.rl_nombre} | Cédula: ${d.rl_cedula}` },
     { type: 'bullet', text: `Teléfono: ${d.rl_tel} | Correo: ${d.rl_email}` },
-    { type: 'subheading', text: '4.2 Responsable Técnico:' },
+    { type: 'subheading', text: '4.2  Responsable Técnico:' },
     { type: 'bullet', text: `Nombre: ${d.rt_nombre || 'N/A'} | Título: ${d.rt_titulo || 'N/A'}` },
     { type: 'bullet', text: `Teléfono: ${d.rt_tel || 'N/A'} | Correo: ${d.rt_email || 'N/A'}` },
-    { type: 'subheading', text: '4.3 Coordinador de Campo:' },
-    { type: 'bullet', text: `Nombre: ${d.cc_nombre || 'N/A'} | Teléfono: ${d.cc_tel || 'N/A'}` },
-    { type: 'spacer', size: 3 },
-    { type: 'heading', text: '5. DECLARACIONES Y COMPROMISOS' },
+    { type: 'subheading', text: '4.3  Coordinador de Campo:' },
+    { type: 'bullet', text: `Nombre: ${d.cc_nombre || 'N/A'} | Teléfono: ${d.cc_tel || 'N/A'} | Correo: ${d.cc_email || 'N/A'}` },
+    ...((d.ct_razon || d.ct_rep) ? [
+      { type: 'subheading', text: '4.4  Empresa Contratista:' },
+      { type: 'bullet', text: `Razón social: ${d.ct_razon || 'N/A'} | RUC: ${d.ct_ruc || 'N/A'}` },
+      { type: 'bullet', text: `Representante: ${d.ct_rep || 'N/A'} | Tel: ${d.ct_tel || 'N/A'} | Correo: ${d.ct_email || 'N/A'}` },
+    ] : []),
+    { type: 'heading', text: '5.  DECLARACIONES Y COMPROMISOS' },
     { type: 'text', text: 'El solicitante declara y se compromete a:' },
     { type: 'bullet', text: 'Cumplir estrictamente con la normativa técnica vigente (Manual MAPOD y MN-TEC-OPE-102).' },
     { type: 'bullet', text: 'Mantener vigente el título habilitante durante toda la duración del contrato.' },
@@ -958,16 +1447,14 @@ document.getElementById('btn-download-pdf').addEventListener('click', async () =
     CNEL.Toast.show('Complete los datos básicos de la empresa antes de descargar.', 'error'); return;
   }
   const btn = document.getElementById('btn-download-pdf');
-  btn.disabled = true;
-  btn.textContent = '⏳ Generando PDF...';
+  btn.disabled = true; btn.textContent = '⏳ Generando PDF...';
   try {
     await CNEL.PdfGenerator.downloadPDF(buildPdfBlocks(d), `Solicitud-Contrato-CNEL-${d.empresa_ruc || 'EP'}`);
     CNEL.Toast.show('PDF generado correctamente.', 'success');
   } catch(e) {
     CNEL.Toast.show('Error al generar el PDF. Intente con Word.', 'error');
   } finally {
-    btn.disabled = false;
-    btn.textContent = '📑 Descargar en PDF';
+    btn.disabled = false; btn.textContent = '📑 Descargar en PDF';
   }
 });
 </script>
