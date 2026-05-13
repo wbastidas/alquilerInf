@@ -608,8 +608,9 @@ document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
 // ─── Constantes ───
 const STORAGE_KEY = 'cnelep_contrato_v1';
+let _autoSaveEnabled = false; // Bloqueado durante inicialización para no pisar datos guardados
 
-// ─── Carga de cargos desde archivo externo ───
+// ─── Carga de Unidades de Negocio ───
 let unidadesData = null;
 fetch('data/unidades.json')
   .then(r => r.json())
@@ -619,28 +620,40 @@ fetch('data/unidades.json')
 function applyDestCargo() {
   if (!unidadesData) return;
   const cargo = document.getElementById('dest_cargo').value;
-  const nombre = document.getElementById('dest_nombre');
   if (cargo === 'Gerente General') {
     const gg = unidadesData.gerencia_general;
+    const nombre = document.getElementById('dest_nombre');
     if (gg && nombre && !nombre.value) nombre.value = gg.nombre;
   }
-  // For UN admin: handled by un_local change
 }
 
 document.getElementById('dest_cargo').addEventListener('change', function() {
-  const isGG = this.value === 'Gerente General';
-  if (unidadesData && isGG) {
+  if (this.value === 'Gerente General' && unidadesData) {
     const gg = unidadesData.gerencia_general;
     const nombre = document.getElementById('dest_nombre');
-    if (gg) nombre.value = gg.nombre;
+    if (gg && nombre) nombre.value = gg.nombre;
   }
 });
 
-// ─── Cobertura local → mostrar UN ───
+// ─── Cobertura → mostrar UN (Local Y Regional) ───
 document.getElementById('cobertura').addEventListener('change', function() {
   const grp = document.getElementById('grupo-un-local');
-  grp.style.display = this.value === 'Local' ? '' : 'none';
-  if (this.value !== 'Local') document.getElementById('un_local').value = '';
+  const show = this.value === 'Local' || this.value === 'Regional';
+  grp.style.display = show ? '' : 'none';
+  const lbl = document.querySelector('#grupo-un-local label');
+  if (lbl) lbl.textContent = this.value === 'Regional'
+    ? 'Unidades de Negocio involucradas *'
+    : 'Unidad de Negocio *';
+  if (!show) document.getElementById('un_local').value = '';
+});
+
+// ─── Sincronizar rep_nombre → rl_nombre automáticamente ───
+document.getElementById('rep_nombre').addEventListener('input', function() {
+  const rl = document.getElementById('rl_nombre');
+  if (rl && !rl.dataset.custom) rl.value = this.value;
+});
+document.getElementById('rl_nombre').addEventListener('input', function() {
+  this.dataset.custom = this.value ? '1' : '';
 });
 
 // ─── Validación de teléfono (sin letras) ───
@@ -649,11 +662,10 @@ document.querySelectorAll('input[type="tel"]').forEach(tel => {
     this.value = this.value.replace(/[^0-9+\-\s]/g, '');
   });
   tel.addEventListener('blur', function() {
-    const errId = `err-${this.id}`;
-    const errEl = document.getElementById(errId);
+    const errEl = document.getElementById(`err-${this.id}`);
     if (this.value && !/^(\+593|0)?[0-9]{8,11}$/.test(this.value.replace(/\s/g,''))) {
       this.classList.add('error');
-      if (errEl) { errEl.textContent = 'Teléfono inválido. Use solo números (8-11 dígitos).'; errEl.classList.add('show'); }
+      if (errEl) { errEl.textContent = 'Teléfono inválido.'; errEl.classList.add('show'); }
     } else {
       this.classList.remove('error');
       if (errEl) errEl.classList.remove('show');
@@ -664,8 +676,7 @@ document.querySelectorAll('input[type="tel"]').forEach(tel => {
 // ─── Validación de correo en blur ───
 document.querySelectorAll('input[type="email"]').forEach(em => {
   em.addEventListener('blur', function() {
-    const errId = `err-${this.id}`;
-    const errEl = document.getElementById(errId);
+    const errEl = document.getElementById(`err-${this.id}`);
     if (this.value && !CNEL.Sanitize.email(this.value)) {
       this.classList.add('error');
       if (errEl) { errEl.textContent = 'Correo electrónico inválido.'; errEl.classList.add('show'); }
@@ -681,26 +692,39 @@ document.querySelectorAll('input[type="email"]').forEach(em => {
   const tbody  = document.querySelector('#tabla-rutas tbody');
   const addBtn = document.getElementById('btn-add-ruta');
   let n = 0;
-  function addRow() {
+  function addRow(savedLat, savedLng) {
     n++;
+    const rowId = n;
     const tr = document.createElement('tr');
     tr.innerHTML = `
       <td style="min-width:200px">
         <div style="display:flex;align-items:center;gap:4px">
-          <input type="text" name="ruta_loc_${n}" id="ruta_loc_${n}" placeholder="Provincia / Cantón / Calle" maxlength="200" style="flex:1;min-width:0">
-          <button type="button" class="btn-coord-picker" onclick="openRutaMapa('ruta_loc_${n}')" title="Seleccionar en mapa" aria-label="Abrir mapa">📍</button>
+          <input type="text" name="ruta_loc_${rowId}" id="ruta_loc_${rowId}" placeholder="Provincia / Cantón / Calle" maxlength="200" style="flex:1;min-width:0">
+          <button type="button" class="btn-coord-picker" onclick="openRutaMapa('ruta_loc_${rowId}','ruta_lat_${rowId}','ruta_lng_${rowId}')" title="Seleccionar en mapa" aria-label="Abrir mapa">📍</button>
         </div>
+        <input type="hidden" name="ruta_lat_${rowId}" id="ruta_lat_${rowId}" value="${savedLat||''}">
+        <input type="hidden" name="ruta_lng_${rowId}" id="ruta_lng_${rowId}" value="${savedLng||''}">
       </td>
-      <td><input type="text" name="ruta_enlace_${n}" placeholder="Enlace A-B" maxlength="150"></td>
-      <td><input type="number" name="ruta_exist_${n}" placeholder="0" min="0" style="width:80px"></td>
-      <td><input type="number" name="ruta_nueva_${n}" placeholder="0" min="0" style="width:80px"></td>
-      <td><input type="number" name="ruta_total_${n}" placeholder="0" min="0" style="width:80px"></td>
+      <td><input type="text" name="ruta_enlace_${rowId}" placeholder="Enlace A-B" maxlength="150"></td>
+      <td><input type="number" name="ruta_exist_${rowId}" placeholder="0" min="0" style="width:80px"></td>
+      <td><input type="number" name="ruta_nueva_${rowId}" placeholder="0" min="0" style="width:80px"></td>
+      <td><input type="number" name="ruta_total_${rowId}" placeholder="0" min="0" style="width:80px" readonly tabindex="-1" style="background:#f4f6fa"></td>
       <td><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
-    tr.querySelector('.btn-icon').onclick = () => tr.remove();
+    // Auto-calcular total = existentes + nuevos
+    const existInput = tr.querySelector(`[name="ruta_exist_${rowId}"]`);
+    const nuevaInput = tr.querySelector(`[name="ruta_nueva_${rowId}"]`);
+    const totalInput = tr.querySelector(`[name="ruta_total_${rowId}"]`);
+    const calcTotal = () => {
+      totalInput.value = (parseInt(existInput.value)||0) + (parseInt(nuevaInput.value)||0);
+      autoSave();
+    };
+    existInput.addEventListener('input', calcTotal);
+    nuevaInput.addEventListener('input', calcTotal);
+    tr.querySelector('.btn-icon').onclick = () => { tr.remove(); autoSave(); };
     tbody.appendChild(tr);
-    autoSave();
+    // No llamar autoSave() aquí — se llama desde event listeners o explícitamente
   }
-  addBtn.addEventListener('click', addRow);
+  addBtn.addEventListener('click', () => { addRow(); autoSave(); });
   addRow();
   window._addRutaRow = addRow;
 })();
@@ -710,7 +734,10 @@ document.querySelectorAll('input[type="email"]').forEach(em => {
   let rutaMap = null;
   let rutaMarker = null;
   let rutaTargetId = null;
-  const modal = document.getElementById('modal-ruta-mapa');
+  let rutaLatId = null;
+  let rutaLngId = null;
+  let lastLat = null, lastLng = null;
+  const modal  = document.getElementById('modal-ruta-mapa');
   const textoEl = document.getElementById('ruta-ubicacion-texto');
 
   function initRutaMap() {
@@ -720,13 +747,17 @@ document.querySelectorAll('input[type="email"]').forEach(em => {
       attribution: '© OpenStreetMap contributors', maxZoom: 19, crossOrigin: true
     }).addTo(rutaMap);
     rutaMap.on('click', async e => {
-      const { lat, lng } = e.latlng;
+      lastLat = e.latlng.lat; lastLng = e.latlng.lng;
       if (rutaMarker) rutaMarker.setLatLng(e.latlng);
       else rutaMarker = L.marker(e.latlng, { draggable: true }).addTo(rutaMap)
-            .on('dragend', ev => reverseGeocode(ev.target.getLatLng().lat, ev.target.getLatLng().lng));
+            .on('dragend', ev => {
+              lastLat = ev.target.getLatLng().lat;
+              lastLng = ev.target.getLatLng().lng;
+              reverseGeocode(lastLat, lastLng);
+            });
       textoEl.value = 'Buscando dirección...';
       textoEl.removeAttribute('readonly');
-      reverseGeocode(lat, lng);
+      reverseGeocode(lastLat, lastLng);
     });
   }
 
@@ -741,19 +772,31 @@ document.querySelectorAll('input[type="email"]').forEach(em => {
         a.county || a.city || a.town || a.village || '',
         a.road || a.pedestrian || a.footway || a.suburb || ''
       ].filter(Boolean);
-      textoEl.value = parts.join(', ') || `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+      textoEl.value = parts.join(', ') || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     } catch(e) {
-      textoEl.value = `Lat: ${lat.toFixed(5)}, Lng: ${lng.toFixed(5)}`;
+      textoEl.value = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
     }
   }
 
-  window.openRutaMapa = function(inputId) {
-    rutaTargetId = inputId;
+  window.openRutaMapa = function(inputId, latId, lngId) {
+    rutaTargetId = inputId; rutaLatId = latId; rutaLngId = lngId;
+    lastLat = null; lastLng = null;
+    const existingLat = document.getElementById(latId)?.value;
+    const existingLng = document.getElementById(lngId)?.value;
     textoEl.value = document.getElementById(inputId)?.value || '';
+    textoEl.removeAttribute('readonly');
     modal.classList.add('open');
     document.body.style.overflow = 'hidden';
     initRutaMap();
-    setTimeout(() => rutaMap.invalidateSize(), 250);
+    setTimeout(() => {
+      rutaMap.invalidateSize();
+      if (existingLat && existingLng) {
+        const ll = L.latLng(parseFloat(existingLat), parseFloat(existingLng));
+        if (rutaMarker) rutaMarker.setLatLng(ll); else rutaMarker = L.marker(ll, { draggable: true }).addTo(rutaMap);
+        rutaMap.setView(ll, 14);
+        lastLat = parseFloat(existingLat); lastLng = parseFloat(existingLng);
+      }
+    }, 250);
   };
 
   document.getElementById('btn-close-ruta-mapa').addEventListener('click', closeRutaMapa);
@@ -762,10 +805,17 @@ document.querySelectorAll('input[type="email"]').forEach(em => {
 
   document.getElementById('ruta-mapa-apply').addEventListener('click', () => {
     const val = textoEl.value.trim();
-    if (val && rutaTargetId) {
+    if (rutaTargetId) {
       const target = document.getElementById(rutaTargetId);
-      if (target) target.value = val;
+      if (target && val) target.value = val;
+      if (lastLat !== null) {
+        const latEl = document.getElementById(rutaLatId);
+        const lngEl = document.getElementById(rutaLngId);
+        if (latEl) latEl.value = lastLat.toFixed(6);
+        if (lngEl) lngEl.value = lastLng.toFixed(6);
+      }
     }
+    autoSave();
     closeRutaMapa();
   });
 
@@ -811,12 +861,15 @@ const stepItems = Array.from(document.querySelectorAll('.step-item'));
 const btnNext = document.getElementById('btn-next');
 const btnPrev = document.getElementById('btn-prev');
 let currentStep = 0;
+let maxVisitedStep = 0; // Paso máximo al que se ha llegado (permite navegar hacia atrás Y adelante)
 
 function showStep(n) {
   steps.forEach((s, i) => s.classList.toggle('active', i === n));
   stepItems.forEach((si, i) => {
     si.classList.toggle('active', i === n);
     si.classList.toggle('done', i < n);
+    si.style.cursor = i <= maxVisitedStep ? 'pointer' : 'default';
+    si.style.opacity = i <= maxVisitedStep ? '1' : '0.55';
     si.setAttribute('tabindex', i === n ? '0' : '-1');
   });
   btnPrev.style.display = n === 0 ? 'none' : '';
@@ -824,6 +877,7 @@ function showStep(n) {
   btnNext.disabled = n === steps.length - 1;
   if (n === steps.length - 1) generatePreview();
   window.scrollTo({ top: document.querySelector('.step-indicator').offsetTop - 80, behavior: 'smooth' });
+  autoSave();
 }
 
 // ─── Validación por paso ───
@@ -844,7 +898,6 @@ function validateCurrentStep() {
       if (err) err.classList.remove('show');
     }
   });
-
   // RUC
   const ruc = document.getElementById('empresa_ruc');
   if (ruc && step.contains(ruc) && ruc.value && !CNEL.Sanitize.ruc(ruc.value)) {
@@ -853,7 +906,6 @@ function validateCurrentStep() {
     if (e) { e.textContent = 'El RUC debe tener 13 dígitos numéricos.'; e.classList.add('show'); }
     ok = false;
   }
-
   // Emails en este paso
   step.querySelectorAll('input[type="email"]').forEach(em => {
     if (em.value && !CNEL.Sanitize.email(em.value)) {
@@ -863,29 +915,24 @@ function validateCurrentStep() {
       ok = false;
     }
   });
-
   // Validación de fechas (paso 3)
   const ini = document.getElementById('fecha_inicio');
   const fin = document.getElementById('fecha_fin');
   const srv = document.getElementById('fecha_servicio');
   if (step.contains(ini) && ini && fin && srv && ini.value && fin.value && srv.value) {
-    const dIni = new Date(ini.value);
-    const dFin = new Date(fin.value);
-    const dSrv = new Date(srv.value);
-    if (dFin < dIni) {
+    if (new Date(fin.value) < new Date(ini.value)) {
       fin.classList.add('error');
       const e = document.getElementById('err-fecha_fin');
-      if (e) { e.textContent = 'La fecha de finalización no puede ser anterior al inicio.'; e.classList.add('show'); }
+      if (e) { e.textContent = 'La finalización no puede ser anterior al inicio.'; e.classList.add('show'); }
       ok = false;
     }
-    if (dSrv < dFin) {
+    if (new Date(srv.value) < new Date(fin.value)) {
       srv.classList.add('error');
       const e = document.getElementById('err-fecha_servicio');
       if (e) { e.textContent = 'La puesta en servicio no puede ser anterior a la finalización estimada.'; e.classList.add('show'); }
       ok = false;
     }
   }
-
   if (!ok) CNEL.Toast.show('Por favor complete todos los campos requeridos correctamente.', 'error');
   return ok;
 }
@@ -893,8 +940,14 @@ function validateCurrentStep() {
 btnNext.addEventListener('click', () => {
   if (currentStep < steps.length - 1) {
     if (!validateCurrentStep()) return;
-    currentStep++; showStep(currentStep);
-    autoSave();
+    // Al avanzar al paso 4, sincronizar rep_nombre → rl_nombre si rl_nombre está vacío
+    if (currentStep === 0) {
+      const rl = document.getElementById('rl_nombre');
+      if (rl && !rl.value && !rl.dataset.custom) rl.value = document.getElementById('rep_nombre').value;
+    }
+    currentStep++;
+    if (currentStep > maxVisitedStep) maxVisitedStep = currentStep;
+    showStep(currentStep);
   }
 });
 btnPrev.addEventListener('click', () => {
@@ -903,21 +956,24 @@ btnPrev.addEventListener('click', () => {
 
 stepItems.forEach((si, i) => {
   si.addEventListener('click', () => {
-    if (i <= currentStep) { currentStep = i; showStep(i); }
+    if (i <= maxVisitedStep) { currentStep = i; showStep(i); }
   });
   si.addEventListener('keydown', e => {
-    if ((e.key === 'Enter' || e.key === ' ') && i <= currentStep) { e.preventDefault(); currentStep = i; showStep(i); }
+    if ((e.key === 'Enter' || e.key === ' ') && i <= maxVisitedStep) {
+      e.preventDefault(); currentStep = i; showStep(i);
+    }
   });
 });
 
-// ─── LocalStorage: auto-guardar / restaurar ───
+// ─── LocalStorage: auto-guardar ───
 function autoSave() {
+  if (!_autoSaveEnabled) return;
   try {
-    const data = {};
-    document.querySelectorAll('#formContrato input, #formContrato select, #formContrato textarea').forEach(el => {
+    const data = { __step: currentStep, __maxStep: maxVisitedStep };
+    document.querySelectorAll('#formContrato input:not([type="hidden"]), #formContrato select, #formContrato textarea').forEach(el => {
       if (el.id) data[el.id] = el.type === 'checkbox' ? el.checked : el.value;
     });
-    // Save cables and rutas as structured data
+    // Guardar cables
     const cables = [];
     document.querySelectorAll('#tabla-cables tbody tr').forEach(tr => {
       const sel = tr.querySelector('select');
@@ -925,111 +981,119 @@ function autoSave() {
       if (sel) cables.push({ tipo: sel.value, metros: inp?.value || '' });
     });
     data.__cables = cables;
+    // Guardar rutas (incluye lat/lng ocultos)
     const rutas = [];
     document.querySelectorAll('#tabla-rutas tbody tr').forEach(tr => {
-      const inputs = tr.querySelectorAll('input');
-      rutas.push([...inputs].map(i => i.value));
+      const inputs = tr.querySelectorAll('input:not([type="hidden"])');
+      const latEl  = tr.querySelector('input[name^="ruta_lat_"]');
+      const lngEl  = tr.querySelector('input[name^="ruta_lng_"]');
+      rutas.push({
+        vals: [...inputs].map(i => i.value),
+        lat:  latEl?.value || '',
+        lng:  lngEl?.value || ''
+      });
     });
     data.__rutas = rutas;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch(e) {}
 }
 
-function restoreSession() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
-    const data = JSON.parse(raw);
-    // Restore simple fields
-    document.querySelectorAll('#formContrato input, #formContrato select, #formContrato textarea').forEach(el => {
-      if (el.id && data[el.id] !== undefined) {
-        if (el.type === 'checkbox') el.checked = data[el.id];
-        else el.value = data[el.id];
+// ─── Restaurar sesión ───
+function restoreSession(data) {
+  // Campos simples
+  document.querySelectorAll('#formContrato input:not([type="hidden"]), #formContrato select, #formContrato textarea').forEach(el => {
+    if (el.id && data[el.id] !== undefined) {
+      if (el.type === 'checkbox') el.checked = data[el.id];
+      else el.value = data[el.id];
+    }
+  });
+  // Cobertura: mostrar/ocultar UN
+  document.getElementById('cobertura').dispatchEvent(new Event('change'));
+  // Restaurar cables
+  if (Array.isArray(data.__cables) && data.__cables.length > 0) {
+    document.querySelector('#tabla-cables tbody').innerHTML = '';
+    data.__cables.forEach(c => window._addCableRow(c.tipo, c.metros));
+  }
+  // Restaurar rutas
+  if (Array.isArray(data.__rutas) && data.__rutas.length > 0) {
+    document.querySelector('#tabla-rutas tbody').innerHTML = '';
+    data.__rutas.forEach(r => {
+      window._addRutaRow();
+      const last = document.querySelector('#tabla-rutas tbody tr:last-child');
+      if (last) {
+        const inputs = last.querySelectorAll('input:not([type="hidden"])');
+        const vals = r.vals || r; // compatible con formato anterior
+        vals.forEach((val, i) => { if (inputs[i]) inputs[i].value = val; });
+        // Recalcular total
+        const exist = parseInt(vals[2]) || 0;
+        const nueva = parseInt(vals[3]) || 0;
+        if (inputs[4]) inputs[4].value = exist + nueva;
+        // Restaurar lat/lng ocultos
+        const latEl = last.querySelector('input[name^="ruta_lat_"]');
+        const lngEl = last.querySelector('input[name^="ruta_lng_"]');
+        if (latEl && r.lat) latEl.value = r.lat;
+        if (lngEl && r.lng) lngEl.value = r.lng;
       }
     });
-    // Fire cobertura change to show/hide UN group
-    document.getElementById('cobertura').dispatchEvent(new Event('change'));
-    // Restore cables
-    if (Array.isArray(data.__cables) && data.__cables.length > 0) {
-      document.querySelector('#tabla-cables tbody').innerHTML = '';
-      // Re-init counter
-      data.__cables.forEach(c => window._addCableRow(c.tipo, c.metros));
-    }
-    // Restore rutas
-    if (Array.isArray(data.__rutas) && data.__rutas.length > 0) {
-      document.querySelector('#tabla-rutas tbody').innerHTML = '';
-      data.__rutas.forEach(r => {
-        window._addRutaRow();
-        const last = document.querySelector('#tabla-rutas tbody tr:last-child');
-        if (last) {
-          const inputs = last.querySelectorAll('input');
-          r.forEach((val, i) => { if (inputs[i]) inputs[i].value = val; });
-        }
-      });
-    }
-    return true;
-  } catch(e) { return false; }
+  }
+  // Restaurar paso
+  if (data.__maxStep) maxVisitedStep = data.__maxStep;
+  if (data.__step) { currentStep = data.__step; showStep(currentStep); }
+  // Marcar rl_nombre como custom si difiere de rep_nombre
+  const rl = document.getElementById('rl_nombre');
+  const rep = document.getElementById('rep_nombre');
+  if (rl && rep && rl.value && rl.value !== rep.value) rl.dataset.custom = '1';
 }
 
-function clearSession() {
-  localStorage.removeItem(STORAGE_KEY);
-  document.querySelector('#tabla-cables tbody').innerHTML = '';
-  document.querySelector('#tabla-rutas tbody').innerHTML = '';
-  window._addCableRow();
-  window._addRutaRow();
-  document.querySelectorAll('#formContrato input:not([type="date"]), #formContrato select, #formContrato textarea').forEach(el => {
-    if (el.type === 'checkbox') el.checked = false;
-    else el.value = '';
-  });
-  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-  document.getElementById('grupo-un-local').style.display = 'none';
-  CNEL.Toast.show('Sesión borrada. Puede ingresar nuevos datos.', 'success');
-}
-
-// Show restore banner if saved session exists
+// ─── Inicialización: auto-restaurar sin banner si hay datos guardados ───
 (function() {
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return;
-  let saved;
-  try { saved = JSON.parse(raw); } catch(e) { return; }
-  const empresa = saved.empresa_razon || '';
-  if (!empresa) return;
-  const banner = document.createElement('div');
-  banner.className = 'session-banner';
-  banner.setAttribute('role', 'alert');
-  banner.innerHTML = `
-    <p>📂 <strong>Sesión guardada encontrada</strong> — Empresa: <em>${CNEL.Sanitize.html(empresa)}</em>. ¿Desea continuar donde dejó?</p>
-    <div style="display:flex;gap:8px;flex-shrink:0">
-      <button type="button" id="btn-restore" class="btn btn-primary btn-sm">↩ Restaurar datos</button>
-      <button type="button" id="btn-clear-session" class="btn btn-secondary btn-sm">✕ Empezar de nuevo</button>
-    </div>`;
-  const form = document.getElementById('formContrato');
-  form.parentNode.insertBefore(banner, form);
-  document.getElementById('btn-restore').addEventListener('click', () => {
-    restoreSession();
-    banner.remove();
-    CNEL.Toast.show('Datos restaurados correctamente.', 'success');
-  });
-  document.getElementById('btn-clear-session').addEventListener('click', () => {
-    clearSession();
-    banner.remove();
-  });
+  let savedData = null;
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (raw) savedData = JSON.parse(raw);
+  } catch(e) {}
+
+  if (savedData && savedData.empresa_razon) {
+    // Auto-restaurar directamente, sin pedir confirmación
+    restoreSession(savedData);
+    // Mostrar aviso compacto con opción de borrar
+    const notice = document.createElement('div');
+    notice.className = 'session-banner';
+    notice.setAttribute('role', 'status');
+    notice.innerHTML = `
+      <p>📂 Sesión previa restaurada — <em>${CNEL.Sanitize.html(savedData.empresa_razon)}</em></p>
+      <button type="button" id="btn-clear-session" class="btn btn-secondary btn-sm">✕ Borrar y empezar de nuevo</button>`;
+    const form = document.getElementById('formContrato');
+    form.parentNode.insertBefore(notice, form);
+    document.getElementById('btn-clear-session').addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      location.reload();
+    });
+  }
+
+  // Habilitar auto-guardado DESPUÉS de la restauración
+  _autoSaveEnabled = true;
+
+  // Actualizar apariencia de steps según maxVisitedStep
+  showStep(currentStep);
 })();
 
-// Auto-save on any change
+// Auto-guardar en cualquier cambio del formulario
 document.getElementById('formContrato').addEventListener('input', autoSave);
 document.getElementById('formContrato').addEventListener('change', autoSave);
 
 // ─── Recolección de datos ───
 function getFormData() {
-  const s = CNEL.Sanitize.text;
+  const s  = CNEL.Sanitize.text;
   const gi = id => s(document.getElementById(id)?.value || '');
 
-  // Rutas
+  // Rutas (incluye lat/lng)
   const rutaRows = [];
   document.querySelectorAll('#tabla-rutas tbody tr').forEach(tr => {
-    const inputs = tr.querySelectorAll('input');
-    const loc = inputs[0]?.value?.trim();
+    const inputs = tr.querySelectorAll('input:not([type="hidden"])');
+    const latEl  = tr.querySelector('input[name^="ruta_lat_"]');
+    const lngEl  = tr.querySelector('input[name^="ruta_lng_"]');
+    const loc    = inputs[0]?.value?.trim();
     if (loc) {
       rutaRows.push([
         s(inputs[0]?.value || ''),
@@ -1037,6 +1101,8 @@ function getFormData() {
         inputs[2]?.value || '0',
         inputs[3]?.value || '0',
         inputs[4]?.value || '0',
+        latEl?.value || '',
+        lngEl?.value || '',
       ]);
     }
   });
@@ -1109,13 +1175,15 @@ function generatePreview() {
           <th style="padding:5px 8px;text-align:center">Exist.</th>
           <th style="padding:5px 8px;text-align:center">Nuevos</th>
           <th style="padding:5px 8px;text-align:center">Total</th>
+          <th style="padding:5px 8px;text-align:center">Coordenadas</th>
         </tr></thead><tbody>
         ${d.rutas.map((r,i) => `<tr style="background:${i%2===0?'#f7faff':'#fff'}">
-          <td style="padding:4px 8px;border:1px solid #ddd">${r[0]}</td>
-          <td style="padding:4px 8px;border:1px solid #ddd">${r[1]}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd">${CNEL.Sanitize.html(r[0])}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd">${CNEL.Sanitize.html(r[1])}</td>
           <td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${r[2]}</td>
           <td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${r[3]}</td>
           <td style="padding:4px 8px;border:1px solid #ddd;text-align:center">${r[4]}</td>
+          <td style="padding:4px 8px;border:1px solid #ddd;text-align:center;font-size:.78rem;color:#666">${r[5]&&r[6]?r[5]+', '+r[6]:'—'}</td>
         </tr>`).join('')}
       </tbody></table>`
     : '<em style="color:#a0aec0">Sin rutas ingresadas</em>';
@@ -1144,7 +1212,7 @@ function generatePreview() {
   `;
 }
 
-// ─── Helpers para Word (carta oficial, fuentes profesionales) ───
+// ─── HTML para Word ───
 function buildDocumentHTML(d) {
   const fechaEs  = CNEL.formatDateES(d.fecha);
   const fechaIni = CNEL.formatDateES(d.fecha_inicio);
@@ -1165,7 +1233,10 @@ function buildDocumentHTML(d) {
   const TBL = 'border-collapse:collapse;width:100%;margin:4pt 0 10pt 0';
 
   const rutaFilas = d.rutas.length
-    ? d.rutas.map(r => `<tr><td style="${TD}">${r[0]}</td><td style="${TD}">${r[1]}</td><td style="${TDC}">${r[2]}</td><td style="${TDC}">${r[3]}</td><td style="${TDC}">${r[4]}</td></tr>`).join('')
+    ? d.rutas.map(r => {
+        const coord = r[5] && r[6] ? `<br><small style="color:#555">Lat: ${r[5]}, Lng: ${r[6]}</small>` : '';
+        return `<tr><td style="${TD}">${r[0]}${coord}</td><td style="${TD}">${r[1]}</td><td style="${TDC}">${r[2]}</td><td style="${TDC}">${r[3]}</td><td style="${TDC}">${r[4]}</td></tr>`;
+      }).join('')
     : `<tr><td style="${TD}" colspan="5"><em>Sin rutas ingresadas</em></td></tr>`;
 
   const cablesItems = d.cables.length
@@ -1182,13 +1253,12 @@ ${sec('4.4  Empresa Contratista')}
 </ul>` : '';
 
   return `
-${d.num_solicitud ? p(`<strong>No. SOLICITUD:</strong> ${d.num_solicitud}`) : ''}
 ${p(`${d.ciudad}, ${fechaEs}`, 'margin-bottom:10pt')}
 ${p('Señor(a)')}
 ${pb(d.dest_nombre)}
 ${p(d.dest_cargo)}
 ${d.un_local ? p(d.un_local) : ''}
-${p('Empresa Eléctrica Pública Estratégica Corporación Nacional de Electricidad — CNEL EP')}
+${p('Empresa Eléctrica Pública Estratégica — CNEL EP')}
 ${p(d.dest_ciudad)}
 ${p('&nbsp;', 'margin:0')}
 ${pb('ASUNTO:&nbsp; SOLICITUD DE SUSCRIPCIÓN DE CONTRATO PARA USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP')}
@@ -1265,7 +1335,6 @@ ${p('Por medio de la presente, declaro y me comprometo a:')}
 </ol>
 ${p('Agradecemos de antemano la atención que se sirva dar a la presente solicitud y quedo a su disposición para cualquier información adicional que requiera, así como para coordinar las inspecciones técnicas necesarias.', 'margin-top:10pt')}
 ${p('Atentamente,', 'margin-top:4pt;margin-bottom:40pt')}
-
 <table border="0" cellpadding="0" cellspacing="0" style="width:100%">
   <tr>
     <td style="width:50%;vertical-align:top;border-top:1pt solid #000;padding-top:5pt">
@@ -1285,7 +1354,12 @@ function buildPdfBlocks(d) {
   const fechaIni = CNEL.formatDateES(d.fecha_inicio);
   const fechaFin = CNEL.formatDateES(d.fecha_fin);
   const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
-  const cablesText = d.cables.length ? d.cables.map(c => `${c.tipo}: ${c.metros} m`).join(', ') : 'Sin cables especificados';
+
+  // Rutas para PDF: incluir coordenadas si existen
+  const rutasPdf = d.rutas.map(r => [
+    r[0] + (r[5] && r[6] ? ` [${r[5]}, ${r[6]}]` : ''),
+    r[1], r[2], r[3], r[4]
+  ]);
 
   const blocks = [
     { type: 'title', text: 'SOLICITUD DE SUSCRIPCIÓN DE CONTRATO\nUSO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP' },
@@ -1312,8 +1386,8 @@ function buildPdfBlocks(d) {
     { type: 'heading', text: '2.  DETALLE DE RUTAS PROPUESTAS' },
     { type: 'table',
       headers: ['Provincia / Cantón / Calle', 'Rutas/Enlaces', 'Exist.', 'Nuevos', 'Total'],
-      colWidths: [58, 42, 18, 18, 18],
-      rows: d.rutas.length ? d.rutas : [['Sin rutas ingresadas', '', '', '', '']]
+      colWidths: [60, 42, 16, 16, 16],
+      rows: rutasPdf.length ? rutasPdf : [['Sin rutas ingresadas', '', '', '', '']]
     },
     { type: 'heading', text: '3.  INFORMACIÓN DEL PROYECTO' },
     { type: 'subheading', text: '3.1  Objetivo del proyecto:' },
