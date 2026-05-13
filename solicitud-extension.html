@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Solicitud de Ampliación – CNEL EP</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
+  <style>
+    .motivacion-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .motivacion-item { display:flex; align-items:flex-start; gap:10px; }
+    .motivacion-item input[type="checkbox"] { width:18px; height:18px; accent-color:var(--azul-medio); margin-top:2px; }
+    .motivacion-item label { font-size:.9rem; color:var(--gris-texto); cursor:pointer; }
+    .resumen-card {
+      background:linear-gradient(135deg,var(--azul-oscuro),var(--azul-medio));
+      border-radius:var(--radio-lg); padding:24px 28px; color:#fff; margin-bottom:28px;
+    }
+    .resumen-card h3 { font-family:'Montserrat',sans-serif; font-size:.88rem; font-weight:700; letter-spacing:.5px; text-transform:uppercase; opacity:.75; margin-bottom:16px; }
+    .resumen-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; }
+    .resumen-col { text-align:center; }
+    .resumen-col .label { font-size:.72rem; opacity:.7; text-transform:uppercase; letter-spacing:.5px; display:block; margin-bottom:4px; }
+    .resumen-col .current { font-size:.88rem; color:rgba(255,255,255,.7); font-family:'Montserrat',sans-serif; }
+    .resumen-col .nuevo { font-size:1.3rem; font-weight:800; color:var(--dorado-claro); font-family:'Montserrat',sans-serif; }
+    .resumen-col .pct { font-size:.78rem; background:rgba(255,255,255,.15); border-radius:20px; padding:2px 8px; display:inline-block; margin-top:2px; }
+    @media(max-width:768px) { .motivacion-grid,.resumen-row { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+
+<a href="#contenido" class="skip-nav">Saltar al contenido principal</a>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Navegación principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="CNEL EP Inicio">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/></svg>
+      </div>
+      <div class="brand-text">CNEL EP<small>Arriendo de Infraestructura</small></div>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navbar-menu" aria-label="Abrir menú">☰</button>
+    <ul class="navbar-nav" id="navbar-menu" role="list">
+      <li><a href="index.html">🏠 Inicio</a></li>
+      <li><a href="requisitos.html">📋 Requisitos</a></li>
+      <li><a href="solicitud-contrato.html">📝 Nuevo Contrato <span class="nav-badge">FORM</span></a></li>
+      <li><a href="solicitud-extension.html" class="active" aria-current="page">📤 Ampliación</a></li>
+      <li><a href="intereses-mora.html">📊 Int. Mora</a></li>
+      <li><a href="intereses-financiamiento.html">💰 Financiamiento</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Ruta de navegación">
+  <ol class="breadcrumb-list">
+    <li><a href="index.html">🏠 Inicio</a></li>
+    <li><span class="current">📤 Solicitud de Ampliación</span></li>
+  </ol>
+</nav>
+
+<!-- PAGE HERO -->
+<header class="page-hero" role="banner">
+  <div class="page-hero-inner">
+    <div>
+      <h1>📤 Solicitud de Ampliación de Infraestructura</h1>
+      <p>Para contratos vigentes: solicite autorización para extender el uso de postes o ductos adicionales. Complete el formulario y exporte su solicitud.</p>
+    </div>
+    <div class="page-hero-badge">
+      <div class="big">6</div>
+      <small>Secciones a<br>completar</small>
+    </div>
+  </div>
+</header>
+
+<main id="contenido" class="section" style="padding-top:40px">
+  <div class="container" style="max-width:960px">
+
+    <div class="alert alert-warning" role="alert">
+      <span class="alert-icon" aria-hidden="true">⚠️</span>
+      <div>
+        <strong>Requisito previo:</strong> Debe contar con un <strong>contrato de arrendamiento vigente</strong> con CNEL EP
+        para solicitar ampliación. Si aún no tiene contrato, diríjase a
+        <a href="solicitud-contrato.html">Solicitud de Nuevo Contrato</a>.
+        Recuerde que no puede instalar en los nuevos postes sin el "Certificado de autorización" firmado (Anexo 11).
+      </div>
+    </div>
+
+    <form id="formExtension" novalidate autocomplete="off" spellcheck="false">
+
+    <!-- RESUMEN CALCULADO (se actualiza dinámico) -->
+    <div class="resumen-card" aria-live="polite" aria-label="Resumen de la ampliación">
+      <h3>📊 Resumen de la Ampliación</h3>
+      <div class="resumen-row">
+        <div class="resumen-col">
+          <span class="label">Postes actuales</span>
+          <span class="current" id="res-pos-actual">—</span>
+        </div>
+        <div class="resumen-col">
+          <span class="label">Ampliación postes</span>
+          <span class="nuevo" id="res-pos-amp">—</span>
+          <span class="pct" id="res-pos-pct"></span>
+        </div>
+        <div class="resumen-col">
+          <span class="label">Ductos actuales (m)</span>
+          <span class="current" id="res-duc-actual">—</span>
+        </div>
+        <div class="resumen-col">
+          <span class="label">Ampliación ductos</span>
+          <span class="nuevo" id="res-duc-amp">—</span>
+          <span class="pct" id="res-duc-pct"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ SECCIÓN 1: ENCABEZADO ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">📋</span> 1. Datos del Documento y Contrato de Referencia</legend>
+
+      <div class="form-row-3">
+        <div class="form-group">
+          <label for="num_solicitud">N.º de Solicitud (consecutivo)</label>
+          <input type="text" id="num_solicitud" name="num_solicitud" placeholder="Ej: AMP-2024-001" maxlength="40">
+        </div>
+        <div class="form-group">
+          <label for="ciudad">Ciudad <span class="req">*</span></label>
+          <input type="text" id="ciudad" name="ciudad" placeholder="Ej: Guayaquil" maxlength="80" required>
+          <div class="field-error" id="err-ciudad" role="alert"></div>
+        </div>
+        <div class="form-group">
+          <label for="fecha">Fecha de solicitud <span class="req">*</span></label>
+          <input type="date" id="fecha" name="fecha" required>
+          <div class="field-error" id="err-fecha" role="alert"></div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dest_nombre">Nombre del destinatario <span class="req">*</span></label>
+          <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Nombre del Coordinador Gestión Arriendo" maxlength="120" required>
+          <div class="field-error" id="err-dest_nombre" role="alert"></div>
+        </div>
+        <div class="form-group">
+          <label for="dest_unidad">Unidad de Negocio / Oficina</label>
+          <input type="text" id="dest_unidad" name="dest_unidad" placeholder="Ej: OFC / UN Guayas Los Ríos" maxlength="80">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="contrato_num">N.º de Contrato vigente <span class="req">*</span></label>
+          <input type="text" id="contrato_num" name="contrato_num" placeholder="Ej: CNEL-2022-0123" maxlength="80" required>
+          <div class="field-error" id="err-contrato_num" role="alert"></div>
+        </div>
+        <div class="form-group">
+          <label for="contrato_fecha">Fecha de suscripción del contrato <span class="req">*</span></label>
+          <input type="date" id="contrato_fecha" name="contrato_fecha" required>
+          <div class="field-error" id="err-contrato_fecha" role="alert"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="ultima_ampliacion">Última ampliación autorizada (si aplica)</label>
+        <input type="text" id="ultima_ampliacion" name="ultima_ampliacion" placeholder="Fecha o N/A" maxlength="80">
+        <p class="form-hint">Ingrese la fecha de la última ampliación aprobada, o escriba "N/A" si no ha habido ampliaciones previas.</p>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="rep_nombre">Representante Legal <span class="req">*</span></label>
+          <input type="text" id="rep_nombre" name="rep_nombre" placeholder="Nombre completo" maxlength="120" required>
+          <div class="field-error" id="err-rep_nombre" role="alert"></div>
+        </div>
+        <div class="form-group">
+          <label for="empresa_razon">Razón Social <span class="req">*</span></label>
+          <input type="text" id="empresa_razon" name="empresa_razon" placeholder="Nombre legal de la empresa" maxlength="200" required>
+          <div class="field-error" id="err-empresa_razon" role="alert"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="empresa_ruc">RUC <span class="req">*</span></label>
+        <input type="text" id="empresa_ruc" name="empresa_ruc" placeholder="0000000000001" maxlength="13" pattern="[0-9]{13}" required style="max-width:220px">
+        <div class="field-error" id="err-empresa_ruc" role="alert"></div>
+      </div>
+    </fieldset>
+
+    <!-- ═══ SECCIÓN 2: RESUMEN EJECUTIVO ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">📊</span> 2. Resumen Ejecutivo de la Ampliación</legend>
+      <p class="form-hint" style="margin-bottom:16px">Ingrese los datos actuales y la ampliación solicitada. El total y porcentaje se calculan automáticamente.</p>
+
+      <div style="overflow-x:auto">
+        <table class="table-form" aria-label="Resumen ejecutivo de la ampliación">
+          <thead>
+            <tr>
+              <th>Concepto</th>
+              <th>Cantidad Actual</th>
+              <th>Ampliación Solicitada</th>
+              <th>Total Proyectado</th>
+              <th>Incremento %</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Postes aéreos</strong></td>
+              <td><input type="number" id="pos_actual"   name="pos_actual"   placeholder="0" min="0" max="999999" style="width:100px"></td>
+              <td><input type="number" id="pos_amp"      name="pos_amp"      placeholder="0" min="0" max="999999" style="width:100px"></td>
+              <td><input type="number" id="pos_total"    name="pos_total"    placeholder="0" readonly style="background:#EEF4FF;width:100px"></td>
+              <td><input type="text"   id="pos_pct"      name="pos_pct"      placeholder="0%" readonly style="background:#EEF4FF;width:80px"></td>
+            </tr>
+            <tr>
+              <td><strong>Ductos subterráneos (m)</strong></td>
+              <td><input type="number" id="duc_actual"   name="duc_actual"   placeholder="0" min="0" max="999999" style="width:100px"></td>
+              <td><input type="number" id="duc_amp"      name="duc_amp"      placeholder="0" min="0" max="999999" style="width:100px"></td>
+              <td><input type="number" id="duc_total"    name="duc_total"    placeholder="0" readonly style="background:#EEF4FF;width:100px"></td>
+              <td><input type="text"   id="duc_pct"      name="duc_pct"      placeholder="0%" readonly style="background:#EEF4FF;width:80px"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </fieldset>
+
+    <!-- ═══ SECCIÓN 3: DETALLE DE RUTAS ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">🗺️</span> 3. Detalle Técnico de Rutas a Ampliar</legend>
+      <div style="overflow-x:auto">
+        <table class="table-form" id="tabla-rutas-amp" aria-label="Detalle de rutas a ampliar">
+          <thead>
+            <tr>
+              <th>Provincia/Ciudad/Recinto</th>
+              <th>Rutas / Enlaces</th>
+              <th>Desde / Hasta (Coordenadas)</th>
+              <th>Total Postes/Ductos</th>
+              <th>Total Equipos Act/Pas</th>
+              <th aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button type="button" id="btn-add-ruta-amp" class="btn btn-secondary btn-sm" style="margin-top:10px">
+        ＋ Agregar ruta
+      </button>
+    </fieldset>
+
+    <!-- ═══ SECCIÓN 4: JUSTIFICACIÓN ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">📝</span> 4. Justificación Técnica</legend>
+      <p class="form-hint" style="margin-bottom:16px">Seleccione el/los motivo(s) de la ampliación:</p>
+      <div class="motivacion-grid" role="group" aria-label="Motivación de la ampliación">
+        <label class="motivacion-item">
+          <input type="checkbox" name="mot_expansion" value="Expansión de cobertura a nuevas zonas">
+          Expansión de cobertura a nuevas zonas
+        </label>
+        <label class="motivacion-item">
+          <input type="checkbox" name="mot_demanda" value="Incremento de demanda en zonas existentes">
+          Incremento de demanda en zonas existentes
+        </label>
+        <label class="motivacion-item">
+          <input type="checkbox" name="mot_redundancia" value="Redundancia y respaldo de rutas críticas">
+          Redundancia y respaldo de rutas críticas
+        </label>
+        <label class="motivacion-item">
+          <input type="checkbox" name="mot_autoridad" value="Requerimiento de autoridad competente">
+          Requerimiento de autoridad competente
+        </label>
+        <label class="motivacion-item" style="grid-column:1/-1">
+          <input type="checkbox" name="mot_otros" value="Otros">
+          Otros:&nbsp;<input type="text" id="mot_otros_texto" name="mot_otros_texto" placeholder="Especifique..." maxlength="200" style="width:300px;display:inline-block">
+        </label>
+      </div>
+    </fieldset>
+
+    <!-- ═══ SECCIÓN 5: CRONOGRAMA Y DETALLES ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">📅</span> 5. Detalles de la Actividad y Cronograma</legend>
+
+      <div class="form-group">
+        <label for="ubicacion_desc">4.1 Descripción de Ubicación</label>
+        <textarea id="ubicacion_desc" name="ubicacion_desc" rows="2"
+          placeholder="Descripción del sector de trabajo con referencia de postes (Se adjuntarán imágenes ArcGIS/Google Earth)" maxlength="500"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>4.2 Geodatabase SIG</label>
+        <p class="form-hint">Se adjuntará la File Geodatabase SIG con el recorrido de la red en el modelo de datos SIG (mencionar en el oficio).</p>
+      </div>
+
+      <p style="font-family:'Montserrat',sans-serif;font-size:.88rem;font-weight:700;color:var(--azul-oscuro);margin-bottom:12px">4.3 Cronograma de Trabajos</p>
+      <div style="overflow-x:auto">
+        <table class="table-form" id="tabla-cronograma" aria-label="Cronograma de trabajos">
+          <thead>
+            <tr>
+              <th>Fecha (dd/mm/aaaa)</th>
+              <th>Horario</th>
+              <th>Actividad</th>
+              <th>Ubicación</th>
+              <th>Técnico Encargado</th>
+              <th aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button type="button" id="btn-add-crono" class="btn btn-secondary btn-sm" style="margin-top:10px">
+        ＋ Agregar actividad
+      </button>
+    </fieldset>
+
+    <!-- ═══ SECCIÓN 6: PERSONAL TÉCNICO ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">👷</span> 6. Personal Técnico Asignado</legend>
+      <div style="overflow-x:auto">
+        <table class="table-form" id="tabla-personal" aria-label="Personal técnico asignado">
+          <thead>
+            <tr>
+              <th>Función</th>
+              <th>Nombre Completo</th>
+              <th>Celular</th>
+              <th>Email</th>
+              <th aria-label="Acciones"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <button type="button" id="btn-add-personal" class="btn btn-secondary btn-sm" style="margin-top:10px">
+        ＋ Agregar persona
+      </button>
+    </fieldset>
+
+    <!-- ═══ COMPROMISOS ═══ -->
+    <fieldset>
+      <legend><span class="leg-icon" aria-hidden="true">✅</span> Compromisos del Proveedor</legend>
+      <div class="checkbox-group" role="group" aria-label="Compromisos del proveedor">
+        <label class="checkbox-item">
+          <input type="checkbox" id="comp_normativo" name="comp_normativo" required>
+          <span><strong>Cumplimiento Normativo:</strong> Declaro adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes. <span class="req">*</span></span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="comp_civil" name="comp_civil" required>
+          <span><strong>Responsabilidad Civil:</strong> Acepto responsabilidad por daños a terceros y a la propiedad de CNEL EP. <span class="req">*</span></span>
+        </label>
+        <label class="checkbox-item">
+          <input type="checkbox" id="comp_polizas" name="comp_polizas" required>
+          <span><strong>Pólizas de Seguro:</strong> Confirmo contar con seguros vigentes que cubran las operaciones. <span class="req">*</span></span>
+        </label>
+      </div>
+      <div class="field-error" id="err-compromisos" role="alert" style="margin-top:8px"></div>
+    </fieldset>
+
+    <!-- ═══ DESCARGA ═══ -->
+    <div class="form-section" style="background:var(--blanco);border-radius:var(--radio-lg);box-shadow:var(--sombra-md);overflow:hidden;margin-top:32px">
+      <div class="form-header">
+        <h2>Generar y Descargar Solicitud</h2>
+        <p>Verifique todos los datos y descargue el documento para presentarlo ante CNEL EP</p>
+      </div>
+      <div class="form-body">
+        <div class="alert alert-info" role="alert">
+          <span class="alert-icon">📌</span>
+          <div>Recuerde que debe <strong>firmar el documento</strong> y presentarlo junto con la información SIG
+          actualizada (Geodatabase) y cualquier documentación técnica de soporte.</div>
+        </div>
+        <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:12px">
+          <button type="button" id="btn-download-word" class="btn btn-primary btn-lg">
+            📄 Descargar en Word (.doc)
+          </button>
+          <button type="button" id="btn-download-pdf" class="btn btn-dorado btn-lg">
+            📑 Descargar en PDF
+          </button>
+        </div>
+      </div>
+    </div>
+
+    </form>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>CNEL EP</h4>
+        <p>Empresa Eléctrica Pública Estratégica<br>Corporación Nacional de Electricidad</p>
+      </div>
+      <div class="footer-col">
+        <h4>Trámites</h4>
+        <ul>
+          <li><a href="index.html">🏠 Inicio / Políticas</a></li>
+          <li><a href="requisitos.html">📋 Requisitos</a></li>
+          <li><a href="solicitud-contrato.html">📝 Solicitud de Contrato</a></li>
+          <li><a href="solicitud-extension.html">📤 Solicitud de Ampliación</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="https://www.cnelep.gob.ec" target="_blank" rel="noopener noreferrer">🌐 CNEL EP</a></li>
+          <li><a href="https://www.arcotel.gob.ec" target="_blank" rel="noopener noreferrer">🌐 ARCOTEL</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> CNEL EP — Todos los derechos reservados</span>
+      <span class="footer-legal">Portal SIG-CNEL</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
+
+// ─── Tabla de rutas de ampliación ───
+(function() {
+  const tbody  = document.querySelector('#tabla-rutas-amp tbody');
+  const addBtn = document.getElementById('btn-add-ruta-amp');
+  let n = 0;
+  function addRow() {
+    n++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="text"   name="amp_prov_${n}"  placeholder="Provincia/Ciudad" maxlength="80"></td>
+      <td><input type="text"   name="amp_ruta_${n}"  placeholder="Enlace A-B"       maxlength="120"></td>
+      <td><input type="text"   name="amp_coord_${n}" placeholder="Lat/Lon o ref."   maxlength="100"></td>
+      <td><input type="number" name="amp_pos_${n}"   placeholder="0" min="0"></td>
+      <td><input type="text"   name="amp_equ_${n}"   placeholder="Ej: 2 act / 3 pas" maxlength="60"></td>
+      <td><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
+    tr.querySelector('.btn-icon').onclick = () => tr.remove();
+    tbody.appendChild(tr);
+  }
+  addBtn.addEventListener('click', addRow);
+  addRow();
+})();
+
+// ─── Tabla de cronograma ───
+(function() {
+  const tbody  = document.querySelector('#tabla-cronograma tbody');
+  const addBtn = document.getElementById('btn-add-crono');
+  let n = 0;
+  function addRow() {
+    n++;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><input type="date"   name="crn_fecha_${n}"></td>
+      <td><input type="text"   name="crn_hora_${n}"  placeholder="08:00 - 17:00" maxlength="20"></td>
+      <td><input type="text"   name="crn_act_${n}"   placeholder="Actividad"     maxlength="150"></td>
+      <td><input type="text"   name="crn_ubic_${n}"  placeholder="Dirección o coordenadas" maxlength="150"></td>
+      <td><input type="text"   name="crn_tec_${n}"   placeholder="Nombre del técnico" maxlength="100"></td>
+      <td><button type="button" class="btn-icon" title="Eliminar" aria-label="Eliminar fila">✕</button></td>`;
+    tr.querySelector('.btn-icon').onclick = () => tr.remove();
+    tbody.appendChild(tr);
+  }
+  addBtn.addEventListener('click', addRow);
+  addRow();
+})();
+
+// ─── Tabla de personal ───
+CNEL.createPersonnelTable('tabla-personal', 'btn-add-personal');
+
+// ─── Cálculo automático de totales y resumen ───
+function calcTotals() {
+  const posAct = parseInt(document.getElementById('pos_actual').value) || 0;
+  const posAmp = parseInt(document.getElementById('pos_amp').value)    || 0;
+  const ducAct = parseInt(document.getElementById('duc_actual').value) || 0;
+  const ducAmp = parseInt(document.getElementById('duc_amp').value)    || 0;
+
+  document.getElementById('pos_total').value = posAct + posAmp;
+  document.getElementById('duc_total').value = ducAct + ducAmp;
+  document.getElementById('pos_pct').value = posAct > 0 ? ((posAmp/posAct)*100).toFixed(1)+'%' : (posAmp > 0 ? '—' : '0%');
+  document.getElementById('duc_pct').value = ducAct > 0 ? ((ducAmp/ducAct)*100).toFixed(1)+'%' : (ducAmp > 0 ? '—' : '0%');
+
+  // Resumen card
+  document.getElementById('res-pos-actual').textContent = posAct || '—';
+  document.getElementById('res-pos-amp').textContent    = posAmp || '—';
+  document.getElementById('res-duc-actual').textContent = ducAct || '—';
+  document.getElementById('res-duc-amp').textContent    = ducAmp || '—';
+  document.getElementById('res-pos-pct').textContent = posAct > 0 && posAmp > 0 ? '+'+((posAmp/posAct)*100).toFixed(1)+'%' : '';
+  document.getElementById('res-duc-pct').textContent = ducAct > 0 && ducAmp > 0 ? '+'+((ducAmp/ducAct)*100).toFixed(1)+'%' : '';
+}
+
+['pos_actual','pos_amp','duc_actual','duc_amp'].forEach(id => {
+  document.getElementById(id).addEventListener('input', calcTotals);
+});
+
+// ─── Recolección de datos ───
+function getFormData() {
+  const s = CNEL.Sanitize.text;
+  const gi = id => s(document.getElementById(id)?.value || '');
+
+  // Motivaciones
+  const motivaciones = [];
+  document.querySelectorAll('[name^="mot_"]:checked').forEach(cb => {
+    if (cb.name === 'mot_otros') {
+      const txt = gi('mot_otros_texto');
+      if (txt) motivaciones.push('Otros: ' + txt);
+    } else {
+      motivaciones.push(s(cb.value));
+    }
+  });
+
+  // Rutas
+  const rutas = [];
+  document.querySelectorAll('#tabla-rutas-amp tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    rutas.push([
+      s(inputs[0]?.value || ''), s(inputs[1]?.value || ''),
+      s(inputs[2]?.value || ''), inputs[3]?.value || '0',
+      s(inputs[4]?.value || ''),
+    ]);
+  });
+
+  // Cronograma
+  const cronograma = [];
+  document.querySelectorAll('#tabla-cronograma tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input');
+    if (inputs[0]?.value) cronograma.push([
+      CNEL.formatDateES(s(inputs[0]?.value || '')),
+      s(inputs[1]?.value || ''), s(inputs[2]?.value || ''),
+      s(inputs[3]?.value || ''), s(inputs[4]?.value || ''),
+    ]);
+  });
+
+  // Personal
+  const personal = [];
+  document.querySelectorAll('#tabla-personal tbody tr').forEach(tr => {
+    const inputs = tr.querySelectorAll('input, select');
+    if (inputs[1]?.value) personal.push([
+      s(inputs[0]?.value || ''), s(inputs[1]?.value || ''),
+      s(inputs[2]?.value || ''), s(inputs[3]?.value || ''),
+    ]);
+  });
+
+  return {
+    num_solicitud:      gi('num_solicitud'),
+    ciudad:             gi('ciudad'),
+    fecha:              gi('fecha'),
+    dest_nombre:        gi('dest_nombre'),
+    dest_unidad:        gi('dest_unidad'),
+    contrato_num:       gi('contrato_num'),
+    contrato_fecha:     gi('contrato_fecha'),
+    ultima_ampliacion:  gi('ultima_ampliacion') || 'N/A',
+    rep_nombre:         gi('rep_nombre'),
+    empresa_razon:      gi('empresa_razon'),
+    empresa_ruc:        gi('empresa_ruc'),
+    pos_actual:         gi('pos_actual') || '0',
+    pos_amp:            gi('pos_amp')    || '0',
+    pos_total:          document.getElementById('pos_total').value || '0',
+    pos_pct:            document.getElementById('pos_pct').value || '0%',
+    duc_actual:         gi('duc_actual') || '0',
+    duc_amp:            gi('duc_amp')    || '0',
+    duc_total:          document.getElementById('duc_total').value || '0',
+    duc_pct:            document.getElementById('duc_pct').value || '0%',
+    rutas,
+    motivaciones,
+    ubicacion_desc:     gi('ubicacion_desc'),
+    cronograma,
+    personal,
+  };
+}
+
+// ─── HTML para Word ───
+function buildDocumentHTML(d) {
+  const fechaEs = CNEL.formatDateES(d.fecha);
+  const contratoFecha = CNEL.formatDateES(d.contrato_fecha);
+
+  const rutaFilas = d.rutas.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td style="text-align:center">${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+  const motivacionesHTML = d.motivaciones.map(m => `<li>${m}</li>`).join('');
+  const cronoFilas = d.cronograma.map(c => `<tr><td>${c[0]}</td><td>${c[1]}</td><td>${c[2]}</td><td>${c[3]}</td><td>${c[4]}</td></tr>`).join('');
+  const personalFilas = d.personal.map(p => `<tr><td>${p[0]}</td><td>${p[1]}</td><td>${p[2]}</td><td>${p[3]}</td></tr>`).join('');
+
+  return `
+${d.num_solicitud ? `<p><strong>SOLICITUD DE AMPLIACIÓN No:</strong> ${d.num_solicitud}</p>` : ''}
+<p style="text-align:right"><strong>FECHA:</strong> ${d.ciudad}, ${fechaEs}</p>
+<br>
+<p>Señor(a)<br>
+<strong>${d.dest_nombre}</strong><br>
+Coordinador Gestión Arriendo de Infraestructura ${d.dest_unidad ? `[${d.dest_unidad}]` : ''}<br>
+Empresa Eléctrica Pública Estratégica Corporación Nacional de Electricidad CNEL EP</p>
+<br>
+<p><strong>ASUNTO:</strong> SOLICITUD DE AMPLIACIÓN DE USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP</p>
+<p><strong>REF:</strong></p>
+<ul>
+  <li>Contrato No. ${d.contrato_num} suscrito el ${contratoFecha}</li>
+  <li>Última ampliación autorizada: ${d.ultima_ampliacion}</li>
+</ul>
+<br>
+<p>De mi consideración:</p>
+<p>${d.rep_nombre}, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, RUC No. ${d.empresa_ruc},
+en el marco del contrato de arrendamiento vigente de la referencia, solicito formalmente autorización para la ampliación del uso de infraestructura eléctrica, según el siguiente detalle:</p>
+
+<h2>1. RESUMEN EJECUTIVO DE LA AMPLIACIÓN</h2>
+<table>
+  <tr><th>CONCEPTO</th><th>CANTIDAD ACTUAL</th><th>AMPLIACIÓN SOLICITADA</th><th>TOTAL PROYECTADO</th><th>INCREMENTO %</th></tr>
+  <tr><td>Postes aéreos</td><td style="text-align:center">${d.pos_actual}</td><td style="text-align:center">${d.pos_amp}</td><td style="text-align:center">${d.pos_total}</td><td style="text-align:center">${d.pos_pct}</td></tr>
+  <tr><td>Ductos subterráneos (m)</td><td style="text-align:center">${d.duc_actual}</td><td style="text-align:center">${d.duc_amp}</td><td style="text-align:center">${d.duc_total}</td><td style="text-align:center">${d.duc_pct}</td></tr>
+</table>
+
+<h2>2. DETALLE TÉCNICO DE RUTAS A AMPLIAR</h2>
+<table>
+  <tr><th>Provincia/Ciudad/Recinto</th><th>Rutas/Enlaces</th><th>Desde/Hasta (Coordenadas)</th><th>Total Postes/Ductos</th><th>Total Equipos Act/Pas</th></tr>
+  ${rutaFilas || '<tr><td colspan="5"><em>Sin rutas ingresadas</em></td></tr>'}
+</table>
+
+<h2>3. JUSTIFICACIÓN TÉCNICA</h2>
+<h2>3.1 Motivación de la ampliación:</h2>
+<ul>${motivacionesHTML || '<li>No especificada</li>'}</ul>
+
+<h2>4. DETALLES DE LA ACTIVIDAD</h2>
+<h2>4.1 Ubicación:</h2>
+<p>${d.ubicacion_desc || 'Se adjuntarán imágenes del sector de trabajo con postes utilizados (ArcGIS/Google Earth).'}</p>
+
+<h2>4.2 Geodatabase SIG:</h2>
+<p>Se adjunta la File Geodatabase SIG, con el recorrido de la red en el modelo de datos SIG.</p>
+
+<h2>4.3 Cronograma de Trabajos:</h2>
+<table>
+  <tr><th>Fecha</th><th>Horario</th><th>Actividad</th><th>Ubicación</th><th>Técnico Encargado</th></tr>
+  ${cronoFilas || '<tr><td colspan="5"><em>Sin cronograma ingresado</em></td></tr>'}
+</table>
+
+<h2>5. PERSONAL TÉCNICO ASIGNADO</h2>
+<table>
+  <tr><th>FUNCIÓN</th><th>NOMBRE COMPLETO</th><th>CELULAR</th><th>EMAIL</th></tr>
+  ${personalFilas || '<tr><td colspan="4"><em>Sin personal ingresado</em></td></tr>'}
+</table>
+
+<h2>6. COMPROMISOS DEL PROVEEDOR</h2>
+<ul>
+  <li><strong>Cumplimiento Normativo:</strong> Declaración de adhesión al MN-TEC-OPE-102, Manual MAPOD y demás normativas vigentes.</li>
+  <li><strong>Responsabilidad Civil:</strong> Aceptación de responsabilidad por daños a terceros y a la propiedad de CNEL EP.</li>
+  <li><strong>Pólizas de Seguro:</strong> Confirmación de contar con seguros vigentes que cubran las operaciones.</li>
+</ul>
+<br><br>
+<p>Atentamente,</p>
+<br><br><br>
+<div class="linea"></div>
+<p><strong>${d.rep_nombre}</strong><br>
+REPRESENTANTE LEGAL<br>
+${d.empresa_razon}</p>
+`;
+}
+
+// ─── Bloques PDF ───
+function buildPdfBlocks(d) {
+  const fechaEs = CNEL.formatDateES(d.fecha);
+  const contratoFecha = CNEL.formatDateES(d.contrato_fecha);
+  const blocks = [
+    { type: 'title', text: `SOLICITUD DE AMPLIACIÓN${d.num_solicitud ? ' No: '+d.num_solicitud : ''}\nUSO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP` },
+    { type: 'spacer', size: 4 },
+    { type: 'text',  text: `${d.ciudad}, ${fechaEs}` },
+    { type: 'spacer', size: 3 },
+    { type: 'text',  text: `Señor(a) ${d.dest_nombre} — Coordinador Gestión Arriendo de Infraestructura ${d.dest_unidad} — CNEL EP` },
+    { type: 'spacer', size: 3 },
+    { type: 'text',  text: `REF: Contrato No. ${d.contrato_num} suscrito el ${contratoFecha} | Última ampliación: ${d.ultima_ampliacion}` },
+    { type: 'spacer', size: 3 },
+    { type: 'text',  text: `${d.rep_nombre}, en calidad de Representante Legal de ${d.empresa_razon}, RUC ${d.empresa_ruc}, solicita ampliación del uso de infraestructura eléctrica.` },
+    { type: 'heading', text: '1. RESUMEN EJECUTIVO DE LA AMPLIACIÓN' },
+    { type: 'table',
+      headers: ['Concepto','Actual','Ampliación','Total','Incremento'],
+      rows: [
+        ['Postes aéreos', d.pos_actual, d.pos_amp, d.pos_total, d.pos_pct],
+        ['Ductos (m)', d.duc_actual, d.duc_amp, d.duc_total, d.duc_pct],
+      ]
+    },
+    { type: 'heading', text: '2. DETALLE TÉCNICO DE RUTAS' },
+    { type: 'table',
+      headers: ['Provincia/Ciudad','Rutas/Enlaces','Coordenadas','Postes/Ductos','Equipos'],
+      rows: d.rutas.length ? d.rutas : [['Sin rutas','','','','']]
+    },
+    { type: 'heading', text: '3. JUSTIFICACIÓN TÉCNICA' },
+    ...((d.motivaciones.length ? d.motivaciones : ['No especificada']).map(m => ({ type: 'bullet', text: m }))),
+    { type: 'heading', text: '4. CRONOGRAMA DE TRABAJOS' },
+    { type: 'table',
+      headers: ['Fecha','Horario','Actividad','Ubicación','Técnico'],
+      rows: d.cronograma.length ? d.cronograma : [['Sin cronograma','','','','']]
+    },
+    { type: 'heading', text: '5. PERSONAL TÉCNICO ASIGNADO' },
+    { type: 'table',
+      headers: ['Función','Nombre','Celular','Email'],
+      rows: d.personal.length ? d.personal : [['Sin personal ingresado','','','']]
+    },
+    { type: 'heading', text: '6. COMPROMISOS DEL PROVEEDOR' },
+    { type: 'bullet', text: 'Cumplimiento Normativo: Adhesión al MN-TEC-OPE-102, Manual MAPOD y normativas vigentes.' },
+    { type: 'bullet', text: 'Responsabilidad Civil: Responsabilidad por daños a terceros y a CNEL EP.' },
+    { type: 'bullet', text: 'Pólizas de Seguro: Seguros vigentes que cubran las operaciones.' },
+    { type: 'spacer', size: 10 },
+    { type: 'signature', name: d.rep_nombre, role: 'REPRESENTANTE LEGAL', company: d.empresa_razon }
+  ];
+  return blocks;
+}
+
+// ─── Validación básica antes de descargar ───
+function validate() {
+  const required = ['ciudad','fecha','dest_nombre','contrato_num','contrato_fecha','rep_nombre','empresa_razon','empresa_ruc'];
+  let ok = true;
+  required.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el || !el.value.trim()) { if (el) el.classList.add('error'); ok = false; }
+    else el.classList.remove('error');
+  });
+  // Compromisos
+  const comps = ['comp_normativo','comp_civil','comp_polizas'];
+  const allChecked = comps.every(id => document.getElementById(id)?.checked);
+  if (!allChecked) {
+    document.getElementById('err-compromisos').textContent = 'Debe aceptar todos los compromisos.';
+    document.getElementById('err-compromisos').classList.add('show');
+    ok = false;
+  } else {
+    document.getElementById('err-compromisos').classList.remove('show');
+  }
+  if (!ok) CNEL.Toast.show('Complete los campos requeridos y acepte los compromisos.', 'error');
+  return ok;
+}
+
+document.getElementById('btn-download-word').addEventListener('click', () => {
+  if (!validate()) return;
+  const d = getFormData();
+  CNEL.DocGenerator.downloadWord(buildDocumentHTML(d), `Solicitud-Ampliacion-CNEL-${d.empresa_ruc || 'EP'}`);
+  CNEL.Toast.show('Documento Word generado correctamente.', 'success');
+});
+
+document.getElementById('btn-download-pdf').addEventListener('click', async () => {
+  if (!validate()) return;
+  const d = getFormData();
+  const btn = document.getElementById('btn-download-pdf');
+  btn.disabled = true; btn.textContent = '⏳ Generando PDF...';
+  try {
+    await CNEL.PdfGenerator.downloadPDF(buildPdfBlocks(d), `Solicitud-Ampliacion-CNEL-${d.empresa_ruc || 'EP'}`);
+    CNEL.Toast.show('PDF generado correctamente.', 'success');
+  } catch(e) {
+    CNEL.Toast.show('Error al generar el PDF. Intente con Word.', 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '📑 Descargar en PDF';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Solicitud de Contrato – CNEL EP</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
+  <style>
+    .form-section { margin-bottom: 32px; }
+    .step-indicator {
+      display: flex;
+      gap: 0;
+      margin-bottom: 36px;
+      border-radius: var(--radio-lg);
+      overflow: hidden;
+      box-shadow: var(--sombra-sm);
+    }
+    .step-item {
+      flex: 1;
+      padding: 14px 8px;
+      text-align: center;
+      background: #E8EEF8;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #718096;
+      position: relative;
+      cursor: pointer;
+      transition: all var(--transicion);
+    }
+    .step-item.active {
+      background: var(--azul-medio);
+      color: var(--blanco);
+    }
+    .step-item.done {
+      background: #276749;
+      color: var(--blanco);
+    }
+    .step-num {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 2px;
+    }
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+    .required-note {
+      font-size: .82rem;
+      color: var(--gris-texto);
+      margin-bottom: 24px;
+    }
+    .required-note strong { color: var(--rojo-error); }
+  </style>
+</head>
+<body>
+
+<a href="#contenido" class="skip-nav">Saltar al contenido principal</a>
+
+<!-- NAVBAR -->
+<nav class="navbar" role="navigation" aria-label="Navegación principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="CNEL EP Inicio">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/></svg>
+      </div>
+      <div class="brand-text">CNEL EP<small>Arriendo de Infraestructura</small></div>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navbar-menu" aria-label="Abrir menú">☰</button>
+    <ul class="navbar-nav" id="navbar-menu" role="list">
+      <li><a href="index.html">🏠 Inicio</a></li>
+      <li><a href="requisitos.html">📋 Requisitos</a></li>
+      <li><a href="solicitud-contrato.html" class="active" aria-current="page">📝 Nuevo Contrato</a></li>
+      <li><a href="solicitud-extension.html">📤 Ampliación</a></li>
+      <li><a href="intereses-mora.html">📊 Int. Mora</a></li>
+      <li><a href="intereses-financiamiento.html">💰 Financiamiento</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Ruta de navegación">
+  <ol class="breadcrumb-list">
+    <li><a href="index.html">🏠 Inicio</a></li>
+    <li><span class="current">📝 Solicitud de Nuevo Contrato</span></li>
+  </ol>
+</nav>
+
+<!-- PAGE HERO -->
+<header class="page-hero" role="banner">
+  <div class="page-hero-inner">
+    <div>
+      <h1>📝 Solicitud de Suscripción de Contrato</h1>
+      <p>Complete los datos del formulario para generar su solicitud formal. Podrá descargarla en Word (.doc) o PDF para presentarla ante CNEL EP.</p>
+    </div>
+    <div class="page-hero-badge">
+      <div class="big">5</div>
+      <small>Secciones a<br>completar</small>
+    </div>
+  </div>
+</header>
+
+<main id="contenido" class="section" style="padding-top:40px">
+  <div class="container" style="max-width:900px">
+
+    <div class="alert alert-warning" role="alert">
+      <span class="alert-icon" aria-hidden="true">⚠️</span>
+      <div>
+        <strong>Importante:</strong> Este formulario genera el documento de solicitud formal. Descárguelo,
+        imprímalo y preséntelo firmado con toda la documentación de soporte ante CNEL EP.
+        Consulte los <a href="requisitos.html">requisitos completos</a> antes de continuar.
+      </div>
+    </div>
+
+    <p class="required-note">Los campos marcados con <strong>*</strong> son obligatorios.</p>
+
+    <!-- Indicador de pasos -->
+    <div class="step-indicator" role="tablist" aria-label="Pasos del formulario">
+      <div class="step-item active" role="tab" data-step="1" tabindex="0">
+        <span class="step-num">1</span>Encabezado
+      </div>
+      <div class="step-item" role="tab" data-step="2" tabindex="-1">
+        <span class="step-num">2</span>Alcance
+      </div>
+      <div class="step-item" role="tab" data-step="3" tabindex="-1">
+        <span class="step-num">3</span>Proyecto
+      </div>
+      <div class="step-item" role="tab" data-step="4" tabindex="-1">
+        <span class="step-num">4</span>Contactos
+      </div>
+      <div class="step-item" role="tab" data-step="5" tabindex="-1">
+        <span class="step-num">5</span>Revisar y Descargar
+      </div>
+    </div>
+
+    <form id="formContrato" novalidate autocomplete="off" spellcheck="false">
+
+    <!-- ═══ PASO 1: ENCABEZADO ═══ -->
+    <div class="form-step active" id="step-1" role="tabpanel" aria-label="Paso 1: Encabezado">
+      <div class="form-section">
+        <div class="form-header">
+          <h2>1. Datos del Documento y Destinatario</h2>
+          <p>Información de fecha, ciudad y a quién va dirigida la solicitud</p>
+        </div>
+        <div class="form-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="ciudad">Ciudad <span class="req" aria-label="requerido">*</span></label>
+              <input type="text" id="ciudad" name="ciudad" placeholder="Ej: Guayaquil" maxlength="80" required autocomplete="off">
+              <div class="field-error" id="err-ciudad" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="fecha">Fecha de la solicitud <span class="req">*</span></label>
+              <input type="date" id="fecha" name="fecha" required>
+              <div class="field-error" id="err-fecha" role="alert"></div>
+            </div>
+          </div>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">👤</span> Destinatario de la Solicitud</legend>
+            <div class="form-group">
+              <label for="dest_nombre">Nombre del destinatario <span class="req">*</span></label>
+              <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Nombre completo del Gerente/Administrador" maxlength="120" required>
+              <div class="field-error" id="err-dest_nombre" role="alert"></div>
+            </div>
+            <div class="form-group">
+              <label for="dest_cargo">Cargo</label>
+              <select id="dest_cargo" name="dest_cargo">
+                <option value="Gerente General">Gerente General – CNEL EP (cobertura regional/nacional)</option>
+                <option value="Administrador de Unidad de Negocio">Administrador de Unidad de Negocio (cobertura local)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dest_ciudad">Ciudad del destinatario <span class="req">*</span></label>
+              <input type="text" id="dest_ciudad" name="dest_ciudad" placeholder="Ej: Guayaquil" maxlength="80" required>
+              <div class="field-error" id="err-dest_ciudad" role="alert"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">🏢</span> Datos del Solicitante</legend>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rep_nombre">Nombre del Representante Legal <span class="req">*</span></label>
+                <input type="text" id="rep_nombre" name="rep_nombre" placeholder="Nombre completo" maxlength="120" required>
+                <div class="field-error" id="err-rep_nombre" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="empresa_razon">Razón Social de la Empresa <span class="req">*</span></label>
+                <input type="text" id="empresa_razon" name="empresa_razon" placeholder="Nombre legal completo" maxlength="200" required>
+                <div class="field-error" id="err-empresa_razon" role="alert"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="empresa_ruc">RUC de la Empresa <span class="req">*</span></label>
+                <input type="text" id="empresa_ruc" name="empresa_ruc" placeholder="0000000000001" maxlength="13" minlength="13" pattern="[0-9]{13}" required>
+                <div class="field-error" id="err-empresa_ruc" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="arcotel_resolucion">N.º de Resolución ARCOTEL <span class="req">*</span></label>
+                <input type="text" id="arcotel_resolucion" name="arcotel_resolucion" placeholder="Ej: ARCOTEL-2024-0001" maxlength="80" required>
+                <div class="field-error" id="err-arcotel_resolucion" role="alert"></div>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="servicios_autorizados">Servicios autorizados por ARCOTEL <span class="req">*</span></label>
+              <input type="text" id="servicios_autorizados" name="servicios_autorizados" placeholder="Ej: Internet fijo, Televisión por cable, Telefonía..." maxlength="300" required>
+              <div class="field-error" id="err-servicios_autorizados" role="alert"></div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PASO 2: ALCANCE ═══ -->
+    <div class="form-step" id="step-2" role="tabpanel" aria-label="Paso 2: Alcance de la solicitud">
+      <div class="form-section">
+        <div class="form-header">
+          <h2>2. Alcance e Infraestructura Solicitada</h2>
+          <p>Detalle la infraestructura y las rutas que requiere utilizar</p>
+        </div>
+        <div class="form-body">
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">📊</span> Infraestructura a Solicitar</legend>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="cant_postes">Cantidad de Postes</label>
+                <input type="number" id="cant_postes" name="cant_postes" placeholder="0" min="0" max="999999">
+              </div>
+              <div class="form-group">
+                <label for="cant_ductos">Ductos Subterráneos (m.l.)</label>
+                <input type="number" id="cant_ductos" name="cant_ductos" placeholder="0" min="0" max="999999">
+              </div>
+              <div class="form-group">
+                <label for="cobertura">Tipo de Cobertura <span class="req">*</span></label>
+                <select id="cobertura" name="cobertura" required>
+                  <option value="">Seleccione...</option>
+                  <option value="Local">Local (1 Unidad de Negocio)</option>
+                  <option value="Regional">Regional (2 Unidades de Negocio)</option>
+                  <option value="Nacional">Nacional (más de 2 UUNN)</option>
+                </select>
+                <div class="field-error" id="err-cobertura" role="alert"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="provincias">Provincias involucradas <span class="req">*</span></label>
+                <input type="text" id="provincias" name="provincias" placeholder="Ej: Guayas, El Oro, Los Ríos" maxlength="300" required>
+                <div class="field-error" id="err-provincias" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="tipo_red">Tipo de redes a instalar <span class="req">*</span></label>
+                <select id="tipo_red" name="tipo_red" required>
+                  <option value="">Seleccione...</option>
+                  <option value="Fibra Óptica">Fibra Óptica</option>
+                  <option value="Coaxial">Coaxial</option>
+                  <option value="Fibra Óptica y Coaxial">Fibra Óptica y Coaxial</option>
+                  <option value="Otros">Otros</option>
+                </select>
+                <div class="field-error" id="err-tipo_red" role="alert"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">🗺️</span> Detalle de Rutas Propuestas</legend>
+            <p class="form-hint" style="margin-bottom:14px">Agregue cada ruta/enlace que planea utilizar. Use el botón para añadir filas.</p>
+            <div style="overflow-x:auto">
+              <table class="table-form" id="tabla-rutas" aria-label="Tabla de rutas propuestas">
+                <thead>
+                  <tr>
+                    <th>Provincia/Ciudad/Recinto</th>
+                    <th>Rutas / Enlaces</th>
+                    <th>Postes ya utilizados</th>
+                    <th>Postes nuevos</th>
+                    <th>Total postes/ductos</th>
+                    <th aria-label="Acciones"></th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <button type="button" id="btn-add-ruta" class="btn btn-secondary btn-sm" style="margin-top:10px">
+              ＋ Agregar ruta
+            </button>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PASO 3: PROYECTO ═══ -->
+    <div class="form-step" id="step-3" role="tabpanel" aria-label="Paso 3: Información del proyecto">
+      <div class="form-section">
+        <div class="form-header">
+          <h2>3. Información Técnica del Proyecto</h2>
+          <p>Detalles técnicos y cronograma de instalación</p>
+        </div>
+        <div class="form-body">
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">🎯</span> Objetivo del Proyecto</legend>
+            <div class="form-group">
+              <label for="obj_proyecto">Descripción del objetivo <span class="req">*</span></label>
+              <textarea id="obj_proyecto" name="obj_proyecto" rows="3" placeholder="Describa el propósito: expansión de red, nueva cobertura, mejora de servicios, etc." maxlength="800" required></textarea>
+              <div class="field-error" id="err-obj_proyecto" role="alert"></div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">🔌</span> Infraestructura a Instalar</legend>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="cable_tipo">Tipo de cable <span class="req">*</span></label>
+                <select id="cable_tipo" name="cable_tipo" required>
+                  <option value="">Seleccione...</option>
+                  <option value="Fibra óptica">Fibra óptica</option>
+                  <option value="Coaxial">Coaxial</option>
+                  <option value="Fibra óptica y Coaxial">Fibra óptica y Coaxial</option>
+                  <option value="Otros">Otros</option>
+                </select>
+                <div class="field-error" id="err-cable_tipo" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="cable_metros">Metros de cable</label>
+                <input type="number" id="cable_metros" name="cable_metros" placeholder="0" min="0" max="9999999">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="equip_activos">Cantidad de elementos activos (equipos)</label>
+                <input type="number" id="equip_activos" name="equip_activos" placeholder="0" min="0" max="9999">
+              </div>
+              <div class="form-group">
+                <label for="equip_pasivos">Cantidad de elementos pasivos</label>
+                <input type="number" id="equip_pasivos" name="equip_pasivos" placeholder="0" min="0" max="9999">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">📅</span> Cronograma Tentativo</legend>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="fecha_inicio">Inicio de instalación <span class="req">*</span></label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+                <div class="field-error" id="err-fecha_inicio" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="fecha_fin">Finalización estimada <span class="req">*</span></label>
+                <input type="date" id="fecha_fin" name="fecha_fin" required>
+                <div class="field-error" id="err-fecha_fin" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="fecha_servicio">Puesta en servicio <span class="req">*</span></label>
+                <input type="date" id="fecha_servicio" name="fecha_servicio" required>
+                <div class="field-error" id="err-fecha_servicio" role="alert"></div>
+              </div>
+            </div>
+          </fieldset>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PASO 4: CONTACTOS ═══ -->
+    <div class="form-step" id="step-4" role="tabpanel" aria-label="Paso 4: Información de contactos">
+      <div class="form-section">
+        <div class="form-header">
+          <h2>4. Información Técnica y Administrativa</h2>
+          <p>Datos de los contactos responsables del proyecto</p>
+        </div>
+        <div class="form-body">
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">👔</span> 4.1 Representante Legal</legend>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rl_nombre">Nombre completo <span class="req">*</span></label>
+                <input type="text" id="rl_nombre" name="rl_nombre" placeholder="Nombre completo" maxlength="120" required>
+                <div class="field-error" id="err-rl_nombre" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="rl_cedula">Cédula <span class="req">*</span></label>
+                <input type="text" id="rl_cedula" name="rl_cedula" placeholder="0000000000" maxlength="10" pattern="[0-9]{10}" required>
+                <div class="field-error" id="err-rl_cedula" role="alert"></div>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rl_tel">Teléfono <span class="req">*</span></label>
+                <input type="tel" id="rl_tel" name="rl_tel" placeholder="0999999999" maxlength="15" required>
+                <div class="field-error" id="err-rl_tel" role="alert"></div>
+              </div>
+              <div class="form-group">
+                <label for="rl_email">Correo electrónico <span class="req">*</span></label>
+                <input type="email" id="rl_email" name="rl_email" placeholder="correo@empresa.com" maxlength="120" required>
+                <div class="field-error" id="err-rl_email" role="alert"></div>
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">🔧</span> 4.2 Responsable Técnico</legend>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rt_nombre">Nombre completo</label>
+                <input type="text" id="rt_nombre" name="rt_nombre" placeholder="Nombre completo" maxlength="120">
+              </div>
+              <div class="form-group">
+                <label for="rt_titulo">Título profesional</label>
+                <input type="text" id="rt_titulo" name="rt_titulo" placeholder="Ej: Ingeniero/a en Telecomunicaciones" maxlength="100">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rt_tel">Teléfono móvil</label>
+                <input type="tel" id="rt_tel" name="rt_tel" placeholder="0999999999" maxlength="15">
+              </div>
+              <div class="form-group">
+                <label for="rt_email">Correo electrónico</label>
+                <input type="email" id="rt_email" name="rt_email" placeholder="tecnico@empresa.com" maxlength="120">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">📍</span> 4.3 Coordinador de Campo</legend>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="cc_nombre">Nombre completo</label>
+                <input type="text" id="cc_nombre" name="cc_nombre" placeholder="Nombre completo" maxlength="120">
+              </div>
+              <div class="form-group">
+                <label for="cc_tel">Teléfono móvil</label>
+                <input type="tel" id="cc_tel" name="cc_tel" placeholder="0999999999" maxlength="15">
+              </div>
+              <div class="form-group">
+                <label for="cc_email">Correo electrónico</label>
+                <input type="email" id="cc_email" name="cc_email" placeholder="campo@empresa.com" maxlength="120">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend><span class="leg-icon" aria-hidden="true">🏗️</span> 4.4 Empresa Contratista (si aplica)</legend>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="ct_razon">Razón social</label>
+                <input type="text" id="ct_razon" name="ct_razon" placeholder="Nombre de la empresa contratista" maxlength="200">
+              </div>
+              <div class="form-group">
+                <label for="ct_ruc">RUC</label>
+                <input type="text" id="ct_ruc" name="ct_ruc" placeholder="0000000000001" maxlength="13">
+              </div>
+            </div>
+            <div class="form-row-3">
+              <div class="form-group">
+                <label for="ct_rep">Representante</label>
+                <input type="text" id="ct_rep" name="ct_rep" placeholder="Nombre completo" maxlength="120">
+              </div>
+              <div class="form-group">
+                <label for="ct_tel">Teléfono móvil</label>
+                <input type="tel" id="ct_tel" name="ct_tel" placeholder="0999999999" maxlength="15">
+              </div>
+              <div class="form-group">
+                <label for="ct_email">Correo electrónico</label>
+                <input type="email" id="ct_email" name="ct_email" placeholder="contratista@empresa.com" maxlength="120">
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ PASO 5: REVISIÓN Y DESCARGA ═══ -->
+    <div class="form-step" id="step-5" role="tabpanel" aria-label="Paso 5: Revisión y descarga">
+      <div class="form-section">
+        <div class="form-header">
+          <h2>5. Revisar y Descargar Solicitud</h2>
+          <p>Verifique la información ingresada y descargue el documento oficial</p>
+        </div>
+        <div class="form-body">
+          <div id="preview-area" style="background:#F4F6FA;border-radius:var(--radio-lg);padding:28px;margin-bottom:24px;font-size:.9rem;line-height:1.8">
+            <em style="color:#718096">Complete los pasos anteriores para ver la vista previa...</em>
+          </div>
+
+          <div class="alert alert-info" role="alert">
+            <span class="alert-icon" aria-hidden="true">📌</span>
+            <div>
+              <strong>Instrucciones de presentación:</strong> Descargue el documento, imprímalo, fírmelo con tinta azul o negra
+              y preséntelo junto con todos los requisitos documentales ante la Unidad de Negocio o Gerencia General de CNEL EP correspondiente.
+            </div>
+          </div>
+
+          <div style="display:flex;gap:14px;flex-wrap:wrap;justify-content:center;margin-top:8px">
+            <button type="button" id="btn-download-word" class="btn btn-primary btn-lg" aria-label="Descargar solicitud en formato Word">
+              📄 Descargar en Word (.doc)
+            </button>
+            <button type="button" id="btn-download-pdf" class="btn btn-dorado btn-lg" aria-label="Descargar solicitud en formato PDF">
+              📑 Descargar en PDF
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navegación entre pasos -->
+    <div style="display:flex;justify-content:space-between;gap:14px;margin-top:8px;flex-wrap:wrap">
+      <button type="button" id="btn-prev" class="btn btn-secondary" style="display:none" aria-label="Paso anterior">← Anterior</button>
+      <div></div>
+      <button type="button" id="btn-next" class="btn btn-primary" aria-label="Siguiente paso">Siguiente →</button>
+    </div>
+
+    </form>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>CNEL EP</h4>
+        <p>Empresa Eléctrica Pública Estratégica<br>Corporación Nacional de Electricidad</p>
+      </div>
+      <div class="footer-col">
+        <h4>Trámites</h4>
+        <ul>
+          <li><a href="index.html">🏠 Inicio / Políticas</a></li>
+          <li><a href="requisitos.html">📋 Requisitos</a></li>
+          <li><a href="solicitud-contrato.html">📝 Solicitud de Contrato</a></li>
+          <li><a href="solicitud-extension.html">📤 Solicitud de Ampliación</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="https://www.cnelep.gob.ec" target="_blank" rel="noopener noreferrer">🌐 CNEL EP</a></li>
+          <li><a href="https://www.arcotel.gob.ec" target="_blank" rel="noopener noreferrer">🌐 ARCOTEL</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> CNEL EP — Todos los derechos reservados</span>
+      <span class="footer-legal">Portal SIG-CNEL</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+document.getElementById('year').textContent = new Date().getFullYear();
+
+// Fijar fecha máxima = hoy para campo fecha
+document.getElementById('fecha').max = new Date().toISOString().split('T')[0];
+document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+
+// ─── Tabla de rutas ───
+CNEL.createRouteTable('tabla-rutas', 'btn-add-ruta');
+
+// ─── Manejo de pasos ───
+const steps = Array.from(document.querySelectorAll('.form-step'));
+const stepItems = Array.from(document.querySelectorAll('.step-item'));
+const btnNext = document.getElementById('btn-next');
+const btnPrev = document.getElementById('btn-prev');
+let currentStep = 0;
+
+function showStep(n) {
+  steps.forEach((s, i) => s.classList.toggle('active', i === n));
+  stepItems.forEach((si, i) => {
+    si.classList.toggle('active', i === n);
+    si.classList.toggle('done', i < n);
+    si.setAttribute('tabindex', i === n ? '0' : '-1');
+  });
+  btnPrev.style.display = n === 0 ? 'none' : '';
+  btnNext.textContent = n === steps.length - 1 ? '✔ Finalizado' : 'Siguiente →';
+  btnNext.disabled = n === steps.length - 1;
+  if (n === steps.length - 1) generatePreview();
+  window.scrollTo({ top: document.querySelector('.step-indicator').offsetTop - 80, behavior: 'smooth' });
+}
+
+// Validación por paso antes de avanzar
+function validateCurrentStep() {
+  const step = steps[currentStep];
+  const required = step.querySelectorAll('[required]');
+  let ok = true;
+  required.forEach(field => {
+    if (!field.value.trim()) {
+      field.classList.add('error');
+      const err = document.getElementById(`err-${field.id || field.name}`);
+      if (err) { err.textContent = 'Este campo es requerido.'; err.classList.add('show'); }
+      ok = false;
+    } else {
+      field.classList.remove('error');
+      const err = document.getElementById(`err-${field.id || field.name}`);
+      if (err) err.classList.remove('show');
+    }
+  });
+  // Validaciones específicas
+  const ruc = document.getElementById('empresa_ruc');
+  if (ruc && ruc.value && !CNEL.Sanitize.ruc(ruc.value)) {
+    ruc.classList.add('error');
+    const e = document.getElementById('err-empresa_ruc');
+    if (e) { e.textContent = 'El RUC debe tener 13 dígitos.'; e.classList.add('show'); }
+    ok = false;
+  }
+  const email = document.getElementById('rl_email');
+  if (email && email.value && !CNEL.Sanitize.email(email.value)) {
+    email.classList.add('error');
+    const e = document.getElementById('err-rl_email');
+    if (e) { e.textContent = 'Correo inválido.'; e.classList.add('show'); }
+    ok = false;
+  }
+  if (!ok) CNEL.Toast.show('Por favor complete todos los campos requeridos.', 'error');
+  return ok;
+}
+
+btnNext.addEventListener('click', () => {
+  if (!validateCurrentStep()) return;
+  if (currentStep < steps.length - 1) { currentStep++; showStep(currentStep); }
+});
+btnPrev.addEventListener('click', () => {
+  if (currentStep > 0) { currentStep--; showStep(currentStep); }
+});
+
+stepItems.forEach((si, i) => {
+  si.addEventListener('click', () => {
+    if (i <= currentStep) { currentStep = i; showStep(i); }
+  });
+  si.addEventListener('keydown', e => {
+    if ((e.key === 'Enter' || e.key === ' ') && i <= currentStep) { e.preventDefault(); currentStep = i; showStep(i); }
+  });
+});
+
+// ─── Recolección de datos del formulario ───
+function getFormData() {
+  const s = CNEL.Sanitize.text;
+  const gi = id => s(document.getElementById(id)?.value || '');
+
+  // Filas de rutas
+  const rutaRows = [];
+  document.querySelectorAll('#tabla-rutas tbody tr').forEach(tr => {
+    const cells = tr.querySelectorAll('input, select');
+    if (cells[0]?.value?.trim()) {
+      rutaRows.push([
+        s(cells[0]?.value || ''),
+        s(cells[1]?.value || ''),
+        cells[2]?.value || '0',
+        cells[3]?.value || '0',
+        cells[4]?.value || '0',
+      ]);
+    }
+  });
+
+  return {
+    ciudad:              gi('ciudad'),
+    fecha:               gi('fecha'),
+    dest_nombre:         gi('dest_nombre'),
+    dest_cargo:          gi('dest_cargo'),
+    dest_ciudad:         gi('dest_ciudad'),
+    rep_nombre:          gi('rep_nombre'),
+    empresa_razon:       gi('empresa_razon'),
+    empresa_ruc:         gi('empresa_ruc'),
+    arcotel_resolucion:  gi('arcotel_resolucion'),
+    servicios:           gi('servicios_autorizados'),
+    cant_postes:         gi('cant_postes') || '0',
+    cant_ductos:         gi('cant_ductos') || '0',
+    cobertura:           gi('cobertura'),
+    provincias:          gi('provincias'),
+    tipo_red:            gi('tipo_red'),
+    rutas:               rutaRows,
+    obj_proyecto:        gi('obj_proyecto'),
+    cable_tipo:          gi('cable_tipo'),
+    cable_metros:        gi('cable_metros') || '0',
+    equip_activos:       gi('equip_activos') || '0',
+    equip_pasivos:       gi('equip_pasivos') || '0',
+    fecha_inicio:        gi('fecha_inicio'),
+    fecha_fin:           gi('fecha_fin'),
+    fecha_servicio:      gi('fecha_servicio'),
+    rl_nombre:           gi('rl_nombre'),
+    rl_cedula:           gi('rl_cedula'),
+    rl_tel:              gi('rl_tel'),
+    rl_email:            gi('rl_email'),
+    rt_nombre:           gi('rt_nombre'),
+    rt_titulo:           gi('rt_titulo'),
+    rt_tel:              gi('rt_tel'),
+    rt_email:            gi('rt_email'),
+    cc_nombre:           gi('cc_nombre'),
+    cc_tel:              gi('cc_tel'),
+    cc_email:            gi('cc_email'),
+    ct_razon:            gi('ct_razon'),
+    ct_ruc:              gi('ct_ruc'),
+    ct_rep:              gi('ct_rep'),
+    ct_tel:              gi('ct_tel'),
+    ct_email:            gi('ct_email'),
+  };
+}
+
+// ─── Vista previa ───
+function generatePreview() {
+  const d = getFormData();
+  const fechaEs = CNEL.formatDateES(d.fecha);
+  const fechaIni = CNEL.formatDateES(d.fecha_inicio);
+  const fechaFin = CNEL.formatDateES(d.fecha_fin);
+  const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
+
+  let rutasHTML = '';
+  if (d.rutas.length) {
+    rutasHTML = `<table style="border-collapse:collapse;width:100%;font-size:.85rem;margin:8px 0">
+      <thead><tr style="background:#002855;color:#fff">
+        <th style="padding:6px;text-align:left">Provincia/Ciudad</th>
+        <th style="padding:6px">Rutas/Enlaces</th>
+        <th style="padding:6px">Postes existentes</th>
+        <th style="padding:6px">Postes nuevos</th>
+        <th style="padding:6px">Total</th>
+      </tr></thead><tbody>
+      ${d.rutas.map((r,i) => `<tr style="background:${i%2===0?'#f7faff':'#fff'}">
+        <td style="padding:5px;border:1px solid #ddd">${r[0]}</td>
+        <td style="padding:5px;border:1px solid #ddd">${r[1]}</td>
+        <td style="padding:5px;border:1px solid #ddd;text-align:center">${r[2]}</td>
+        <td style="padding:5px;border:1px solid #ddd;text-align:center">${r[3]}</td>
+        <td style="padding:5px;border:1px solid #ddd;text-align:center">${r[4]}</td>
+      </tr>`).join('')}
+    </tbody></table>`;
+  } else {
+    rutasHTML = '<em style="color:#a0aec0">Sin rutas ingresadas</em>';
+  }
+
+  document.getElementById('preview-area').innerHTML = `
+    <p><strong>FECHA:</strong> ${CNEL.Sanitize.html(d.ciudad)}, ${fechaEs}</p>
+    <p><strong>Destinatario:</strong> ${CNEL.Sanitize.html(d.dest_nombre)} — ${CNEL.Sanitize.html(d.dest_cargo)}, CNEL EP ${CNEL.Sanitize.html(d.dest_ciudad)}</p>
+    <hr style="margin:12px 0;border-color:#D0D9E8">
+    <p><strong>Empresa:</strong> ${CNEL.Sanitize.html(d.empresa_razon)} | RUC: ${CNEL.Sanitize.html(d.empresa_ruc)}</p>
+    <p><strong>Representante Legal:</strong> ${CNEL.Sanitize.html(d.rep_nombre)}</p>
+    <p><strong>Resolución ARCOTEL:</strong> ${CNEL.Sanitize.html(d.arcotel_resolucion)}</p>
+    <p><strong>Servicios:</strong> ${CNEL.Sanitize.html(d.servicios)}</p>
+    <hr style="margin:12px 0;border-color:#D0D9E8">
+    <p><strong>Infraestructura:</strong> ${CNEL.Sanitize.html(d.cant_postes)} postes | ${CNEL.Sanitize.html(d.cant_ductos)} m.l. de ductos | Cobertura: ${CNEL.Sanitize.html(d.cobertura)}</p>
+    <p><strong>Provincias:</strong> ${CNEL.Sanitize.html(d.provincias)}</p>
+    <p><strong>Tipo de red:</strong> ${CNEL.Sanitize.html(d.tipo_red)}</p>
+    <p><strong>Rutas propuestas:</strong></p>${rutasHTML}
+    <hr style="margin:12px 0;border-color:#D0D9E8">
+    <p><strong>Objetivo:</strong> ${CNEL.Sanitize.html(d.obj_proyecto)}</p>
+    <p><strong>Cable:</strong> ${CNEL.Sanitize.html(d.cable_tipo)} — ${CNEL.Sanitize.html(d.cable_metros)} m | Activos: ${CNEL.Sanitize.html(d.equip_activos)} | Pasivos: ${CNEL.Sanitize.html(d.equip_pasivos)}</p>
+    <p><strong>Cronograma:</strong> Inicio ${fechaIni} · Fin ${fechaFin} · Servicio ${fechaSrv}</p>
+  `;
+}
+
+// ─── Generación del documento Word ───
+function buildDocumentHTML(d) {
+  const fechaEs = CNEL.formatDateES(d.fecha);
+  const fechaIni = CNEL.formatDateES(d.fecha_inicio);
+  const fechaFin = CNEL.formatDateES(d.fecha_fin);
+  const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
+
+  const rutaFilas = d.rutas.length
+    ? d.rutas.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td style="text-align:center">${r[2]}</td><td style="text-align:center">${r[3]}</td><td style="text-align:center">${r[4]}</td></tr>`).join('')
+    : '<tr><td colspan="5" style="text-align:center;color:#999"><em>Sin rutas ingresadas</em></td></tr>';
+
+  const contratista = (d.ct_razon || d.ct_rep)
+    ? `<h2>4.4 Empresa Contratista</h2>
+       <p><strong>Razón social:</strong> ${d.ct_razon || 'N/A'}</p>
+       <p><strong>RUC:</strong> ${d.ct_ruc || 'N/A'}</p>
+       <p><strong>Representante:</strong> ${d.ct_rep || 'N/A'}</p>
+       <p><strong>Teléfono:</strong> ${d.ct_tel || 'N/A'}</p>
+       <p><strong>Correo:</strong> ${d.ct_email || 'N/A'}</p>` : '';
+
+  return `
+<p style="text-align:right"><strong>FECHA:</strong> ${d.ciudad}, ${fechaEs}</p>
+<br>
+<p>Señor(a)<br>
+<strong>${d.dest_nombre}</strong><br>
+${d.dest_cargo}<br>
+Empresa Eléctrica Pública Estratégica Corporación Nacional de Electricidad CNEL EP<br>
+${d.dest_ciudad}</p>
+<br>
+<p><strong>ASUNTO:</strong> SOLICITUD DE SUSCRIPCIÓN DE CONTRATO PARA USO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP</p>
+<br>
+<p>De mi consideración:</p>
+<p>${d.rep_nombre}, en mi calidad de Representante Legal de <strong>${d.empresa_razon}</strong>, con RUC No. ${d.empresa_ruc},
+empresa debidamente autorizada por la Agencia de Regulación y Control de las Telecomunicaciones (ARCOTEL) mediante resolución No. ${d.arcotel_resolucion}
+para la prestación de servicios de ${d.servicios}, comparezco ante usted para solicitar formalmente el arrendamiento de infraestructura eléctrica de su representada.</p>
+
+<h2>1. ALCANCE DE LA SOLICITUD</h2>
+<p>Solicitamos autorización para el uso de la siguiente infraestructura:</p>
+<ul>
+  <li>Postes: ${d.cant_postes} unidades</li>
+  <li>Ductos subterráneos: ${d.cant_ductos} metros lineales</li>
+  <li>Cobertura geográfica: ${d.cobertura}</li>
+  <li>Provincias involucradas: ${d.provincias}</li>
+  <li>Tipo de redes a instalar: ${d.tipo_red}</li>
+</ul>
+
+<h2>2. DETALLE DE RUTAS PROPUESTAS</h2>
+<table>
+  <tr>
+    <th>Provincia/Ciudad/Recinto</th>
+    <th>Rutas/Enlaces</th>
+    <th>Postes/Ductos ya utilizados</th>
+    <th>Postes/Ductos nuevos</th>
+    <th>Postes/Ductos totales</th>
+  </tr>
+  ${rutaFilas}
+</table>
+
+<h2>3. INFORMACIÓN DEL PROYECTO</h2>
+<h2>3.1 Objetivo del proyecto:</h2>
+<p>${d.obj_proyecto}</p>
+
+<h2>3.2 Tipo de infraestructura a instalar:</h2>
+<ul>
+  <li>Tipo de redes: ${d.cable_tipo} — ${d.cable_metros} metros</li>
+  <li>Elementos activos: ${d.equip_activos} equipos</li>
+  <li>Elementos pasivos: ${d.equip_pasivos} equipos</li>
+</ul>
+
+<h2>3.3 Cronograma tentativo:</h2>
+<ul>
+  <li>Inicio de instalación: ${fechaIni}</li>
+  <li>Finalización estimada: ${fechaFin}</li>
+  <li>Puesta en servicio: ${fechaSrv}</li>
+</ul>
+
+<h2>4. INFORMACIÓN TÉCNICA Y ADMINISTRATIVA</h2>
+<h2>4.1 Representante Legal:</h2>
+<ul>
+  <li>Nombre: ${d.rl_nombre}</li>
+  <li>Cédula: ${d.rl_cedula}</li>
+  <li>Teléfono: ${d.rl_tel}</li>
+  <li>Correo electrónico: ${d.rl_email}</li>
+</ul>
+
+<h2>4.2 Responsable Técnico:</h2>
+<ul>
+  <li>Nombre: ${d.rt_nombre || '[No registrado]'}</li>
+  <li>Título profesional: ${d.rt_titulo || '[No registrado]'}</li>
+  <li>Teléfono móvil: ${d.rt_tel || '[No registrado]'}</li>
+  <li>Correo electrónico: ${d.rt_email || '[No registrado]'}</li>
+</ul>
+
+<h2>4.3 Coordinador de Campo:</h2>
+<ul>
+  <li>Nombre: ${d.cc_nombre || '[No registrado]'}</li>
+  <li>Teléfono móvil: ${d.cc_tel || '[No registrado]'}</li>
+  <li>Correo electrónico: ${d.cc_email || '[No registrado]'}</li>
+</ul>
+
+${contratista}
+
+<h2>5. DECLARACIONES Y COMPROMISOS</h2>
+<p>Por medio de la presente, declaro y me comprometo a:</p>
+<ol>
+  <li>Cumplir estrictamente con toda la normativa técnica vigente, incluyendo el Manual MAPOD y el MN-TEC-OPE-102 de CNEL EP.</li>
+  <li>Mantener vigente nuestro título habilitante durante toda la duración del contrato.</li>
+  <li>Contratar las pólizas de seguro requeridas (responsabilidad civil e incendio contra todo riesgo).</li>
+  <li>Respetar la integridad de la infraestructura eléctrica y no afectar el servicio de energía.</li>
+  <li>Identificar adecuadamente todos los elementos instalados según normativa.</li>
+  <li>Pagar puntualmente los valores de canon de arrendamiento establecidos, así como los valores por multa, intereses o cualquier otra actividad inherente descrita en el contrato o sus anexos.</li>
+  <li>Presentar anualmente la información georreferenciada actualizada en formato SIG.</li>
+  <li>Realizar el mantenimiento preventivo y correctivo de nuestras instalaciones.</li>
+</ol>
+<p>Agradecemos de antemano la atención que se sirva dar a la presente solicitud y quedo a su disposición para cualquier información adicional que requiera, así como para coordinar las inspecciones técnicas necesarias.</p>
+<br><br>
+<p>Atentamente,</p>
+<br><br><br>
+<div class="linea"></div>
+<p><strong>${d.rep_nombre}</strong><br>
+REPRESENTANTE LEGAL<br>
+${d.empresa_razon}</p>
+`;
+}
+
+// ─── Construir bloques PDF ───
+function buildPdfBlocks(d) {
+  const fechaEs = CNEL.formatDateES(d.fecha);
+  const fechaIni = CNEL.formatDateES(d.fecha_inicio);
+  const fechaFin = CNEL.formatDateES(d.fecha_fin);
+  const fechaSrv = CNEL.formatDateES(d.fecha_servicio);
+
+  const blocks = [
+    { type: 'title', text: 'SOLICITUD DE SUSCRIPCIÓN DE CONTRATO\nUSO DE INFRAESTRUCTURA ELÉCTRICA DE CNEL EP' },
+    { type: 'spacer', size: 4 },
+    { type: 'text', text: `${d.ciudad}, ${fechaEs}` },
+    { type: 'spacer', size: 3 },
+    { type: 'text', text: `Señor(a) ${d.dest_nombre}` },
+    { type: 'text', text: `${d.dest_cargo} — CNEL EP, ${d.dest_ciudad}` },
+    { type: 'spacer', size: 3 },
+    { type: 'text', text: `${d.rep_nombre}, en calidad de Representante Legal de ${d.empresa_razon}, RUC ${d.empresa_ruc}, autorizada por ARCOTEL mediante resolución No. ${d.arcotel_resolucion} para la prestación de ${d.servicios}, solicita formalmente el arrendamiento de infraestructura eléctrica.` },
+    { type: 'spacer', size: 3 },
+    { type: 'heading', text: '1. ALCANCE DE LA SOLICITUD' },
+    { type: 'bullet', text: `Postes: ${d.cant_postes} unidades` },
+    { type: 'bullet', text: `Ductos subterráneos: ${d.cant_ductos} metros lineales` },
+    { type: 'bullet', text: `Cobertura geográfica: ${d.cobertura}` },
+    { type: 'bullet', text: `Provincias: ${d.provincias}` },
+    { type: 'bullet', text: `Tipo de redes: ${d.tipo_red}` },
+    { type: 'spacer', size: 3 },
+    { type: 'heading', text: '2. DETALLE DE RUTAS PROPUESTAS' },
+    {
+      type: 'table',
+      headers: ['Provincia/Ciudad', 'Rutas/Enlaces', 'Exist.', 'Nuevos', 'Total'],
+      rows: d.rutas.length ? d.rutas : [['Sin rutas ingresadas', '', '', '', '']]
+    },
+    { type: 'spacer', size: 3 },
+    { type: 'heading', text: '3. INFORMACIÓN DEL PROYECTO' },
+    { type: 'subheading', text: 'Objetivo del proyecto:' },
+    { type: 'text', text: d.obj_proyecto },
+    { type: 'subheading', text: 'Infraestructura a instalar:' },
+    { type: 'bullet', text: `Cable: ${d.cable_tipo} — ${d.cable_metros} metros` },
+    { type: 'bullet', text: `Elementos activos: ${d.equip_activos}` },
+    { type: 'bullet', text: `Elementos pasivos: ${d.equip_pasivos}` },
+    { type: 'subheading', text: 'Cronograma tentativo:' },
+    { type: 'bullet', text: `Inicio: ${fechaIni}` },
+    { type: 'bullet', text: `Finalización: ${fechaFin}` },
+    { type: 'bullet', text: `Puesta en servicio: ${fechaSrv}` },
+    { type: 'spacer', size: 3 },
+    { type: 'heading', text: '4. INFORMACIÓN TÉCNICA Y ADMINISTRATIVA' },
+    { type: 'subheading', text: '4.1 Representante Legal:' },
+    { type: 'bullet', text: `Nombre: ${d.rl_nombre} | Cédula: ${d.rl_cedula}` },
+    { type: 'bullet', text: `Teléfono: ${d.rl_tel} | Correo: ${d.rl_email}` },
+    { type: 'subheading', text: '4.2 Responsable Técnico:' },
+    { type: 'bullet', text: `Nombre: ${d.rt_nombre || 'N/A'} | Título: ${d.rt_titulo || 'N/A'}` },
+    { type: 'bullet', text: `Teléfono: ${d.rt_tel || 'N/A'} | Correo: ${d.rt_email || 'N/A'}` },
+    { type: 'subheading', text: '4.3 Coordinador de Campo:' },
+    { type: 'bullet', text: `Nombre: ${d.cc_nombre || 'N/A'} | Teléfono: ${d.cc_tel || 'N/A'}` },
+    { type: 'spacer', size: 3 },
+    { type: 'heading', text: '5. DECLARACIONES Y COMPROMISOS' },
+    { type: 'text', text: 'El solicitante declara y se compromete a:' },
+    { type: 'bullet', text: 'Cumplir estrictamente con la normativa técnica vigente (Manual MAPOD y MN-TEC-OPE-102).' },
+    { type: 'bullet', text: 'Mantener vigente el título habilitante durante toda la duración del contrato.' },
+    { type: 'bullet', text: 'Contratar las pólizas de seguro requeridas.' },
+    { type: 'bullet', text: 'Respetar la integridad de la infraestructura eléctrica de CNEL EP.' },
+    { type: 'bullet', text: 'Identificar adecuadamente todos los elementos instalados.' },
+    { type: 'bullet', text: 'Pagar puntualmente el canon de arrendamiento y demás valores contractuales.' },
+    { type: 'bullet', text: 'Presentar anualmente la información georreferenciada en formato SIG.' },
+    { type: 'bullet', text: 'Realizar el mantenimiento preventivo y correctivo de las instalaciones.' },
+    { type: 'spacer', size: 8 },
+    { type: 'signature', name: d.rep_nombre, role: 'REPRESENTANTE LEGAL', company: d.empresa_razon }
+  ];
+  return blocks;
+}
+
+// ─── Botones de descarga ───
+document.getElementById('btn-download-word').addEventListener('click', () => {
+  const d = getFormData();
+  if (!d.empresa_razon || !d.rep_nombre) {
+    CNEL.Toast.show('Complete los datos básicos de la empresa antes de descargar.', 'error'); return;
+  }
+  CNEL.DocGenerator.downloadWord(buildDocumentHTML(d), `Solicitud-Contrato-CNEL-${d.empresa_ruc || 'EP'}`);
+  CNEL.Toast.show('Documento Word generado correctamente.', 'success');
+});
+
+document.getElementById('btn-download-pdf').addEventListener('click', async () => {
+  const d = getFormData();
+  if (!d.empresa_razon || !d.rep_nombre) {
+    CNEL.Toast.show('Complete los datos básicos de la empresa antes de descargar.', 'error'); return;
+  }
+  const btn = document.getElementById('btn-download-pdf');
+  btn.disabled = true;
+  btn.textContent = '⏳ Generando PDF...';
+  try {
+    await CNEL.PdfGenerator.downloadPDF(buildPdfBlocks(d), `Solicitud-Contrato-CNEL-${d.empresa_ruc || 'EP'}`);
+    CNEL.Toast.show('PDF generado correctamente.', 'success');
+  } catch(e) {
+    CNEL.Toast.show('Error al generar el PDF. Intente con Word.', 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = '📑 Descargar en PDF';
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!-- Seguridad -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com;
+                 script-src 'self' https://cdnjs.cloudflare.com;
+                 style-src 'self' https://fonts.googleapis.com 'unsafe-inline';
+                 font-src https://fonts.gstatic.com;
+                 img-src 'self' data:;
+                 object-src 'none';
+                 base-uri 'self';">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Portal de Arrendamiento de Infraestructura – CNEL EP</title>
+  <meta name="description" content="Portal oficial de arrendamiento y compartición de infraestructura eléctrica de CNEL EP para proveedores de telecomunicaciones.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
+</head>
+<body>
+
+<a href="#contenido" class="skip-nav">Saltar al contenido principal</a>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar" role="navigation" aria-label="Navegación principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="CNEL EP Inicio">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/>
+        </svg>
+      </div>
+      <div class="brand-text">
+        CNEL EP
+        <small>Arriendo de Infraestructura</small>
+      </div>
+    </a>
+
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navbar-menu" aria-label="Abrir menú">
+      ☰
+    </button>
+
+    <ul class="navbar-nav" id="navbar-menu" role="list">
+      <li><a href="index.html" class="active" aria-current="page">🏠 Inicio</a></li>
+      <li><a href="requisitos.html">📋 Requisitos</a></li>
+      <li><a href="solicitud-contrato.html">📝 Nuevo Contrato <span class="nav-badge">FORM</span></a></li>
+      <li><a href="solicitud-extension.html">📤 Ampliación</a></li>
+      <li><a href="intereses-mora.html">📊 Int. Mora</a></li>
+      <li><a href="intereses-financiamiento.html">💰 Financiamiento</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<header class="hero" role="banner">
+  <div class="hero-grid">
+    <div>
+      <div class="hero-eyebrow" aria-hidden="true">
+        ⚡ CNEL EP — Corporación Nacional de Electricidad
+      </div>
+      <h1>
+        Portal de <span>Arrendamiento</span><br>de Infraestructura Eléctrica
+      </h1>
+      <p class="hero-desc">
+        Gestión integral de contratos de arrendamiento y compartición de postes y ductos
+        para proveedores de telecomunicaciones y servicios afines, conforme a la normativa vigente.
+      </p>
+      <div class="hero-actions">
+        <a href="solicitud-contrato.html" class="btn btn-dorado btn-lg">
+          📝 Solicitar Contrato
+        </a>
+        <a href="requisitos.html" class="btn btn-secondary btn-lg" style="color:#fff;border-color:rgba(255,255,255,.5);">
+          📋 Ver Requisitos
+        </a>
+      </div>
+    </div>
+    <div class="hero-stats" aria-label="Estadísticas">
+      <div class="stat-card">
+        <span class="num">10</span>
+        <span class="lbl">Unidades de<br>Negocio</span>
+      </div>
+      <div class="stat-card">
+        <span class="num">24/7</span>
+        <span class="lbl">Servicio<br>Eléctrico</span>
+      </div>
+      <div class="stat-card">
+        <span class="num">EC</span>
+        <span class="lbl">Cobertura<br>Nacional</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ═══════════════ ACCESO RÁPIDO ═══════════════ -->
+<section class="quick-access" aria-label="Acceso rápido a trámites">
+  <div class="container">
+    <div class="quick-grid">
+      <a href="solicitud-contrato.html" class="quick-card animate-in" aria-label="Formulario de nuevo contrato">
+        <div class="quick-icon" aria-hidden="true">📝</div>
+        <h3>Solicitud de Nuevo Contrato</h3>
+        <p>Complete y descargue la solicitud formal para suscribir un contrato de uso de infraestructura eléctrica.</p>
+        <span class="quick-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a href="requisitos.html" class="quick-card animate-in" aria-label="Requisitos de documentación">
+        <div class="quick-icon" aria-hidden="true">📋</div>
+        <h3>Requisitos Documentales</h3>
+        <p>Consulte la lista completa de documentos legales, técnicos y financieros requeridos para su solicitud.</p>
+        <span class="quick-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a href="solicitud-extension.html" class="quick-card animate-in" aria-label="Solicitud de ampliación">
+        <div class="quick-icon" aria-hidden="true">📤</div>
+        <h3>Ampliación de Infraestructura</h3>
+        <p>Solicite la extensión de uso de postes o ductos adicionales en el marco de su contrato vigente.</p>
+        <span class="quick-arrow" aria-hidden="true">→</span>
+      </a>
+
+      <a href="#politicas" class="quick-card animate-in" aria-label="Políticas de arrendamiento">
+        <div class="quick-icon" aria-hidden="true">📜</div>
+        <h3>Políticas de Arrendamiento</h3>
+        <p>Conozca las normativas, obligaciones y condiciones que regulan el uso de la infraestructura de CNEL EP.</p>
+        <span class="quick-arrow" aria-hidden="true">→</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ POLÍTICAS PRINCIPALES ═══════════════ -->
+<main id="contenido">
+<section id="politicas" class="section section-alt" aria-labelledby="pol-title">
+  <div class="container">
+    <div class="section-divider" aria-hidden="true"></div>
+    <h2 class="section-title" id="pol-title">Políticas Principales de Arrendamiento</h2>
+    <p class="section-subtitle">
+      Normativas vigentes que regulan el uso de la infraestructura eléctrica de CNEL EP por parte
+      de proveedores de telecomunicaciones y servicios afines.
+    </p>
+
+    <div class="alert alert-warning" role="alert">
+      <span class="alert-icon" aria-hidden="true">⚠️</span>
+      <div>
+        <strong>Normativa de referencia:</strong> El cumplimiento de estas políticas es obligatorio conforme al
+        Manual MAPOD, MN-TEC-OPE-102 y demás regulaciones vigentes de CNEL EP y ARCOTEL.
+      </div>
+    </div>
+
+    <div class="policy-grid" role="list">
+
+      <!-- Política 5.1 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🔢</span>
+        <div class="policy-num">Política 5.1</div>
+        <h3>Identificación de Postes</h3>
+        <p>
+          La instalación de cables y equipos no debe ocultar el número de identificación de cada poste.
+          Dicho número debe ser visible desde la vía pública en todo momento. Si se afecta, el proveedor
+          deberá repintarlo o colocar una nueva placa a su costo; de no hacerlo, CNEL EP facturará
+          los costos de corrección según el Anexo 14.
+        </p>
+      </article>
+
+      <!-- Política 5.2 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">⚡</span>
+        <div class="policy-num">Política 5.2</div>
+        <h3>Puestas a Tierra Independientes</h3>
+        <p>
+          El proveedor debe diseñar y mantener sus propias puestas a tierra para redes de
+          telecomunicaciones. Queda <strong>prohibido</strong> utilizar o hacer coincidir sus
+          conexiones de tierra con las de la red eléctrica de CNEL EP. El incumplimiento genera
+          facturación de remediación y notificación al ente de control competente.
+        </p>
+      </article>
+
+      <!-- Política 5.3 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🔧</span>
+        <div class="policy-num">Política 5.3</div>
+        <h3>Mantenimiento de Equipos y Cables</h3>
+        <p>
+          Los proveedores son responsables del mantenimiento y buen estado de sus equipos instalados.
+          Si la instalación afecta la integridad del poste, deben instalar tensores en coordinación
+          con CNEL EP en un plazo máximo de <strong>15 días</strong>. El incumplimiento conlleva
+          retiro de infraestructura.
+        </p>
+      </article>
+
+      <!-- Política 5.4 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🛡️</span>
+        <div class="policy-num">Política 5.4</div>
+        <h3>Pólizas de Seguro Obligatorias</h3>
+        <p>
+          Se requieren pólizas vigentes de Responsabilidad Civil con daños a terceros e Incendio
+          contra todo riesgo, con endoso de beneficiario a favor de CNEL EP por el 5% del valor
+          del contrato. Deben presentarse previo a la firma por mínimo 2 años y mantenerse
+          vigentes durante toda la duración del contrato.
+        </p>
+      </article>
+
+      <!-- Política 5.5 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">📢</span>
+        <div class="policy-num">Política 5.5</div>
+        <h3>Notificación de Cambios Administrativos</h3>
+        <p>
+          El proveedor tiene <strong>3 días</strong> desde la notificación de ARCOTEL para comunicar
+          por escrito a CNEL EP cualquier cambio en su título habilitante, representante legal,
+          RUC o representantes técnicos. Sin esta comunicación no se autorizarán extensiones de
+          uso de infraestructura.
+        </p>
+      </article>
+
+      <!-- Política 5.13 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">📊</span>
+        <div class="policy-num">Política 5.13</div>
+        <h3>Límites de Instalación por Poste</h3>
+        <p>
+          Con el pago del canon, cada proveedor puede instalar hasta: <strong>2 cables de transporte/distribución</strong>,
+          <strong>8 cables de abonados/acometidas</strong> y <strong>1 equipo de telecomunicaciones</strong> por poste.
+          No se permiten más de 3 equipos (cajas de distribución) de distintos proveedores en un mismo poste.
+        </p>
+      </article>
+
+      <!-- Política 5.25 / 5.28 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">⚖️</span>
+        <div class="policy-num">Políticas 5.25 / 5.28</div>
+        <h3>Usos No Autorizados y Sanciones</h3>
+        <p>
+          El uso no autorizado de infraestructura genera facturación proporcional retroactiva.
+          Adicionalmente, se impondrá una sanción de <strong>20 SBU</strong> (30 SBU en reincidencia)
+          por manipular puestas a tierra, modificar estructuras eléctricas o colocar brazos extensores
+          sin autorización, conforme al Art. 68 de la LOSPEE.
+        </p>
+      </article>
+
+      <!-- Política 5.31 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🚫</span>
+        <div class="policy-num">Política 5.31</div>
+        <h3>Prohibición de Subarrendamiento</h3>
+        <p>
+          Los proveedores no podrán subarrendar, ceder ni permitir el uso de la infraestructura
+          arrendada a terceros, ni utilizarla para fines distintos al contrato. El incumplimiento
+          genera tareas de remediación a costo del proveedor y es causal de <strong>terminación
+          del contrato</strong>.
+        </p>
+      </article>
+
+      <!-- Política 5.33 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">💳</span>
+        <div class="policy-num">Política 5.33</div>
+        <h3>Plazos y Mora en el Pago del Canon</h3>
+        <p>
+          El pago debe realizarse en <strong>30 días</strong> desde la emisión de la factura SAP.
+          Los retrasos generan intereses por mora calculados a la tasa activa referencial del
+          Banco Central del Ecuador. El Administrador del Contrato notificará dentro de 5 días
+          del vencimiento.
+        </p>
+      </article>
+
+      <!-- Política 5.34 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🏦</span>
+        <div class="policy-num">Política 5.34</div>
+        <h3>Modalidades de Pago</h3>
+        <p>
+          Se ofrecen dos modalidades: <strong>Pago anual o semestral</strong> (sin garantía bancaria adicional)
+          o <strong>Pago mensual</strong> (requiere garantía bancaria incondicional e irrevocable equivalente
+          a 3 meses de canon, emitida por institución financiera supervisada por la Superintendencia de Bancos).
+        </p>
+      </article>
+
+      <!-- Política 5.44 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🗺️</span>
+        <div class="policy-num">Política 5.44</div>
+        <h3>Información Geoespacial SIG Anual</h3>
+        <p>
+          Cada año, dentro del primer trimestre desde la suscripción del contrato, el proveedor debe
+          presentar a CNEL EP la planimetría digital actualizada en formato <strong>SIG (File Geodatabase
+          / WGS84 UTM Zona 17S)</strong>. El incumplimiento suspende las autorizaciones de extensión de uso.
+        </p>
+      </article>
+
+      <!-- Política 5.57 -->
+      <article class="policy-card animate-in" role="listitem">
+        <span class="policy-icon" aria-hidden="true">🔄</span>
+        <div class="policy-num">Política 5.57 / 5.62–5.63</div>
+        <h3>Fin de Contrato y Prórroga</h3>
+        <p>
+          Al finalizar el contrato, el proveedor dispone de <strong>90 días</strong> para retirar
+          toda su infraestructura. La solicitud de prórroga debe presentarse con al menos <strong>90 días
+          de anticipación</strong>; no opera automáticamente y requiere estar al día en pagos, pólizas,
+          título habilitante y datos SIG.
+        </p>
+      </article>
+
+    </div><!-- /policy-grid -->
+  </div>
+</section>
+
+<!-- ═══════════════ BANNER CTA ═══════════════ -->
+<section class="section section-dark" aria-label="Llamada a la acción">
+  <div class="container" style="text-align:center">
+    <div class="section-divider" style="margin:0 auto 16px;" aria-hidden="true"></div>
+    <h2 class="section-title" style="color:#fff">¿Listo para solicitar su contrato?</h2>
+    <p class="section-subtitle" style="margin:0 auto 36px;color:rgba(255,255,255,.8)">
+      Prepare su documentación, complete el formulario en línea y descargue su solicitud
+      en formato Word o PDF para presentarla ante CNEL EP.
+    </p>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+      <a href="requisitos.html" class="btn btn-secondary" style="color:#fff;border-color:rgba(255,255,255,.5);">
+        📋 Verificar Requisitos
+      </a>
+      <a href="solicitud-contrato.html" class="btn btn-dorado btn-lg">
+        📝 Iniciar Solicitud de Contrato
+      </a>
+      <a href="solicitud-extension.html" class="btn btn-secondary" style="color:#fff;border-color:rgba(255,255,255,.5);">
+        📤 Solicitar Ampliación
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ INFORMACIÓN DE CONTACTO ═══════════════ -->
+<section class="section" aria-label="Información de contacto y referencia">
+  <div class="container">
+    <div class="section-divider" aria-hidden="true"></div>
+    <h2 class="section-title">Información de Referencia</h2>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:24px;margin-top:32px">
+
+      <div class="policy-card" style="border-left-color:var(--dorado)">
+        <h3 style="margin-bottom:12px">📞 Fuentes ARCOTEL</h3>
+        <ul style="list-style:none;font-size:.88rem;line-height:1.8">
+          <li><a href="https://www.arcotel.gob.ec/lineas-telefonicas/" target="_blank" rel="noopener noreferrer">Abonados fijos</a></li>
+          <li><a href="https://www.arcotel.gob.ec/servicio-de-suscripcion-television-pagada2-2/" target="_blank" rel="noopener noreferrer">TV pagada</a></li>
+          <li><a href="https://www.arcotel.gob.ec/abonados-y-usuarios/" target="_blank" rel="noopener noreferrer">Internet</a></li>
+        </ul>
+      </div>
+
+      <div class="policy-card" style="border-left-color:var(--dorado)">
+        <h3 style="margin-bottom:12px">📄 Documentos Técnicos</h3>
+        <ul style="list-style:none;font-size:.88rem;line-height:1.8">
+          <li>Manual MAPOD – Postes y Ductos</li>
+          <li>MN-TEC-OPE-102 – Instalación de Redes</li>
+          <li>GU-TEC-OPE-102 – Modelo de Datos SIG</li>
+          <li>IT-COM-AC-100 – Facturación SAP</li>
+        </ul>
+      </div>
+
+      <div class="policy-card" style="border-left-color:var(--dorado)">
+        <h3 style="margin-bottom:12px">⚖️ Base Legal</h3>
+        <ul style="list-style:none;font-size:.88rem;line-height:1.8">
+          <li>LOSPEE – Art. 68, numeral 3</li>
+          <li>Código Orgánico Administrativo</li>
+          <li>Regulaciones ARCOTEL vigentes</li>
+          <li>Código Civil – Art. 30</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>CNEL EP</h4>
+        <p>
+          Empresa Eléctrica Pública Estratégica<br>
+          Corporación Nacional de Electricidad<br>
+          Portal de Arrendamiento de Infraestructura Eléctrica
+        </p>
+        <p style="margin-top:12px;font-size:.8rem;color:rgba(255,255,255,.4)">
+          Este portal es de uso exclusivo para trámites relacionados con el arrendamiento
+          y compartición de infraestructura eléctrica de CNEL EP.
+        </p>
+      </div>
+      <div class="footer-col">
+        <h4>Trámites</h4>
+        <ul>
+          <li><a href="index.html">🏠 Inicio / Políticas</a></li>
+          <li><a href="requisitos.html">📋 Requisitos</a></li>
+          <li><a href="solicitud-contrato.html">📝 Solicitud de Contrato</a></li>
+          <li><a href="solicitud-extension.html">📤 Solicitud de Ampliación</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Normativa</h4>
+        <ul>
+          <li><a href="https://www.cnelep.gob.ec" target="_blank" rel="noopener noreferrer">🌐 CNEL EP</a></li>
+          <li><a href="https://www.arcotel.gob.ec" target="_blank" rel="noopener noreferrer">🌐 ARCOTEL</a></li>
+          <li><a href="https://www.regulacionelectrica.gob.ec" target="_blank" rel="noopener noreferrer">🌐 ARCERNNR</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> CNEL EP — Todos los derechos reservados</span>
+      <span class="footer-legal">Uso exclusivo para trámites internos. Versión del proceso: SIG-CNEL</span>
+    </div>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

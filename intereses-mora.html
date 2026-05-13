@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="es-EC">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Calculadora de Intereses por Mora – CNEL EP</title>
+  <meta name="description" content="Calculadora de intereses por mora en contratos de arrendamiento de infraestructura CNEL EP, con tasas BCE históricas 2016–2026.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
+  <!-- SheetJS para exportar Excel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+</head>
+<body>
+
+<a href="#contenido" class="skip-nav">Saltar al contenido principal</a>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar" role="navigation" aria-label="Navegación principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="CNEL EP Inicio">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/>
+        </svg>
+      </div>
+      <div class="brand-text">CNEL EP<small>Arriendo de Infraestructura</small></div>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navbar-menu" aria-label="Abrir menú">☰</button>
+    <ul class="navbar-nav" id="navbar-menu" role="list">
+      <li><a href="index.html">🏠 Inicio</a></li>
+      <li><a href="requisitos.html">📋 Requisitos</a></li>
+      <li><a href="solicitud-contrato.html">📝 Nuevo Contrato <span class="nav-badge">FORM</span></a></li>
+      <li><a href="solicitud-extension.html">📤 Ampliación</a></li>
+      <li><a href="intereses-mora.html" class="active" aria-current="page">📊 Int. Mora</a></li>
+      <li><a href="intereses-financiamiento.html">💰 Financiamiento</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Ruta de navegación">
+  <ol class="breadcrumb-list">
+    <li><a href="index.html">🏠 Inicio</a></li>
+    <li><span class="current">📊 Interes por mora</span></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════ PAGE HERO ═══════════════ -->
+<div class="page-hero"  role="banner">
+  <div class="page-hero-inner">
+    <div>
+      <h1>📊 Calculadora de Intereses por Mora</h1>
+      <p>>Cálculo automático según tasas BCE históricas 2016–2026 · CNEL EP - Alquiler</p>
+    </div>
+
+    <div class="page-hero-badge">
+      <div class="big" id="big">$0</div>
+      <small>Monto pagar</small>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════ CONTENIDO ═══════════════ -->
+<main id="contenido" class="container" style="padding-top:2rem; padding-bottom:3rem;">
+
+
+  <!-- GRID PRINCIPAL -->
+  <div class="calc-grid">
+
+    <!-- COLUMNA IZQUIERDA: Formulario -->
+    <div class="card" style="align-self: start;">
+
+      <div class="form-section">
+        <div class="form-header">
+          <h2>Datos del Cálculo</h2>
+        </div>
+        <div class="form-body">
+
+          <form id="formMora" novalidate autocomplete="off">
+            <div class="form-group">
+              <label for="fechaInicial">Fecha inicial de mora <span aria-label="requerido">*</span></label>
+              <input type="date" id="fechaInicial" name="fechaInicial"  lang="es-EC" required>
+              <span class="field-hint">Primer día de incumplimiento de pago</span>
+            </div>
+
+            <div class="form-group">
+              <label for="fechaFin">Fecha de corte / pago <span aria-label="requerido">*</span></label>
+              <input type="date" id="fechaFin" name="fechaFin" required>
+              <span class="field-hint">Fecha en que se realiza o evalúa el pago</span>
+            </div>
+
+            <div class="form-group">
+              <label for="montoDeuda">Monto base de la deuda ($) <span aria-label="requerido">*</span></label>
+              <input type="text" id="montoDeuda" name="montoDeuda" required
+                     placeholder="Ej: 1250,50" inputmode="decimal" maxlength="20">
+              <span class="field-hint">Use coma para decimales (Ej: 1250,50)</span>
+            </div>
+
+            <div class="form-group">
+              <label for="descripcion">Descripción / Referencia</label>
+              <input type="text" id="descripcion" name="descripcion"
+                     placeholder="Ej: Factura N.º 001-2025, Contrato EC-GYE-045"
+                     maxlength="120">
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-dorado">⚡ Calcular Interés</button>
+              <button type="button" class="btn btn-secondary" id="btnLimpiar">↺ Limpiar</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Spinner -->
+        <div class="loading-calc" id="loadingMora">
+          <div class="spinner-ring"></div>
+          <p style="font-size:.88rem; color:var(--azul-medio);">Calculando períodos y tasas BCE…</p>
+        </div>
+      </div>
+
+      <!-- Tabla de periodos detectados -->
+      <div id="periodosBox" style="display:none; margin-top:1.5rem;">
+        <h3 style="font-family:'Montserrat',sans-serif; font-size:.9rem; color:var(--azul-oscuro); margin-bottom:.75rem; text-transform:uppercase; letter-spacing:.04em;">
+          Desglose por Período y Tasa BCE
+        </h3>
+        <div style="overflow-x:auto;">
+          <table class="periodos-table" id="periodosTabla">
+            <thead>
+              <tr>
+                <th>Período</th>
+                <th>Días Mora</th>
+                <th>Días Mes</th>
+                <th>Tasa BCE</th>
+                <th class="monetary">Interés</th>
+              </tr>
+            </thead>
+            <tbody id="periodosBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+
+    </div>
+
+    <!-- COLUMNA DERECHA: Resultado -->
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+
+      <!-- Fórmula -->
+
+      <div class="form-section">
+        <div class="form-header">
+          <h2>Fórmula aplicada</h2>
+        </div>
+        <div class="form-body">
+          <div class="formula-mono">Im = Md × ((Ti ÷ 12) ÷ Dm) × Do</div>
+          <br>
+          <strong>Im</strong> — Interés mensual &nbsp;|&nbsp;
+          <strong>Md</strong> — Monto base de deuda<br>
+          <strong>Ti</strong> — Tasa BCE del período (%) &nbsp;|&nbsp;
+          <strong>Dm</strong> — Días del mes<br>
+          <strong>Do</strong> — Días en mora del período
+        </div>
+      </div>
+
+
+      <!-- Info tasas BCE disponibles -->
+      <div class="card" style="background:linear-gradient(135deg,rgba(0,40,85,.03) 0%,rgba(232,160,0,.06) 100%);">
+        <h3 style="font-family:'Montserrat',sans-serif; font-size:.9rem; color:var(--azul-oscuro); margin-bottom:.75rem; text-transform:uppercase; letter-spacing:.04em;">
+          📅 Cobertura de Tasas BCE
+        </h3>
+        <p style="font-size:.87rem; color:var(--text-muted); margin-bottom:.75rem;">
+          La calculadora dispone de tasas históricas del Banco Central del Ecuador para los siguientes períodos:
+        </p>
+        <div style="display:flex; gap:.5rem; flex-wrap:wrap;" id="añosDisponibles"></div>
+      </div>
+
+
+      <div class="form-section">
+
+        <div class="form-header">
+          <h2>✅ Resultado del Cálculo</h2>
+        </div>
+
+        <div class="calc-placeholder" id="resultPlaceholder">
+          <div class="placeholder-icon">📊</div>
+          <p>Complete el formulario y presione <strong>Calcular</strong> para ver el resultado.</p>
+        </div>
+
+        <div id="resultadoMora"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ HISTORIAL ═══ -->
+  <div class="card" id="cardHistorial">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.75rem;">
+      <h2 style="font-family:'Montserrat',sans-serif; font-size:1.1rem; color:var(--azul-oscuro); margin:0;">
+        Historial de Cálculos
+      </h2>
+      <div class="history-actions">
+        <button class="btn btn-dorado btn-sm" id="btnExportPDF">📄 PDF</button>
+        <button class="btn btn-secondary btn-sm" id="btnExportExcel">📊 Excel</button>
+        <button class="btn btn-sm" id="btnLimpiarHistorial"
+                style="background:rgba(220,38,38,.1); color:#b91c1c; border:1px solid rgba(220,38,38,.3);">
+          🗑️ Limpiar Historial
+        </button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="history-table" id="historialTabla">
+        <thead>
+          <tr>
+            <th style="width:30px;"></th>
+            <th>Descripción</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Días Mora</th>
+            <th class="monetary">Monto ($)</th>
+            <th class="monetary">Interés ($)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="historialBody">
+          <tr>
+            <td colspan="8" class="calc-placeholder" style="padding:2.5rem;">
+              <div class="placeholder-icon">📋</div>
+              No hay cálculos en el historial
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/></svg>
+      <div>
+        <strong>CNEL EP</strong>
+        <small>Corporación Nacional de Electricidad</small>
+      </div>
+    </div>
+    <p class="footer-copy">
+      © 2025 CNEL EP · Portal de Arrendamiento de Infraestructura ·
+      Calculadora de Intereses por Mora — Uso Interno
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+/* ================================================================
+   TASAS BCE ECUADOR — Fuente: Banco Central del Ecuador
+   Tasa activa referencial por año/mes (%)
+================================================================ */
+const TasasBCE = {
+  2016: { 1:9.15,2:8.88,3:8.86,4:9.03,5:8.89,6:8.66,7:8.67,8:8.21,9:8.78,10:8.71,11:8.38,12:8.10 },
+  2017: { 1:8.02,2:8.25,3:8.14,4:8.13,5:7.37,6:7.72,7:8.15,8:7.58,9:8.19,10:7.86,11:7.79,12:7.83 },
+  2018: { 1:7.72,2:7.41,3:7.26,4:7.63,5:6.67,6:7.33,7:7.48,8:7.63,9:8.01,10:8.34,11:8.47,12:8.69 },
+  2019: { 1:7.99,2:8.82,3:8.75,4:8.62,5:8.62,6:8.02,7:8.26,8:8.74,9:8.65,10:8.79,11:8.68,12:8.78 },
+  2020: { 1:8.68,2:8.81,3:8.77,4:8.40,5:8.98,6:9.10,7:9.12,8:9.03,9:9.02,10:8.96,11:8.83,12:8.50 },
+  2021: { 1:8.58,2:8.38,3:8.12,4:8.28,5:9.33,6:8.06,7:8.12,8:7.87,9:7.57,10:7.49,11:7.64,12:7.44 },
+  2022: { 1:7.39,2:7.38,3:7.23,4:7.04,5:6.74,6:7.11,7:7.31,8:8.09,9:8.45,10:8.35,11:8.49,12:8.48 },
+  2023: { 1:8.54,2:8.78,3:8.96,4:9.04,5:8.96,6:9.03,7:9.02,8:9.29,9:9.49,10:9.48,11:9.80,12:9.94 },
+  2024: { 1:10.14,2:10.34,3:10.53,4:10.87,5:11.12,6:11.40,7:11.63,8:11.12,9:11.68,10:11.25,11:10.73,12:10.43 },
+  2025: { 1:9.80,2:9.33,3:8.54,4:8.40,5:8.34,6:8.46,7:8.50,8:8.17,9:8.00,10:7.91,11:7.84,12:7.76 },
+  2026: { 1:7.74,2:7.54,3:7.19,4:7.02 }
+};
+
+const MESES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+/* ================================================================
+   UTILIDADES
+================================================================ */
+const Util = {
+  fmt2: n => n.toFixed(2).replace('.', ','),
+  fmtUSD: n => '$' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+  parseDec: s => parseFloat((s||'0').toString().replace(',','.')),
+  fmtFecha: d => {
+    const dd = d.getDate().toString().padStart(2,'0');
+    const mm = (d.getMonth()+1).toString().padStart(2,'0');
+    return `${dd}/${mm}/${d.getFullYear()}`;
+  },
+  diasMes: (y,m) => new Date(y, m, 0).getDate(),
+  getTasa: (y,m) => (TasasBCE[y] && TasasBCE[y][m]) ? TasasBCE[y][m] : null,
+  nombreMes: m => MESES[m-1]
+};
+
+/* ================================================================
+   MOTOR DE CÁLCULO
+================================================================ */
+function calcularPeriodos(fechaIni, fechaFin) {
+  const periodos = [];
+  let cur = new Date(fechaIni);
+  while (cur < fechaFin) {
+    const y = cur.getFullYear();
+    const m = cur.getMonth() + 1;
+    const ultimoDia = new Date(y, m, 0);
+    const finPeriodo = new Date(Math.min(ultimoDia.getTime(), fechaFin.getTime()));
+    const diasMora = Math.round((finPeriodo - cur) / 86400000) + 1;
+    if (diasMora > 0) periodos.push({ año: y, mes: m, diasMora });
+    cur = new Date(y, m, 1);
+  }
+  return periodos;
+}
+
+function calcularInteresesMora(monto, periodos) {
+  let interesTotal = 0;
+  let diasTotal = 0;
+  const detalles = [];
+  const resumenAño = {};
+
+  for (const p of periodos) {
+    const dm = Util.diasMes(p.año, p.mes);
+    const tasa = Util.getTasa(p.año, p.mes);
+    if (!tasa) throw new Error(`Tasa BCE no disponible para ${Util.nombreMes(p.mes)} ${p.año}`);
+
+    // Im = Md × ((Ti/100 / 12) / Dm) × Do
+    const interes = monto * ((tasa / 100 / 12) / dm) * p.diasMora;
+
+    interesTotal += interes;
+    diasTotal += p.diasMora;
+    detalles.push({ ...p, diasMes: dm, tasa, interes });
+
+    if (!resumenAño[p.año]) resumenAño[p.año] = { interes: 0, dias: 0, meses: [] };
+    resumenAño[p.año].interes += interes;
+    resumenAño[p.año].dias += p.diasMora;
+    resumenAño[p.año].meses.push(`${Util.nombreMes(p.mes)} (${Util.fmt2(tasa)}%)`);
+  }
+
+  return { interesTotal, diasTotal, detalles, resumenAño };
+}
+
+/* ================================================================
+   RENDERIZADO
+================================================================ */
+function renderPeriodos(detalles, monto) {
+  const body = document.getElementById('periodosBody');
+  let totalInterés = 0;
+  let totalDias = 0;
+  let rows = '';
+
+  detalles.forEach(d => {
+    totalInterés += d.interes;
+    totalDias += d.diasMora;
+    rows += `<tr>
+      <td><strong>${Util.nombreMes(d.mes)} ${d.año}</strong></td>
+      <td style="text-align:center">${d.diasMora}</td>
+      <td style="text-align:center">${d.diasMes}</td>
+      <td style="text-align:center">${Util.fmt2(d.tasa)}%</td>
+      <td class="monetary">${Util.fmtUSD(d.interes)}</td>
+    </tr>`;
+  });
+
+  rows += `<tr class="total-row">
+    <td><strong>TOTAL</strong></td>
+    <td style="text-align:center"><strong>${totalDias}</strong></td>
+    <td></td><td></td>
+    <td class="monetary"><strong>${Util.fmtUSD(totalInterés)}</strong></td>
+  </tr>`;
+
+  body.innerHTML = rows;
+  document.getElementById('periodosBox').style.display = 'block';
+}
+
+function renderResultado(datos) {
+  const { monto, periodos: p, calc, fechaIni, fechaFin } = datos;
+
+  let añosHTML = '';
+  Object.keys(calc.resumenAño).forEach(año => {
+    const r = calc.resumenAño[año];
+    añosHTML += `<div class="year-summary">
+      <div class="year-label">📅 ${año}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:.85rem;opacity:.85;">${r.dias} días · ${r.meses.join(', ')}</span>
+        <strong style="font-size:.95rem;">${Util.fmtUSD(r.interes)}</strong>
+      </div>
+    </div>`;
+  });
+
+  const html = `
+
+    <div class="form-body">
+
+      <div class="result-item">
+        <span class="label">Período</span>
+        <span class="val">${Util.fmtFecha(fechaIni)} → ${Util.fmtFecha(fechaFin)}</span>
+      </div>
+      <div class="result-item">
+        <span class="label">Monto base</span>
+        <span class="val">${Util.fmtUSD(monto)}</span>
+      </div>
+      <div class="result-item">
+        <span class="label">Total días en mora</span>
+        <span class="val">${calc.diasTotal} días</span>
+      </div>
+      ${añosHTML}
+      <div class="result-item grand-total">
+        <span class="label">INTERÉS TOTAL A COBRAR</span>
+        <span class="val">${Util.fmtUSD(calc.interesTotal)}</span>
+      </div>
+    </div>
+    `;
+
+  document.getElementById('big').innerText = `${Util.fmtUSD(monto + calc.interesTotal)}`;
+
+  document.getElementById('resultPlaceholder').style.display = 'none';
+  document.getElementById('resultadoMora').innerHTML = html;
+  document.getElementById('resultadoMora').style.display = 'block';
+}
+
+/* ================================================================
+   HISTORIAL
+================================================================ */
+let historial = [];
+let contador = 0;
+
+function agregarHistorial(item) {
+  historial.push(item);
+  renderHistorial();
+}
+
+function renderHistorial() {
+  const tbody = document.getElementById('historialBody');
+  if (historial.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="calc-placeholder" style="padding:2.5rem;">
+      <div class="placeholder-icon">📋</div>No hay cálculos en el historial</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = historial.map((c, i) => `
+    <tr class="expandable-row" onclick="toggleDetalle(${i})" id="row-${i}">
+      <td><span class="expand-icon">▶</span></td>
+      <td>${c.descripcion}</td>
+      <td>${c.fechaIniStr}</td>
+      <td>${c.fechaFinStr}</td>
+      <td style="text-align:center">${c.diasTotal}</td>
+      <td class="monetary">${Util.fmtUSD(c.monto)}</td>
+      <td class="monetary"><strong>${Util.fmtUSD(c.interesTotal)}</strong></td>
+      <td>
+        <button class="btn btn-sm" onclick="event.stopPropagation();eliminarCalculo(${i})"
+          style="background:rgba(220,38,38,.1);color:#b91c1c;border:1px solid rgba(220,38,38,.3);">
+          Eliminar
+        </button>
+      </td>
+    </tr>
+    <tr class="detail-row" id="det-${i}">
+      <td colspan="8">
+        <div class="detail-content">
+          <h4>Detalle Mensual — ${c.descripcion}</h4>
+          <table class="detail-inner-table">
+            <thead><tr><th>Mes/Año</th><th>Días Mora</th><th>Días Mes</th><th>Tasa BCE</th><th class="monetary">Interés</th></tr></thead>
+            <tbody>
+              ${c.detalles.map(d => `<tr>
+                <td>${Util.nombreMes(d.mes)} ${d.año}</td>
+                <td style="text-align:center">${d.diasMora}</td>
+                <td style="text-align:center">${d.diasMes}</td>
+                <td style="text-align:center">${Util.fmt2(d.tasa)}%</td>
+                <td class="monetary">${Util.fmtUSD(d.interes)}</td>
+              </tr>`).join('')}
+              <tr class="total-row">
+                <td><strong>TOTAL</strong></td>
+                <td style="text-align:center"><strong>${c.diasTotal}</strong></td>
+                <td></td><td></td>
+                <td class="monetary"><strong>${Util.fmtUSD(c.interesTotal)}</strong></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleDetalle(i) {
+  const det = document.getElementById(`det-${i}`);
+  const row = document.getElementById(`row-${i}`);
+  if (det.classList.contains('show')) {
+    det.classList.remove('show');
+    row.classList.remove('expanded');
+  } else {
+    det.classList.add('show');
+    row.classList.add('expanded');
+  }
+}
+
+function eliminarCalculo(i) {
+  if (confirm('¿Eliminar este cálculo del historial?')) {
+    historial.splice(i, 1);
+    renderHistorial();
+  }
+}
+
+/* ================================================================
+   EXPORTADORES
+================================================================ */
+function exportarPDF() {
+  if (!historial.length) { CNEL.Toast.show('No hay cálculos para exportar', 'warning'); return; }
+
+  let html = `<html><head><meta charset="UTF-8">
+    <style>
+      body{font-family:Arial,sans-serif;margin:20px;font-size:10px}
+      h1{color:#002855;font-size:16px;margin-bottom:4px}
+      h2{color:#002855;font-size:12px;margin:18px 0 6px}
+      p{color:#555;margin:2px 0}
+      table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9px}
+      th{background:#002855;color:#E8A000;padding:5px 7px;text-align:left}
+      td{padding:4px 7px;border-bottom:1px solid #e0e0e0}
+      .total td{background:#f0f5ff;font-weight:bold;border-top:2px solid #002855}
+      .monetary{text-align:right}
+      .footer{margin-top:30px;font-size:8px;color:#888;text-align:center;border-top:1px solid #ccc;padding-top:10px}
+      .seccion{page-break-inside:avoid;margin-bottom:20px}
+    </style></head><body>
+    <h1>Reporte de Intereses por Mora — CNEL EP</h1>
+    <p>Corporación Nacional de Electricidad · ${Util.fmtFecha(new Date())} ${new Date().toLocaleTimeString('es-EC')}</p>`;
+
+  let totalMonto = 0, totalInteres = 0;
+  historial.forEach((c, idx) => {
+    totalMonto += c.monto;
+    totalInteres += c.interesTotal;
+    html += `<div class="seccion">
+      <h2>Cálculo ${idx+1}: ${c.descripcion}</h2>
+      <p><b>Período:</b> ${c.fechaIniStr} → ${c.fechaFinStr} &nbsp;|&nbsp; <b>Días:</b> ${c.diasTotal} &nbsp;|&nbsp; <b>Monto:</b> $${c.monto.toFixed(2)} &nbsp;|&nbsp; <b>Interés:</b> $${c.interesTotal.toFixed(2)}</p>
+      <table><thead><tr><th>Mes/Año</th><th>Días Mora</th><th>Días Mes</th><th>Tasa BCE</th><th class="monetary">Interés ($)</th></tr></thead><tbody>
+      ${c.detalles.map(d=>`<tr><td>${Util.nombreMes(d.mes)} ${d.año}</td><td style="text-align:center">${d.diasMora}</td><td style="text-align:center">${d.diasMes}</td><td style="text-align:center">${d.tasa.toFixed(2)}%</td><td class="monetary">$${d.interes.toFixed(2)}</td></tr>`).join('')}
+      <tr class="total"><td>TOTAL</td><td style="text-align:center">${c.diasTotal}</td><td></td><td></td><td class="monetary">$${c.interesTotal.toFixed(2)}</td></tr>
+      </tbody></table></div>`;
+  });
+
+  html += `<div class="seccion total" style="background:#f0f5ff;padding:10px;border-radius:4px">
+    <h2>Resumen General</h2>
+    <p><b>Total monto base:</b> $${totalMonto.toFixed(2)}</p>
+    <p><b>Total intereses:</b> $${totalInteres.toFixed(2)}</p>
+    <p><b>Total a recuperar:</b> $${(totalMonto+totalInteres).toFixed(2)}</p>
+  </div>
+  <div class="footer"><p>Fórmula: Im = Md × ((Ti ÷ 12) ÷ Dm) × Do &nbsp;·&nbsp; Tasas BCE aplicadas automáticamente por período</p>
+  <p>Sistema de Intereses por Mora — CNEL EP</p></div></body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 350);
+}
+
+function exportarExcel() {
+  if (!historial.length) { CNEL.Toast.show('No hay cálculos para exportar', 'warning'); return; }
+  if (typeof XLSX === 'undefined') { CNEL.Toast.show('Librería Excel aún cargando, intente en un momento', 'warning'); return; }
+
+  const wb = XLSX.utils.book_new();
+
+  // Hoja 1: Resumen
+  const resumenData = [
+    ['CNEL EP — Reporte de Intereses por Mora'],
+    [`Generado: ${Util.fmtFecha(new Date())}`],
+    [],
+    ['#','Descripción','Fecha Inicio','Fecha Fin','Días Mora','Monto Base ($)','Interés Total ($)','Total a Recuperar ($)']
+  ];
+  historial.forEach((c, i) => {
+    resumenData.push([i+1, c.descripcion, c.fechaIniStr, c.fechaFinStr, c.diasTotal,
+      parseFloat(c.monto.toFixed(2)), parseFloat(c.interesTotal.toFixed(2)),
+      parseFloat((c.monto+c.interesTotal).toFixed(2))]);
+  });
+
+  // Hoja 2: Detalle mensual
+  const detalleData = [
+    ['#Cálculo','Descripción','Mes/Año','Días Mora','Días Mes','Tasa BCE (%)','Interés ($)']
+  ];
+  historial.forEach((c, i) => {
+    c.detalles.forEach(d => {
+      detalleData.push([i+1, c.descripcion, `${Util.nombreMes(d.mes)} ${d.año}`,
+        d.diasMora, d.diasMes, parseFloat(d.tasa.toFixed(2)), parseFloat(d.interes.toFixed(2))]);
+    });
+  });
+
+  const ws1 = XLSX.utils.aoa_to_sheet(resumenData);
+  ws1['!cols'] = [{wch:5},{wch:30},{wch:12},{wch:12},{wch:10},{wch:14},{wch:14},{wch:16}];
+  const ws2 = XLSX.utils.aoa_to_sheet(detalleData);
+  ws2['!cols'] = [{wch:10},{wch:30},{wch:18},{wch:10},{wch:10},{wch:12},{wch:12}];
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Detalle Mensual');
+
+  const fecha = Util.fmtFecha(new Date()).replace(/\//g,'-');
+  XLSX.writeFile(wb, `Intereses_Mora_CNEL_${fecha}.xlsx`);
+}
+
+/* ================================================================
+   INICIALIZACIÓN
+================================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+  // Mostrar años disponibles
+  const añosDiv = document.getElementById('añosDisponibles');
+  Object.keys(TasasBCE).forEach(año => {
+    const mesesDisp = Object.keys(TasasBCE[año]).length;
+    añosDiv.innerHTML += `<span style="
+      display:inline-flex;align-items:center;gap:.3rem;
+      background:rgba(0,40,85,.08);border:1px solid rgba(0,40,85,.2);
+      border-radius:20px;padding:.22rem .7rem;font-size:.8rem;font-weight:600;color:var(--azul-oscuro);">
+      ${año} <span style="opacity:.6;font-weight:400">${mesesDisp} meses</span>
+    </span>`;
+  });
+
+  // Auto-completar fecha fin
+  document.getElementById('fechaInicial').addEventListener('change', function() {
+    const fechaFin = document.getElementById('fechaFin');
+    if (!fechaFin.value && this.value) {
+      const d = new Date(this.value);
+      d.setMonth(d.getMonth() + 1);
+      fechaFin.value = d.toISOString().split('T')[0];
+    }
+  });
+
+  // Formatear monto (solo números y coma)
+  document.getElementById('montoDeuda').addEventListener('input', function() {
+    let v = this.value.replace(/[^0-9,]/g,'');
+    const partes = v.split(',');
+    if (partes.length > 2) v = partes[0] + ',' + partes.slice(1).join('');
+    if (partes[1] && partes[1].length > 2) v = partes[0] + ',' + partes[1].substring(0,2);
+    this.value = v;
+  });
+
+  // Submit del formulario
+  document.getElementById('formMora').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const loading = document.getElementById('loadingMora');
+    loading.classList.add('visible');
+
+    await new Promise(r => setTimeout(r, 300));
+
+    try {
+      const fechaIni = new Date(document.getElementById('fechaInicial').value);
+      const fechaFin = new Date(document.getElementById('fechaFin').value);
+      const montoStr = document.getElementById('montoDeuda').value;
+      const desc = document.getElementById('descripcion').value || 'Sin descripción';
+
+      if (!montoStr) throw new Error('Ingrese el monto de la deuda');
+      const monto = Util.parseDec(montoStr);
+      if (isNaN(monto) || monto <= 0) throw new Error('El monto debe ser mayor a 0');
+      if (fechaFin <= fechaIni) throw new Error('La fecha de corte debe ser posterior a la fecha inicial de mora');
+
+      const periodos = calcularPeriodos(fechaIni, fechaFin);
+      if (!periodos.length) throw new Error('El período ingresado no genera días de mora');
+
+      const calc = calcularInteresesMora(monto, periodos);
+
+      renderPeriodos(calc.detalles, monto);
+      renderResultado({ monto, periodos, calc, fechaIni, fechaFin });
+
+      agregarHistorial({
+        id: ++contador,
+        descripcion: desc,
+        fechaIniStr: Util.fmtFecha(fechaIni),
+        fechaFinStr: Util.fmtFecha(fechaFin),
+        diasTotal: calc.diasTotal,
+        monto,
+        interesTotal: calc.interesTotal,
+        detalles: calc.detalles,
+        resumenAño: calc.resumenAño
+      });
+
+      CNEL.Toast.show('Cálculo realizado correctamente', 'success');
+
+    } catch (err) {
+      document.getElementById('resultPlaceholder').style.display = 'none';
+      document.getElementById('resultadoMora').innerHTML = `
+        <div class="alert alert-error">❌ <strong>Error:</strong> ${err.message}</div>`;
+      document.getElementById('resultadoMora').style.display = 'block';
+      CNEL.Toast.show(err.message, 'error');
+    } finally {
+      loading.classList.remove('visible');
+    }
+  });
+
+  // Limpiar formulario
+  document.getElementById('btnLimpiar').addEventListener('click', function() {
+    document.getElementById('formMora').reset();
+    document.getElementById('periodosBox').style.display = 'none';
+    document.getElementById('resultadoMora').style.display = 'none';
+    document.getElementById('resultPlaceholder').style.display = 'block';
+  });
+
+  // Botones de exportar
+  document.getElementById('btnExportPDF').addEventListener('click', exportarPDF);
+  document.getElementById('btnExportExcel').addEventListener('click', exportarExcel);
+
+  // Limpiar historial
+  document.getElementById('btnLimpiarHistorial').addEventListener('click', function() {
+    if (!historial.length) return;
+    if (confirm('¿Limpiar todo el historial? Esta acción no se puede deshacer.')) {
+      historial = [];
+      renderHistorial();
+    }
+  });
+});
+</script>
+</body>
+</html>

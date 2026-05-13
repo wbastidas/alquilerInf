@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-Content-Type-Options" content="nosniff">
+  <meta http-equiv="X-Frame-Options" content="SAMEORIGIN">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Calculadora de Financiamiento – CNEL EP</title>
+  <meta name="description" content="Calculadora de intereses por financiamiento y tabla de amortización para contratos de arrendamiento de infraestructura CNEL EP.">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect fill='%23002855' width='32' height='32' rx='6'/><text x='16' y='22' text-anchor='middle' fill='%23E8A000' font-size='18' font-family='Arial' font-weight='bold'>⚡</text></svg>">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js" defer></script>
+  <style>
+    .form-section { margin-bottom: 16px; }
+    .step-indicator {
+      display: flex;
+      gap: 0;
+      margin-bottom: 36px;
+      border-radius: var(--radio-lg);
+      overflow: hidden;
+      box-shadow: var(--sombra-sm);
+    }
+    .step-item {
+      flex: 1;
+      padding: 8px 4px;
+      text-align: center;
+      background: #E8EEF8;
+      font-family: 'Montserrat', sans-serif;
+      font-size: .78rem;
+      font-weight: 600;
+      color: #718096;
+      position: relative;
+      cursor: pointer;
+      transition: all var(--transicion);
+    }
+    .step-item.active {
+      background: var(--azul-medio);
+      color: var(--blanco);
+    }
+    .step-item.done {
+      background: #276749;
+      color: var(--blanco);
+    }
+    .step-num {
+      display: block;
+      font-size: 1.1rem;
+      margin-bottom: 2px;
+    }
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+    .required-note {
+      font-size: .82rem;
+      color: var(--gris-texto);
+      margin-bottom: 24px;
+    }
+    .required-note strong { color: var(--rojo-error); }
+  </style>
+</head>
+<body>
+
+<a href="#contenido" class="skip-nav">Saltar al contenido principal</a>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar" role="navigation" aria-label="Navegación principal">
+  <div class="navbar-inner">
+    <a href="index.html" class="navbar-brand" aria-label="CNEL EP Inicio">
+      <div class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/></svg>
+      </div>
+      <div class="brand-text">CNEL EP<small>Arriendo de Infraestructura</small></div>
+    </a>
+    <button class="nav-toggle" aria-expanded="false" aria-controls="navbar-menu" aria-label="Abrir menú">☰</button>
+    <ul class="navbar-nav" id="navbar-menu" role="list">
+      <li><a href="index.html">🏠 Inicio</a></li>
+      <li><a href="requisitos.html">📋 Requisitos</a></li>
+      <li><a href="solicitud-contrato.html">📝 Nuevo Contrato <span class="nav-badge">FORM</span></a></li>
+      <li><a href="solicitud-extension.html">📤 Ampliación</a></li>
+      <li><a href="intereses-mora.html">📊 Int. Mora</a></li>
+      <li><a href="intereses-financiamiento.html" class="active" aria-current="page">💰 Financiamiento</a></li>
+    </ul>
+  </div>
+</nav>
+
+
+<!-- BREADCRUMB -->
+<nav class="breadcrumb" aria-label="Ruta de navegación">
+  <ol class="breadcrumb-list">
+    <li><a href="index.html">🏠 Inicio</a></li>
+    <li><span class="current">💰 Interés por Financiamiento</span></li>
+  </ol>
+</nav>
+
+<!-- ═══════════════ PAGE HERO ═══════════════ -->
+<div class="page-hero"  role="banner">
+  <div class="page-hero-inner">
+    <div>
+      <h1>💰 Calculadora de Financiamiento</h1>
+      <p>Tabla de amortización y cuota mensual · Sistema francés de amortización · Exportación PDF/Excel</p>
+    </div>
+
+    <div class="page-hero-badge">
+      <div class="big" id="big">$0</div>
+      <small>Monto pagar</small>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════ CONTENIDO ═══════════════ -->
+<main id="contenido" class="container" style="padding-top:2rem; padding-bottom:3rem;">
+
+  <div class="calc-grid">
+
+    <!-- COLUMNA IZQUIERDA: Formulario -->
+    <div class="card" style="align-self:start;">
+
+      <div class="form-section">
+        <div class="form-header">
+          <h2>Datos del Financiamiento</h2>
+        </div>
+        <div class="form-body">
+
+          <form id="formFinanc" novalidate autocomplete="off">
+
+            <div class="form-group">
+              <label for="monto">Monto a financiar ($) <span aria-label="requerido">*</span></label>
+              <input type="text" id="monto" name="monto" required
+                     placeholder="Ej: 5000,00" inputmode="decimal" maxlength="20">
+              <span class="field-hint">Ingrese el capital a financiar con coma decimal</span>
+            </div>
+            <div class="form-group">
+              <label for="meses">Plazo (número de meses) <span aria-label="requerido">*</span></label>
+              <input type="number" id="meses" name="meses" required
+                     min="1" max="360" placeholder="Ej: 12">
+              <span class="field-hint">Entre 1 y 360 meses</span>
+            </div>
+
+            <div class="form-group">
+              <label for="tasaAnual">Tasa BCE anual (%) <span aria-label="requerido">*</span></label>
+              <div style="display:flex; gap:.5rem; align-items:center;">
+                <input type="text" id="tasaAnual" name="tasaAnual" required
+                       placeholder="Ej: 9,80" inputmode="decimal" maxlength="10" style="flex:1;">
+                <button type="button" id="btnTasaActual" class="btn btn-secondary btn-sm"
+                        title="Cargar tasa BCE más reciente disponible">
+                  ⚡ Cargar tasa BCE
+                </button>
+              </div>
+              <span class="field-hint" id="tasaHint">Tasa activa referencial anual del BCE</span>
+            </div>
+
+            <div class="form-group">
+              <label for="descFinanc">Descripción / Referencia</label>
+              <input type="text" id="descFinanc" name="descFinanc"
+                     placeholder="Ej: Financiamiento equipos Contrato EC-GYE-045"
+                     maxlength="120">
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-dorado">💰 Calcular Amortización</button>
+              <button type="button" class="btn btn-secondary" id="btnLimpiarF">↺ Limpiar</button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Spinner -->
+        <div class="loading-calc" id="loadingFinanc">
+          <div class="spinner-ring"></div>
+          <p style="font-size:.88rem; color:var(--azul-medio);">Generando tabla de amortización…</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: Resultado resumen -->
+
+    <div style="display:flex; flex-direction:column; gap:1.25rem;">
+      <!-- Fórmula -->
+      <div class="form-section">
+        <div class="form-header">
+          <h2>Formula de Cuota Constante</h2>
+        </div>
+        <div class="form-body">
+          <div class="formula-mono">C = M × (i × (1+i)ⁿ) / ((1+i)ⁿ − 1)</div>
+          <br>
+          <strong>C</strong> — Cuota mensual fija &nbsp;|&nbsp;
+          <strong>M</strong> — Monto del capital<br>
+          <strong>i</strong> — Tasa mensual (tasa anual ÷ 12) &nbsp;|&nbsp;
+          <strong>n</strong> — Número de meses
+        </div>
+      </div>
+
+      <div class="form-section">
+
+        <div class="form-header">
+          <h2>✅ Resumen del Financiamiento</h2>
+        </div>
+
+        <div class="form-body" id="placeholderF">
+          <div class="placeholder-icon">💰</div>
+          <p>Complete el formulario y presione <strong>Calcular</strong>.</p>
+        </div>
+
+        <div id="resultadoFinanc"></div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ HISTORIAL ═══ -->
+  <div class="card" id="cardHistorialF">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:.75rem;">
+      <h2 style="font-family:'Montserrat',sans-serif; font-size:1.1rem; color:var(--azul-oscuro); margin:0;">
+        Historial de Financiamientos
+      </h2>
+      <div class="history-actions">
+        <button class="btn btn-dorado btn-sm" id="btnExportPDFF">📄 PDF</button>
+        <button class="btn btn-secondary btn-sm" id="btnExportExcelF">📊 Excel</button>
+        <button class="btn btn-sm" id="btnLimpiarHistF"
+                style="background:rgba(220,38,38,.1); color:#b91c1c; border:1px solid rgba(220,38,38,.3);">
+          🗑️ Limpiar Historial
+        </button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="history-table" id="historialTablaF">
+        <thead>
+          <tr>
+            <th style="width:30px;"></th>
+            <th>Descripción</th>
+            <th>Fecha Cálculo</th>
+            <th class="monetary">Monto ($)</th>
+            <th style="text-align:center">Meses</th>
+            <th style="text-align:center">Tasa (%)</th>
+            <th class="monetary">Cuota Mensual ($)</th>
+            <th class="monetary">Interés Total ($)</th>
+            <th class="monetary">Total a Pagar ($)</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="historialBodyF">
+          <tr>
+            <td colspan="10" class="calc-placeholder" style="padding:2.5rem;">
+              <div class="placeholder-icon">📋</div>
+              No hay cálculos en el historial
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</main>
+
+<!-- ═══════════════ FOOTER ═══════════════ -->
+<footer class="footer" role="contentinfo">
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/></svg>
+      <div>
+        <strong>CNEL EP</strong>
+        <small>Corporación Nacional de Electricidad</small>
+      </div>
+    </div>
+    <p class="footer-copy">
+      © 2025 CNEL EP · Portal de Arrendamiento de Infraestructura ·
+      Calculadora de Financiamiento — Uso Interno
+    </p>
+  </div>
+</footer>
+
+<script src="main.js"></script>
+<script>
+/* ================================================================
+   TASAS BCE — referencia para el botón "Cargar tasa BCE"
+================================================================ */
+const TasasBCERef = {
+  2026: { 1:7.74, 2:7.54, 3:7.19, 4:7.02 },
+  2025: { 1:9.80, 2:9.33, 3:8.54, 4:8.40, 5:8.34, 6:8.46, 7:8.50, 8:8.17, 9:8.00, 10:7.91, 11:7.84, 12:7.76 }
+};
+
+function getUltimaTasaBCE() {
+  const años = Object.keys(TasasBCERef).map(Number).sort((a,b)=>b-a);
+  for (const año of años) {
+    const meses = Object.keys(TasasBCERef[año]).map(Number).sort((a,b)=>b-a);
+    if (meses.length) return { año, mes: meses[0], tasa: TasasBCERef[año][meses[0]] };
+  }
+  return null;
+}
+
+/* ================================================================
+   UTILIDADES
+================================================================ */
+const UtilF = {
+  fmt2: n => n.toFixed(2).replace('.', ','),
+  fmtUSD: n => '$' + n.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.'),
+  parseDec: s => parseFloat((s||'0').toString().replace(',','.')),
+  fmtFecha: d => d.toLocaleDateString('es-EC', { day:'2-digit', month:'2-digit', year:'numeric' }),
+  MESES: ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre']
+};
+
+/* ================================================================
+   MOTOR DE CÁLCULO DE AMORTIZACIÓN
+================================================================ */
+function calcularAmortizacion(monto, meses, tasaAnual) {
+  const i = (tasaAnual / 100) / 12;
+  const factor = Math.pow(1 + i, meses);
+  const cuota = monto * (i * factor) / (factor - 1);
+  const totalPagado = cuota * meses;
+  const totalInteres = totalPagado - monto;
+
+  let saldo = monto;
+  const tabla = [];
+  for (let m = 1; m <= meses; m++) {
+    const interesMes = saldo * i;
+    const capitalMes = cuota - interesMes;
+    saldo -= capitalMes;
+    tabla.push({
+      mes: m,
+      cuota,
+      capital: capitalMes,
+      interes: interesMes,
+      saldo: Math.max(0, saldo)
+    });
+  }
+
+  return { cuota, totalPagado, totalInteres, tasaMensual: i * 100, tabla };
+}
+
+/* ================================================================
+   RENDERIZADO
+================================================================ */
+function renderResultadoF(datos) {
+  const { monto, meses, tasaAnual, calc } = datos;
+  const ahorro = ((calc.totalInteres / monto) * 100).toFixed(1).replace('.', ',');
+
+  document.getElementById('resultadoFinanc').innerHTML = `
+
+
+        <div class="form-body">
+          <div class="result-item">
+            <span class="label">Capital financiado</span>
+            <span class="val">${UtilF.fmtUSD(monto)}</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Plazo</span>
+            <span class="val">${meses} meses</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Tasa anual BCE</span>
+            <span class="val">${UtilF.fmt2(tasaAnual)}%</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Tasa mensual equivalente</span>
+            <span class="val">${UtilF.fmt2(calc.tasaMensual)}%</span>
+          </div>
+          <div class="result-item">
+            <span class="label">Interés total</span>
+            <span class="val">${UtilF.fmtUSD(calc.totalInteres)}</span>
+          </div>
+          <div class="result-item grand-total">
+            <span class="label">CUOTA MENSUAL FIJA</span>
+            <span class="val">${UtilF.fmtUSD(calc.cuota)}</span>
+          </div>
+        </div>
+      </div>
+   `;
+
+  document.getElementById('big').innerText = `${UtilF.fmtUSD(calc.totalPagado)}`;
+  document.getElementById('placeholderF').style.display = 'none';
+  document.getElementById('resultadoFinanc').style.display = 'block';
+}
+
+function renderTablaAmort(tabla) {
+  const body = document.getElementById('amortBody');
+  let totalCuota = 0, totalCapital = 0, totalInteres = 0;
+
+  body.innerHTML = tabla.map(r => {
+    totalCuota += r.cuota;
+    totalCapital += r.capital;
+    totalInteres += r.interes;
+    return `<tr>
+      <td>${r.mes}</td>
+      <td>${UtilF.fmtUSD(r.cuota)}</td>
+      <td>${UtilF.fmtUSD(r.capital)}</td>
+      <td>${UtilF.fmtUSD(r.interes)}</td>
+      <td>${UtilF.fmtUSD(r.saldo)}</td>
+    </tr>`;
+  }).join('') + `<tr class="total-row">
+    <td>TOT</td>
+    <td>${UtilF.fmtUSD(totalCuota)}</td>
+    <td>${UtilF.fmtUSD(totalCapital)}</td>
+    <td>${UtilF.fmtUSD(totalInteres)}</td>
+    <td>—</td>
+  </tr>`;
+
+  //document.getElementById('amortPages').textContent = `${tabla.length} cuotas`;
+  //document.getElementById('cardAmort').style.display = 'block';
+}
+
+/* ================================================================
+   HISTORIAL
+================================================================ */
+let historialF = [];
+let contadorF = 0;
+
+function agregarHistorialF(item) {
+  historialF.unshift(item);
+  renderHistorialF();
+}
+
+function renderHistorialF() {
+  const tbody = document.getElementById('historialBodyF');
+  if (!historialF.length) {
+    tbody.innerHTML = `<tr><td colspan="10" class="calc-placeholder" style="padding:2.5rem;">
+      <div class="placeholder-icon">📋</div>No hay cálculos en el historial</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = historialF.map((c, i) => `
+    <tr class="expandable-row" onclick="toggleDetalleF(${i})" id="rowF-${i}">
+      <td><span class="expand-icon">▶</span></td>
+      <td>${c.descripcion}</td>
+      <td>${c.fecha}</td>
+      <td class="monetary">${UtilF.fmtUSD(c.monto)}</td>
+      <td style="text-align:center">${c.meses}</td>
+      <td style="text-align:center">${UtilF.fmt2(c.tasaAnual)}%</td>
+      <td class="monetary"><strong>${UtilF.fmtUSD(c.cuota)}</strong></td>
+      <td class="monetary">${UtilF.fmtUSD(c.totalInteres)}</td>
+      <td class="monetary">${UtilF.fmtUSD(c.totalPagado)}</td>
+      <td>
+        <button class="btn btn-sm" onclick="event.stopPropagation();eliminarF(${i})"
+          style="background:rgba(220,38,38,.1);color:#b91c1c;border:1px solid rgba(220,38,38,.3);">
+          Eliminar
+        </button>
+      </td>
+    </tr>
+    <tr class="detail-row" id="detF-${i}">
+      <td colspan="10">
+        <div class="detail-content">
+          <h4>Tabla de Amortización — ${c.descripcion}</h4>
+          <div style="overflow-x:auto; max-height:320px; overflow-y:auto;">
+            <table class="amort-table">
+              <thead style="position:sticky;top:0;z-index:1;">
+                <tr><th style="text-align:center">Mes</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr>
+              </thead>
+              <tbody>
+                ${c.tabla.map(r=>`<tr>
+                  <td>${r.mes}</td>
+                  <td>${UtilF.fmtUSD(r.cuota)}</td>
+                  <td>${UtilF.fmtUSD(r.capital)}</td>
+                  <td>${UtilF.fmtUSD(r.interes)}</td>
+                  <td>${UtilF.fmtUSD(r.saldo)}</td>
+                </tr>`).join('')}
+                <tr class="total-row">
+                  <td>TOT</td>
+                  <td>${UtilF.fmtUSD(c.totalPagado)}</td>
+                  <td>${UtilF.fmtUSD(c.monto)}</td>
+                  <td>${UtilF.fmtUSD(c.totalInteres)}</td>
+                  <td>—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function toggleDetalleF(i) {
+  const det = document.getElementById(`detF-${i}`);
+  const row = document.getElementById(`rowF-${i}`);
+  if (det.classList.contains('show')) {
+    det.classList.remove('show');
+    row.classList.remove('expanded');
+  } else {
+    det.classList.add('show');
+    row.classList.add('expanded');
+  }
+}
+
+function eliminarF(i) {
+  if (confirm('¿Eliminar este cálculo del historial?')) {
+    historialF.splice(i, 1);
+    renderHistorialF();
+  }
+}
+
+/* ================================================================
+   EXPORTADORES
+================================================================ */
+function exportarPDFF() {
+  if (!historialF.length) { CNEL.Toast.show('No hay cálculos para exportar', 'warning'); return; }
+
+  let html = `<html><head><meta charset="UTF-8">
+    <style>
+      body{font-family:Arial,sans-serif;margin:20px;font-size:10px}
+      h1{color:#002855;font-size:16px;margin-bottom:4px}
+      h2{color:#002855;font-size:12px;margin:18px 0 6px}
+      p{color:#555;margin:2px 0}
+      table{width:100%;border-collapse:collapse;margin:8px 0;font-size:9px}
+      th{background:#002855;color:#E8A000;padding:5px 7px;text-align:right}
+      th:first-child{text-align:center}
+      td{padding:4px 7px;border-bottom:1px solid #e0e0e0;text-align:right}
+      td:first-child{text-align:center;font-weight:600}
+      .total td{background:#f0f5ff;font-weight:bold;border-top:2px solid #002855}
+      .footer{margin-top:30px;font-size:8px;color:#888;text-align:center;border-top:1px solid #ccc;padding-top:10px}
+      .seccion{page-break-inside:avoid;margin-bottom:20px}
+      .resumen-card{background:#f5f8ff;padding:8px;border-radius:4px;margin-bottom:10px}
+    </style></head><body>
+    <h1>Reporte de Intereses por Financiamiento — CNEL EP</h1>
+    <p>Corporación Nacional de Electricidad · ${UtilF.fmtFecha(new Date())} ${new Date().toLocaleTimeString('es-EC')}</p>`;
+
+  historialF.forEach((c, idx) => {
+    html += `<div class="seccion">
+      <h2>Financiamiento ${idx+1}: ${c.descripcion}</h2>
+      <div class="resumen-card">
+        <p><b>Capital:</b> $${c.monto.toFixed(2)} &nbsp;|&nbsp; <b>Plazo:</b> ${c.meses} meses &nbsp;|&nbsp; <b>Tasa anual:</b> ${c.tasaAnual.toFixed(2)}%</p>
+        <p><b>Cuota mensual:</b> $${c.cuota.toFixed(2)} &nbsp;|&nbsp; <b>Interés total:</b> $${c.totalInteres.toFixed(2)} &nbsp;|&nbsp; <b>Total a pagar:</b> $${c.totalPagado.toFixed(2)}</p>
+      </div>
+      <table><thead><tr><th>Mes</th><th>Cuota</th><th>Capital</th><th>Interés</th><th>Saldo</th></tr></thead><tbody>
+      ${c.tabla.map(r=>`<tr><td>${r.mes}</td><td>$${r.cuota.toFixed(2)}</td><td>$${r.capital.toFixed(2)}</td><td>$${r.interes.toFixed(2)}</td><td>$${r.saldo.toFixed(2)}</td></tr>`).join('')}
+      <tr class="total"><td>TOTAL</td><td>$${c.totalPagado.toFixed(2)}</td><td>$${c.monto.toFixed(2)}</td><td>$${c.totalInteres.toFixed(2)}</td><td>—</td></tr>
+      </tbody></table></div>`;
+  });
+
+  html += `<div class="footer"><p>Fórmula: C = M × (i × (1+i)ⁿ) / ((1+i)ⁿ − 1) — Sistema Francés de Amortización</p>
+    <p>Sistema de Intereses por Financiamiento — CNEL EP</p></div></body></html>`;
+
+  const w = window.open('', '_blank');
+  w.document.write(html);
+  w.document.close();
+  setTimeout(() => w.print(), 350);
+}
+
+function exportarExcelF() {
+  if (!historialF.length) { CNEL.Toast.show('No hay cálculos para exportar', 'warning'); return; }
+  if (typeof XLSX === 'undefined') { CNEL.Toast.show('Librería Excel aún cargando, intente en un momento', 'warning'); return; }
+
+  const wb = XLSX.utils.book_new();
+
+  // Hoja Resumen
+  const resData = [
+    ['CNEL EP — Reporte de Intereses por Financiamiento'],
+    [`Generado: ${UtilF.fmtFecha(new Date())}`],
+    [],
+    ['#','Descripción','Fecha','Monto ($)','Meses','Tasa Anual (%)','Cuota Mensual ($)','Interés Total ($)','Total a Pagar ($)']
+  ];
+  historialF.forEach((c, i) => {
+    resData.push([i+1, c.descripcion, c.fecha, +c.monto.toFixed(2), c.meses,
+      +c.tasaAnual.toFixed(2), +c.cuota.toFixed(2), +c.totalInteres.toFixed(2), +c.totalPagado.toFixed(2)]);
+  });
+
+  // Hoja Detalle amortización
+  const detData = [];
+  historialF.forEach((c, i) => {
+    detData.push([`Financiamiento ${i+1}: ${c.descripcion}`, '', '', '', '']);
+    detData.push(['Mes','Cuota ($)','Capital ($)','Interés ($)','Saldo ($)']);
+    c.tabla.forEach(r => {
+      detData.push([r.mes, +r.cuota.toFixed(2), +r.capital.toFixed(2), +r.interes.toFixed(2), +r.saldo.toFixed(2)]);
+    });
+    detData.push(['TOTAL', +c.totalPagado.toFixed(2), +c.monto.toFixed(2), +c.totalInteres.toFixed(2), '']);
+    detData.push([]);
+  });
+
+  const ws1 = XLSX.utils.aoa_to_sheet(resData);
+  ws1['!cols'] = [{wch:5},{wch:35},{wch:12},{wch:12},{wch:8},{wch:10},{wch:14},{wch:14},{wch:14}];
+  const ws2 = XLSX.utils.aoa_to_sheet(detData);
+  ws2['!cols'] = [{wch:8},{wch:12},{wch:12},{wch:12},{wch:12}];
+
+  XLSX.utils.book_append_sheet(wb, ws1, 'Resumen');
+  XLSX.utils.book_append_sheet(wb, ws2, 'Amortización');
+
+  const fecha = UtilF.fmtFecha(new Date()).replace(/\//g,'-');
+  XLSX.writeFile(wb, `Financiamiento_CNEL_${fecha}.xlsx`);
+}
+
+/* ================================================================
+   INICIALIZACIÓN
+================================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+
+  // Botón "Cargar tasa BCE"
+  document.getElementById('btnTasaActual').addEventListener('click', function() {
+    const ref = getUltimaTasaBCE();
+    if (ref) {
+      const mesesNom = ['','Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+      document.getElementById('tasaAnual').value = ref.tasa.toString().replace('.', ',');
+      document.getElementById('tasaHint').textContent =
+        `✔ Tasa BCE: ${mesesNom[ref.mes]} ${ref.año} — ${ref.tasa}% anual`;
+      CNEL.Toast.show(`Tasa BCE ${mesesNom[ref.mes]} ${ref.año}: ${ref.tasa}%`, 'success');
+    } else {
+      CNEL.Toast.show('No se encontró tasa BCE disponible', 'warning');
+    }
+  });
+
+  // Formatear inputs numéricos
+  ['monto', 'tasaAnual'].forEach(id => {
+    document.getElementById(id).addEventListener('input', function() {
+      let v = this.value.replace(/[^0-9,]/g,'');
+      const partes = v.split(',');
+      if (partes.length > 2) v = partes[0] + ',' + partes.slice(1).join('');
+      if (partes[1] && partes[1].length > 2) v = partes[0] + ',' + partes[1].substring(0,2);
+      this.value = v;
+    });
+  });
+
+  // Submit
+  document.getElementById('formFinanc').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const loading = document.getElementById('loadingFinanc');
+    loading.classList.add('visible');
+
+    await new Promise(r => setTimeout(r, 250));
+
+    try {
+      const montoStr  = document.getElementById('monto').value;
+      const mesesVal  = parseInt(document.getElementById('meses').value, 10);
+      const tasaStr   = document.getElementById('tasaAnual').value;
+      const desc      = document.getElementById('descFinanc').value || 'Sin descripción';
+
+      if (!montoStr) throw new Error('Ingrese el monto a financiar');
+      const monto = UtilF.parseDec(montoStr);
+      if (isNaN(monto) || monto <= 0) throw new Error('El monto debe ser mayor a 0');
+      if (!mesesVal || mesesVal < 1 || mesesVal > 360) throw new Error('El plazo debe ser entre 1 y 360 meses');
+      if (!tasaStr) throw new Error('Ingrese la tasa BCE anual');
+      const tasaAnual = UtilF.parseDec(tasaStr);
+      if (isNaN(tasaAnual) || tasaAnual <= 0 || tasaAnual > 100) throw new Error('La tasa debe ser un porcentaje válido (0–100)');
+
+      const calc = calcularAmortizacion(monto, mesesVal, tasaAnual);
+
+      renderResultadoF({ monto, meses: mesesVal, tasaAnual, calc });
+      //renderTablaAmort(calc.tabla);
+
+      agregarHistorialF({
+        id: ++contadorF,
+        descripcion: desc,
+        fecha: UtilF.fmtFecha(new Date()),
+        monto,
+        meses: mesesVal,
+        tasaAnual,
+        cuota: calc.cuota,
+        totalInteres: calc.totalInteres,
+        totalPagado: calc.totalPagado,
+        tabla: calc.tabla
+      });
+
+      CNEL.Toast.show('Tabla de amortización generada', 'success');
+
+    } catch (err) {
+      document.getElementById('placeholderF').style.display = 'none';
+      document.getElementById('resultadoFinanc').innerHTML = `
+        <div class="alert alert-error">❌ <strong>Error:</strong> ${err.message}</div>`;
+      document.getElementById('resultadoFinanc').style.display = 'block';
+      CNEL.Toast.show(err.message, 'error');
+    } finally {
+      loading.classList.remove('visible');
+    }
+  });
+
+  // Limpiar
+  document.getElementById('btnLimpiarF').addEventListener('click', function() {
+    document.getElementById('formFinanc').reset();
+    document.getElementById('resultadoFinanc').style.display = 'none';
+    document.getElementById('placeholderF').style.display = 'block';
+    //document.getElementById('cardAmort').style.display = 'none';
+    document.getElementById('tasaHint').textContent = 'Tasa activa referencial anual del BCE';
+  });
+
+  // Exportar
+  document.getElementById('btnExportPDFF').addEventListener('click', exportarPDFF);
+  document.getElementById('btnExportExcelF').addEventListener('click', exportarExcelF);
+
+  // Limpiar historial
+  document.getElementById('btnLimpiarHistF').addEventListener('click', function() {
+    if (!historialF.length) return;
+    if (confirm('¿Limpiar todo el historial? Esta acción no se puede deshacer.')) {
+      historialF = [];
+      renderHistorialF();
+    }
+  });
+});
+</script>
+</body>
+</html>
