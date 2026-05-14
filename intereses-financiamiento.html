@@ -255,20 +255,35 @@
 
 </main>
 
-<!-- ═══════════════ FOOTER ═══════════════ -->
-<footer class="footer" role="contentinfo">
-  <div class="footer-inner">
-    <div class="footer-brand">
-      <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><path d="M16 2L4 16h8l-2 14 16-18h-9L16 2z" fill="#E8A000"/></svg>
-      <div>
-        <strong>CNEL EP</strong>
-        <small>Corporación Nacional de Electricidad</small>
+<!-- FOOTER -->
+<footer role="contentinfo">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>CNEL EP</h4>
+        <p>Empresa Eléctrica Pública Estratégica<br>Corporación Nacional de Electricidad</p>
+      </div>
+      <div class="footer-col">
+        <h4>Trámites</h4>
+        <ul>
+          <li><a href="index.html">🏠 Inicio / Políticas</a></li>
+          <li><a href="requisitos.html">📋 Requisitos</a></li>
+          <li><a href="solicitud-contrato.html">📝 Solicitud de Contrato</a></li>
+          <li><a href="solicitud-extension.html">📤 Solicitud de Ampliación</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Recursos</h4>
+        <ul>
+          <li><a href="https://www.cnelep.gob.ec" target="_blank" rel="noopener noreferrer">🌐 CNEL EP</a></li>
+          <li><a href="https://www.arcotel.gob.ec" target="_blank" rel="noopener noreferrer">🌐 ARCOTEL</a></li>
+        </ul>
       </div>
     </div>
-    <p class="footer-copy">
-      © 2025 CNEL EP · Portal de Arrendamiento de Infraestructura ·
-      Calculadora de Financiamiento — Uso Interno
-    </p>
+    <div class="footer-bottom">
+      <span>© <span id="year"></span> CNEL EP — Todos los derechos reservados</span>
+      <span class="footer-legal">Portal SIG-CNEL</span>
+    </div>
   </div>
 </footer>
 
@@ -684,6 +699,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   });
 });
+document.getElementById('year').textContent = new Date().getFullYear();
 </script>
 </body>
 </html>
