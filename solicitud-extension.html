@@ -476,51 +476,53 @@ document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
 
-// ─── Carga de delegados de ampliación desde archivo externo ───
-(function() {
-  const selUN       = document.getElementById('dest_unidad');
-  const destNombre  = document.getElementById('dest_nombre');
-  const destEmail   = document.getElementById('dest_email');
-  const emailHint   = document.getElementById('dest_email_hint');
-  const emailText   = document.getElementById('dest_email_text');
-  let delegadosData = null;
+// Datos embebidos como respaldo garantizado
+window._DELEGADOS_AMP = {"unidades":[
+  {"id":"guayaquil",      "nombre_unidad":"CNEL EP UN Guayaquil",       "responsable":"Ing. Andrea Solano Reyes",    "cargo":"Coordinadora de Gestión Arriendo de Infraestructura","email":"arriendo.guayaquil@cnelep.gob.ec",      "ciudad":"Guayaquil"},
+  {"id":"guayas_los_rios","nombre_unidad":"CNEL EP UN Guayas Los Ríos", "responsable":"Ing. Roberto Cárdenas Loor",  "cargo":"Coordinador de Gestión Arriendo de Infraestructura", "email":"arriendo.guayaslorios@cnelep.gob.ec",   "ciudad":"Milagro"},
+  {"id":"manabi",         "nombre_unidad":"CNEL EP UN Manabí",          "responsable":"Ing. Diana Vera Alcívar",     "cargo":"Coordinadora de Gestión Arriendo de Infraestructura","email":"arriendo.manabi@cnelep.gob.ec",         "ciudad":"Portoviejo"},
+  {"id":"el_oro",         "nombre_unidad":"CNEL EP UN El Oro",          "responsable":"Ing. Fernando Castillo Arias","cargo":"Coordinador de Gestión Arriendo de Infraestructura", "email":"arriendo.eloro@cnelep.gob.ec",          "ciudad":"Machala"},
+  {"id":"santa_elena",    "nombre_unidad":"CNEL EP UN Santa Elena",     "responsable":"Ing. Gabriela Párraga Muñoz", "cargo":"Coordinadora de Gestión Arriendo de Infraestructura","email":"arriendo.santaelena@cnelep.gob.ec",    "ciudad":"Santa Elena"},
+  {"id":"milagro",        "nombre_unidad":"CNEL EP UN Milagro",         "responsable":"Ing. Xavier Herrera Quimi",   "cargo":"Coordinador de Gestión Arriendo de Infraestructura", "email":"arriendo.milagro@cnelep.gob.ec",        "ciudad":"Milagro"},
+  {"id":"bolivar",        "nombre_unidad":"CNEL EP UN Bolívar",         "responsable":"Ing. Lorena Chimbo Guamán",   "cargo":"Coordinadora de Gestión Arriendo de Infraestructura","email":"arriendo.bolivar@cnelep.gob.ec",       "ciudad":"Guaranda"},
+  {"id":"los_rios",       "nombre_unidad":"CNEL EP UN Los Ríos",        "responsable":"Ing. César Andrade Tomalá",   "cargo":"Coordinador de Gestión Arriendo de Infraestructura", "email":"arriendo.losrios@cnelep.gob.ec",        "ciudad":"Babahoyo"},
+  {"id":"esmeraldas",     "nombre_unidad":"CNEL EP UN Esmeraldas",      "responsable":"Ing. Mayra Tenorio Caicedo",  "cargo":"Coordinadora de Gestión Arriendo de Infraestructura","email":"arriendo.esmeraldas@cnelep.gob.ec",    "ciudad":"Esmeraldas"},
+  {"id":"sucumbios",      "nombre_unidad":"CNEL EP UN Sucumbíos",       "responsable":"Ing. Patricio Chamorro Tapia","cargo":"Coordinador de Gestión Arriendo de Infraestructura", "email":"arriendo.sucumbios@cnelep.gob.ec",      "ciudad":"Nueva Loja"},
+  {"id":"ofc",            "nombre_unidad":"CNEL EP Oficina Central",    "responsable":"Ing. Patricia Sánchez Andrade","cargo":"Directora de Gestión Comercial",                    "email":"comercial@cnelep.gob.ec",               "ciudad":"Guayaquil"}
+]};
 
-  fetch('data/delegados-ampliacion.json')
-    .then(r => r.json())
-    .then(data => {
-      delegadosData = data;
-      selUN.innerHTML = '<option value="">— Seleccione la Unidad de Negocio —</option>';
-      data.unidades.forEach(u => {
-        const opt = document.createElement('option');
-        opt.value = u.id;
-        opt.textContent = u.nombre_unidad;
-        selUN.appendChild(opt);
-      });
-      if (selUN.value) applyUnidad(selUN.value);
-    })
-    .catch(() => {
-      selUN.innerHTML = `
-        <option value="">— Seleccione —</option>
-        <option value="guayaquil">CNEL EP UN Guayaquil</option>
-        <option value="guayas_los_rios">CNEL EP UN Guayas Los Ríos</option>
-        <option value="manabi">CNEL EP UN Manabí</option>
-        <option value="ofc">CNEL EP Oficina Central</option>`;
-      destNombre.removeAttribute('readonly');
-      destNombre.style.background = '';
+// ─── Carga de delegados de ampliación ───
+(function() {
+  const selUN      = document.getElementById('dest_unidad');
+  const destNombre = document.getElementById('dest_nombre');
+  const destEmail  = document.getElementById('dest_email');
+  const emailHint  = document.getElementById('dest_email_hint');
+  const emailText  = document.getElementById('dest_email_text');
+
+  function poblarSelect(data) {
+    selUN.innerHTML = '<option value="">— Seleccione la Unidad de Negocio —</option>';
+    data.unidades.forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.id;
+      opt.textContent = u.nombre_unidad;
+      selUN.appendChild(opt);
     });
+    if (selUN.dataset.prev) applyUnidad(selUN.dataset.prev);
+  }
 
   function applyUnidad(id) {
-    if (!delegadosData || !id) {
+    const data = window._DELEGADOS_AMP;
+    if (!data || !id) {
       destNombre.value = '';
       destEmail.value  = '';
       emailHint.style.display = 'none';
       return;
     }
-    const found = delegadosData.unidades.find(u => u.id === id);
+    const found = data.unidades.find(u => u.id === id);
     if (found) {
-      destNombre.value        = found.responsable;
-      destEmail.value         = found.email;
-      emailText.textContent   = found.email;
+      destNombre.value      = found.responsable;
+      destEmail.value       = found.email;
+      emailText.textContent = found.email;
       emailHint.style.display = '';
     } else {
       destNombre.value = '';
@@ -528,6 +530,15 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
       emailHint.style.display = 'none';
     }
   }
+
+  // Poblar de inmediato con datos embebidos
+  poblarSelect(window._DELEGADOS_AMP);
+
+  // Intentar refrescar desde archivo (entorno con servidor)
+  fetch('data/delegados-ampliacion.json')
+    .then(r => { if (!r.ok) throw new Error(); return r.json(); })
+    .then(data => { window._DELEGADOS_AMP = data; poblarSelect(data); })
+    .catch(() => { /* usar datos embebidos ya cargados */ });
 
   selUN.addEventListener('change', function() { applyUnidad(this.value); });
 })();
