@@ -1,0 +1,92 @@
+{
+  "unidades": [
+    {
+      "id": "guayaquil",
+      "nombre_unidad": "CNEL EP UN Guayaquil",
+      "responsable": "Ing. Andrea Solano Reyes",
+      "cargo": "Coordinadora de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.guayaquil@cnelep.gob.ec",
+      "ciudad": "Guayaquil"
+    },
+    {
+      "id": "guayas_los_rios",
+      "nombre_unidad": "CNEL EP UN Guayas Los Ríos",
+      "responsable": "Ing. Roberto Cárdenas Loor",
+      "cargo": "Coordinador de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.guayaslorios@cnelep.gob.ec",
+      "ciudad": "Milagro"
+    },
+    {
+      "id": "manabi",
+      "nombre_unidad": "CNEL EP UN Manabí",
+      "responsable": "Ing. Diana Vera Alcívar",
+      "cargo": "Coordinadora de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.manabi@cnelep.gob.ec",
+      "ciudad": "Portoviejo"
+    },
+    {
+      "id": "el_oro",
+      "nombre_unidad": "CNEL EP UN El Oro",
+      "responsable": "Ing. Fernando Castillo Arias",
+      "cargo": "Coordinador de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.eloro@cnelep.gob.ec",
+      "ciudad": "Machala"
+    },
+    {
+      "id": "santa_elena",
+      "nombre_unidad": "CNEL EP UN Santa Elena",
+      "responsable": "Ing. Gabriela Párraga Muñoz",
+      "cargo": "Coordinadora de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.santaelena@cnelep.gob.ec",
+      "ciudad": "Santa Elena"
+    },
+    {
+      "id": "milagro",
+      "nombre_unidad": "CNEL EP UN Milagro",
+      "responsable": "Ing. Xavier Herrera Quimi",
+      "cargo": "Coordinador de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.milagro@cnelep.gob.ec",
+      "ciudad": "Milagro"
+    },
+    {
+      "id": "bolivar",
+      "nombre_unidad": "CNEL EP UN Bolívar",
+      "responsable": "Ing. Lorena Chimbo Guamán",
+      "cargo": "Coordinadora de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.bolivar@cnelep.gob.ec",
+      "ciudad": "Guaranda"
+    },
+    {
+      "id": "los_rios",
+      "nombre_unidad": "CNEL EP UN Los Ríos",
+      "responsable": "Ing. César Andrade Tomalá",
+      "cargo": "Coordinador de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.losrios@cnelep.gob.ec",
+      "ciudad": "Babahoyo"
+    },
+    {
+      "id": "esmeraldas",
+      "nombre_unidad": "CNEL EP UN Esmeraldas",
+      "responsable": "Ing. Mayra Tenorio Caicedo",
+      "cargo": "Coordinadora de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.esmeraldas@cnelep.gob.ec",
+      "ciudad": "Esmeraldas"
+    },
+    {
+      "id": "sucumbios",
+      "nombre_unidad": "CNEL EP UN Sucumbíos",
+      "responsable": "Ing. Patricio Chamorro Tapia",
+      "cargo": "Coordinador de Gestión Arriendo de Infraestructura",
+      "email": "arriendo.sucumbios@cnelep.gob.ec",
+      "ciudad": "Nueva Loja"
+    },
+    {
+      "id": "ofc",
+      "nombre_unidad": "CNEL EP Oficina Central",
+      "responsable": "Ing. Patricia Sánchez Andrade",
+      "cargo": "Directora de Gestión Comercial",
+      "email": "comercial@cnelep.gob.ec",
+      "ciudad": "Guayaquil"
+    }
+  ]
+}

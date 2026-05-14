@@ -151,11 +151,10 @@
         <div class="form-group">
           <label for="dest_nombre">Nombre del destinatario</label>
           <input type="text" id="dest_nombre" name="dest_nombre" placeholder="Se completa al seleccionar la Unidad de Negocio" maxlength="120" readonly style="background:#f4f6fa;cursor:default">
-          <p class="form-hint">Completado automáticamente según la UN seleccionada.</p>
-        </div>
-        <div class="form-group" id="dest_email_group" style="display:none">
-          <label for="dest_email">Correo del destinatario</label>
-          <input type="email" id="dest_email" name="dest_email" placeholder="correo@cnelep.gob.ec" maxlength="120" readonly style="background:#f4f6fa;cursor:default">
+          <p class="form-hint" id="dest_email_hint" style="display:none;color:var(--azul-medio)">
+            <span style="font-size:.8rem">✉️ </span><span id="dest_email_text"></span>
+          </p>
+          <input type="hidden" id="dest_email" name="dest_email">
         </div>
       </div>
 
@@ -477,19 +476,19 @@ document.getElementById('year').textContent = new Date().getFullYear();
 document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
 
-// ─── Carga de Unidades de Negocio desde archivo externo ───
+// ─── Carga de delegados de ampliación desde archivo externo ───
 (function() {
-  const selUN      = document.getElementById('dest_unidad');
-  const destNombre = document.getElementById('dest_nombre');
-  const destEmail  = document.getElementById('dest_email');
-  const emailGroup = document.getElementById('dest_email_group');
-  let unidadesData = null;
+  const selUN       = document.getElementById('dest_unidad');
+  const destNombre  = document.getElementById('dest_nombre');
+  const destEmail   = document.getElementById('dest_email');
+  const emailHint   = document.getElementById('dest_email_hint');
+  const emailText   = document.getElementById('dest_email_text');
+  let delegadosData = null;
 
-  fetch('data/unidades.json')
+  fetch('data/delegados-ampliacion.json')
     .then(r => r.json())
     .then(data => {
-      unidadesData = data;
-      // Poblar el select dinámicamente
+      delegadosData = data;
       selUN.innerHTML = '<option value="">— Seleccione la Unidad de Negocio —</option>';
       data.unidades.forEach(u => {
         const opt = document.createElement('option');
@@ -497,11 +496,9 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
         opt.textContent = u.nombre_unidad;
         selUN.appendChild(opt);
       });
-      // Si ya había un valor guardado, aplicarlo
       if (selUN.value) applyUnidad(selUN.value);
     })
     .catch(() => {
-      // Si el archivo no carga, dejar el select como texto libre y habilitar nombre
       selUN.innerHTML = `
         <option value="">— Seleccione —</option>
         <option value="guayaquil">CNEL EP UN Guayaquil</option>
@@ -513,30 +510,29 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
     });
 
   function applyUnidad(id) {
-    if (!unidadesData || !id) {
+    if (!delegadosData || !id) {
       destNombre.value = '';
       destEmail.value  = '';
-      emailGroup.style.display = 'none';
+      emailHint.style.display = 'none';
       return;
     }
-    const found = unidadesData.unidades.find(u => u.id === id);
+    const found = delegadosData.unidades.find(u => u.id === id);
     if (found) {
       destNombre.value        = found.responsable;
       destEmail.value         = found.email;
-      emailGroup.style.display = '';
+      emailText.textContent   = found.email;
+      emailHint.style.display = '';
     } else {
       destNombre.value = '';
       destEmail.value  = '';
-      emailGroup.style.display = 'none';
+      emailHint.style.display = 'none';
     }
   }
 
-  selUN.addEventListener('change', function() {
-    applyUnidad(this.value);
-  });
+  selUN.addEventListener('change', function() { applyUnidad(this.value); });
 })();
 
-// ─── Mapa Leaflet ───
+// ─── Mapa Leaflet (Sección 5) ───
 (function() {
   const map = L.map('mapa-ubicacion', { zoomControl: true }).setView([-1.8312, -78.1834], 7);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -576,6 +572,9 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
     document.getElementById('mapa_lat').value = '';
     document.getElementById('mapa_lng').value = '';
   });
+
+  // Exponer globalmente para que la sección 3 mueva el mapa automáticamente
+  window.mapaUbicacion = { map, setPoint };
 })();
 
 // ─── Selector de coordenadas Desde/Hasta ───
@@ -682,6 +681,51 @@ document.getElementById('fecha').max  = new Date().toISOString().split('T')[0];
     if (hasta)  parts.push(`Hasta: ${hasta}`);
     const target = document.getElementById(targetInputId);
     if (target && parts.length) target.value = parts.join(' | ');
+
+    // Auto-fill provincia si el campo coordenadas es de una ruta (amp_coord_N)
+    const rowMatch = targetInputId && targetInputId.match(/^amp_coord_(\d+)$/);
+    if (rowMatch && desde) {
+      const n = rowMatch[1];
+      const provInput = document.querySelector(`[name="amp_prov_${n}"]`);
+      const coords = desde.match(/([-\d.]+),\s*([-\d.]+)/);
+      if (coords) {
+        const lat = parseFloat(coords[1]);
+        const lng = parseFloat(coords[2]);
+        // Reverse geocoding con Nominatim
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=es`, {
+          headers: { 'Accept-Language': 'es' }
+        })
+          .then(r => r.json())
+          .then(geo => {
+            const a = geo.address || {};
+            const provincia = a.state || a.region || '';
+            const ciudad    = a.city || a.town || a.municipality || a.county || '';
+            const recinto   = a.village || a.suburb || a.neighbourhood || '';
+            const partes    = [provincia, ciudad, recinto].filter(Boolean);
+            if (provInput && !provInput.value) {
+              provInput.value = partes.join(' / ');
+            }
+            // Si es la primera ruta, mover mapa de sección 5 y pre-llenar descripción
+            if (n === '1' && window.mapaUbicacion) {
+              const latlng = L.latLng(lat, lng);
+              window.mapaUbicacion.map.setView(latlng, 14);
+              window.mapaUbicacion.setPoint(latlng);
+              const descEl = document.getElementById('ubicacion_desc');
+              if (descEl && !descEl.value) {
+                descEl.value = partes.join(', ') || `Lat ${lat.toFixed(6)}, Lng ${lng.toFixed(6)}`;
+              }
+            }
+          })
+          .catch(() => {
+            // Si falla geocoding, aún mover el mapa con la primera ruta
+            if (n === '1' && window.mapaUbicacion) {
+              const latlng = L.latLng(lat, lng);
+              window.mapaUbicacion.map.setView(latlng, 14);
+              window.mapaUbicacion.setPoint(latlng);
+            }
+          });
+      }
+    }
     closePicker();
   });
 
